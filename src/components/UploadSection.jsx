@@ -12,8 +12,8 @@ const UploadSection = () => {
       const newErrors = [];
       
       // 1. Validar Peso (< 50MB)
-      if (file.size > 50 * 1024 * 1024) {
-        newErrors.push("El archivo supera los 50MB permitidos.");
+      if (file.size > 80 * 1024 * 1024) {
+        newErrors.push("El archivo supera los 80MB permitidos.");
       }
 
       // 2. Validar Resolución (9:16)
@@ -140,7 +140,7 @@ const UploadSection = () => {
           <Upload size={48} color="var(--primary)" style={{ marginBottom: '20px' }} />
           <p style={{ fontWeight: '500' }}>Arrastra tu video aquí o haz clic para buscar</p>
           <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '10px' }}>
-            MP4, MOV | Max. 50MB | Formato Vertical 9:16
+            MP4, MOV | Max. 80MB | Formato Vertical 9:16
           </span>
           <input type="file" accept="video/*" style={{ display: 'none' }} onChange={handleFileChange} />
         </label>
