@@ -109,9 +109,9 @@ const VideoGallery = () => {
                   color: 'var(--text-muted)'
                 }}>
                   {video.source_url ? (
-                    video.source_url.match(/\.(mp4|mov|webm)$/i) ? (
+                    (video.processed_url || video.source_url).match(/\.(mp4|mov|webm)$/i) ? (
                       <video
-                        src={video.source_url}
+                        src={video.processed_url || video.source_url}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         muted
                         onMouseOver={e => e.target.play()}

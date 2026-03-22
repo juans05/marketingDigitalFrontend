@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Heart, Share2, MessageCircle, TrendingUp, Calendar, Copy, ChevronDown, ChevronUp, Loader } from 'lucide-react';
+import { Eye, Heart, Share2, MessageCircle, TrendingUp, Calendar, Copy, ChevronDown, ChevronUp, Loader, CheckCircle, Clock } from 'lucide-react';
 
 const PLATFORM_CONFIG = {
   tiktok:    { label: 'TikTok',    color: '#ff0050', bg: 'rgba(255,0,80,0.1)' },
@@ -9,17 +9,15 @@ const PLATFORM_CONFIG = {
   twitter:   { label: 'Twitter/X', color: '#1da1f2', bg: 'rgba(29,161,242,0.1)' },
 };
 
-// Parsea la respuesta de analytics de Ayrshare (estructura flexible)
+// Parsea la respuesta de analytics de Ayrshare
 const parseAnalytics = (raw) => {
   if (!raw) return null;
-  // Ayrshare devuelve analytics en diferentes estructuras según la versión
   if (raw.analytics && Array.isArray(raw.analytics)) {
     return raw.analytics.reduce((acc, item) => {
       acc[item.platform] = item.results || item.analytics || {};
       return acc;
     }, {});
   }
-  // Si ya viene como objeto plano por plataforma
   if (typeof raw === 'object' && !Array.isArray(raw)) {
     return raw;
   }
@@ -50,10 +48,10 @@ const PlatformRow = ({ platform, data }) => {
         <span style={{ fontWeight: '600', color: config.color, fontSize: '14px' }}>{config.label}</span>
       </div>
       <div style={{ display: 'flex', gap: '8px' }}>
-        <StatBadge icon={<Eye size={14} />}        value={data?.views ?? data?.impressions ?? data?.reach}          label="Views"    color="#9b51e0" />
-        <StatBadge icon={<Heart size={14} />}       value={data?.likes ?? data?.hearts}                              label="Likes"    color="#e1306c" />
-        <StatBadge icon={<Share2 size={14} />}      value={data?.shares ?? data?.reposts ?? data?.retweets}          label="Shares"   color="#10b981" />
-        <StatBadge icon={<MessageCircle size={14} />} value={data?.comments ?? data?.replies}                        label="Comentarios" color="#f59e0b" />
+        <StatBadge icon={<Eye size={14} />}        value={data?.views ?? data?.impressions ?? data?.reach}       label="Views"    color="#9b51e0" />
+        <StatBadge icon={<Heart size={14} />}       value={data?.likes ?? data?.hearts}                           label="Likes"    color="#e1306c" />
+        <StatBadge icon={<Share2 size={14} />}      value={data?.shares ?? data?.reposts ?? data?.retweets}       label="Shares"   color="#10b981" />
+        <StatBadge icon={<MessageCircle size={14} />} value={data?.comments ?? data?.replies}                     label="Comentarios" color="#f59e0b" />
       </div>
     </div>
   );
@@ -63,10 +61,13 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
   const [expanded, setExpanded] = useState(false);
   const [data, setData] = useState(initialData || null);
   const [loading, setLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
   const [copyCopied, setCopyCopied] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState(data?.scheduled_at ? new Date(data.scheduled_at).toISOString().slice(0, 16) : '');
+  const [hashtags, setHashtags] = useState(data?.hashtags || '');
 
   const fetchAnalytics = async () => {
-    if (data?.analytics_4h !== undefined) return; // ya tenemos datos completos
+    if (data?.analytics_4h !== undefined) return;
     setLoading(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics/${videoId}`);
@@ -75,6 +76,30 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
       console.error('Error cargando analytics:', e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setSaveLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/video/${videoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scheduled_at: scheduledDate || null,
+          hashtags: hashtags,
+          status: scheduledDate ? 'scheduled' : data.status
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setData(updated);
+        alert("¡Ajustes guardados correctamente!");
+      }
+    } catch (e) {
+      console.error('Error guardando ajustes:', e);
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -93,7 +118,6 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
 
   return (
     <div>
-      {/* Botón expandir */}
       <button
         onClick={handleExpand}
         style={{
@@ -112,11 +136,10 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
           fontWeight: '600'
         }}
       >
-        <span>Ver Analytics</span>
+        <span>Detalles y Programación</span>
         {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
 
-      {/* Panel expandido */}
       {expanded && (
         <div style={{ marginTop: '12px' }}>
           {loading ? (
@@ -125,28 +148,98 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
             </div>
           ) : (
             <>
-              {/* Metadata del post */}
-              {(data?.published_at || data?.scheduled_for) && (
+              {/* Programación y Hashtags */}
+              <div style={{ 
+                background: 'rgba(255,255,255,0.03)', 
+                borderRadius: '12px', 
+                padding: '16px', 
+                marginBottom: '10px',
+                border: '1px solid rgba(255,255,255,0.05)'
+              }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '5px' }}>
+                    <Calendar size={10} /> Programar Publicación
+                  </label>
+                  <input 
+                    type="datetime-local" 
+                    value={scheduledDate}
+                    onChange={(e) => setScheduledDate(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#111',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '6px',
+                      color: 'white',
+                      padding: '8px',
+                      fontSize: '13px'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '5px' }}>
+                    Hashtags Sugeridos / Propios
+                  </label>
+                  <textarea 
+                    value={hashtags}
+                    onChange={(e) => setHashtags(e.target.value)}
+                    placeholder="#viral #musica #reel..."
+                    style={{
+                      width: '100%',
+                      background: '#111',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '6px',
+                      color: 'white',
+                      padding: '8px',
+                      fontSize: '13px',
+                      height: '60px',
+                      resize: 'none'
+                    }}
+                  />
+                </div>
+
+                <button 
+                  onClick={handleSaveSettings}
+                  disabled={saveLoading}
+                  style={{
+                    width: '100%',
+                    background: 'var(--primary)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    opacity: saveLoading ? 0.7 : 1
+                  }}
+                >
+                  {saveLoading ? 'Guardando...' : 'Guardar Ajustes'}
+                </button>
+              </div>
+
+              {/* Metadata */}
+              {(data?.published_at || data?.scheduled_at) && (
                 <div style={{
                   display: 'flex', gap: '16px', marginBottom: '12px',
-                  fontSize: '12px', color: 'var(--text-muted)'
+                  fontSize: '11px', color: 'var(--text-muted)'
                 }}>
                   {data.published_at && (
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Calendar size={12} />
-                      Publicado: {new Date(data.published_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      <CheckCircle size={10} color="#4ade80" />
+                      Publicado: {new Date(data.published_at).toLocaleDateString()}
                     </span>
                   )}
-                  {data.viral_score && (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--primary)' }}>
-                      <TrendingUp size={12} />
-                      Viral Score: {data.viral_score}/10
+                  {data.scheduled_at && (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#60a5fa' }}>
+                      <Clock size={10} />
+                      Prog: {new Date(data.scheduled_at).toLocaleDateString()} {new Date(data.scheduled_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </span>
                   )}
                 </div>
               )}
 
-              {/* Analytics por plataforma */}
+              {/* Analytics */}
               {analytics ? (
                 Object.entries(analytics).map(([platform, pData]) => (
                   <PlatformRow key={platform} platform={platform} data={pData} />
@@ -154,43 +247,32 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
               ) : (
                 <div style={{
                   padding: '16px', textAlign: 'center',
-                  color: 'var(--text-muted)', fontSize: '13px',
+                  color: 'var(--text-muted)', fontSize: '12px',
                   background: 'rgba(255,255,255,0.03)', borderRadius: '10px', marginBottom: '10px'
                 }}>
-                  Analytics disponibles 4h después de publicar
+                  {data?.status === 'published' ? 'Analytics disponibles 4h después' : 'Disponible al publicar'}
                 </div>
               )}
 
-              {/* Copy generado por IA */}
+              {/* Copy IA */}
               {data?.ai_copy_short && (
                 <div style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(155,81,224,0.05)',
+                  border: '1px solid rgba(155,81,224,0.15)',
                   borderRadius: '10px',
                   padding: '12px',
                   marginTop: '8px'
                 }}>
-                  <div style={{
-                    display: 'flex', justifyContent: 'space-between',
-                    alignItems: 'center', marginBottom: '8px'
-                  }}>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>
-                      Copy IA — TikTok / Instagram
-                    </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 'bold' }}>COPY IA SUGERIDO</span>
                     <button
                       onClick={() => copyToClipboard(data.ai_copy_short)}
-                      style={{
-                        background: 'none', border: 'none', cursor: 'pointer',
-                        color: copyCopied ? '#10b981' : 'var(--text-muted)',
-                        display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px'
-                      }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: copyCopied ? '#10b981' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}
                     >
-                      <Copy size={12} /> {copyCopied ? '¡Copiado!' : 'Copiar'}
+                      <Copy size={12} /> {copyCopied ? 'Copiado' : 'Copiar'}
                     </button>
                   </div>
-                  <p style={{ fontSize: '13px', color: 'white', margin: 0, lineHeight: '1.5' }}>
-                    {data.ai_copy_short}
-                  </p>
+                  <p style={{ fontSize: '12px', color: 'white', margin: 0, lineHeight: '1.4' }}>{data.ai_copy_short}</p>
                 </div>
               )}
             </>
