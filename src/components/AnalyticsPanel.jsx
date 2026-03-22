@@ -65,6 +65,13 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
   const [copyCopied, setCopyCopied] = useState(false);
   const [scheduledDate, setScheduledDate] = useState(data?.scheduled_at ? new Date(data.scheduled_at).toISOString().slice(0, 16) : '');
   const [hashtags, setHashtags] = useState(data?.hashtags || '');
+  const [selectedPlatforms, setSelectedPlatforms] = useState(data?.platforms || ['tiktok', 'instagram', 'youtube']);
+
+  const togglePlatform = (p) => {
+    setSelectedPlatforms(prev => 
+      prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]
+    );
+  };
 
   const fetchAnalytics = async () => {
     if (data?.analytics_4h !== undefined) return;
@@ -88,6 +95,7 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
         body: JSON.stringify({
           scheduled_at: scheduledDate || null,
           hashtags: hashtags,
+          platforms: selectedPlatforms,
           status: scheduledDate ? 'scheduled' : data.status
         })
       });
@@ -174,6 +182,37 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                       fontSize: '13px'
                     }}
                   />
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                    Publicar en:
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {Object.entries(PLATFORM_CONFIG).map(([id, config]) => {
+                      const isActive = selectedPlatforms.includes(id);
+                      return (
+                        <button
+                          key={id}
+                          onClick={() => togglePlatform(id)}
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '15px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            border: '1px solid',
+                            borderColor: isActive ? config.color : 'rgba(255,255,255,0.1)',
+                            background: isActive ? config.bg : 'transparent',
+                            color: isActive ? config.color : 'var(--text-muted)',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {config.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div style={{ marginBottom: '12px' }}>
