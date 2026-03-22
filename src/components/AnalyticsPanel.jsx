@@ -69,7 +69,7 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
     if (data?.analytics_4h !== undefined) return; // ya tenemos datos completos
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/api/vidalis/analytics/${videoId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics/${videoId}`);
       if (res.ok) setData(await res.json());
     } catch (e) {
       console.error('Error cargando analytics:', e);

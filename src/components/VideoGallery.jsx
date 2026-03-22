@@ -33,7 +33,7 @@ const VideoGallery = () => {
     const user = JSON.parse(localStorage.getItem('vidalis_user') || '{}');
     const artistId = user.artistId || user.id || 'demo-artist-id';
 
-    fetch(`http://localhost:3001/api/vidalis/gallery/${artistId}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/gallery/${artistId}`)
       .then(r => r.ok ? r.json() : [])
       .then(data => setVideos(data))
       .catch(e => console.error('Gallery error:', e))

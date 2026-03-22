@@ -64,7 +64,7 @@ const UploadSection = () => {
       const agencyFolder = user?.agency ? user.agency.replace(/\s+/g, '_').toLowerCase() : 'general';
 
       // 1. Obtener FIRMA del Backend (pasando la carpeta)
-      const sigResponse = await fetch(`http://localhost:3001/api/vidalis/cloudinary-signature?folder=${agencyFolder}`);
+      const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}`);
       const sigData = await sigResponse.json();
 
       // 2. Subir directamente a CLOUDINARY (No consume RAM del servidor)
@@ -90,7 +90,7 @@ const UploadSection = () => {
       if (!uploadRes.ok) throw new Error("Error subiendo a Cloudinary");
 
       // 3. Registrar en nuestro BACKEND (Base de Datos + n8n)
-      const response = await fetch('http://localhost:3001/api/vidalis/upload', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/upload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

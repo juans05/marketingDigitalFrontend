@@ -20,7 +20,7 @@ const Dashboard = () => {
 
     // Cargar estadísticas reales
     if (parsedUser.id) {
-      fetch(`http://localhost:3001/api/vidalis/stats/${parsedUser.id}`)
+      fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/stats/${parsedUser.id}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (data) setStats({
