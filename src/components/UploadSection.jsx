@@ -59,8 +59,12 @@ const UploadSection = () => {
     setStatus('uploading');
     
     try {
-      // 1. Obtener FIRMA del Backend
-      const sigResponse = await fetch('http://localhost:3001/api/vidalis/cloudinary-signature');
+      // 0. Obtener info de la agencia desde el localStorage
+      const user = JSON.parse(localStorage.getItem('vidalis_user'));
+      const agencyFolder = user?.agency ? user.agency.replace(/\s+/g, '_').toLowerCase() : 'general';
+
+      // 1. Obtener FIRMA del Backend (pasando la carpeta)
+      const sigResponse = await fetch(`http://localhost:3001/api/vidalis/cloudinary-signature?folder=${agencyFolder}`);
       const sigData = await sigResponse.json();
 
       // 2. Subir directamente a CLOUDINARY (No consume RAM del servidor)
@@ -70,6 +74,11 @@ const UploadSection = () => {
       formData.append('timestamp', sigData.timestamp);
       formData.append('signature', sigData.signature);
       formData.append('upload_preset', sigData.uploadPreset);
+      
+      // IMPORTANTE: Si la firma incluye carpeta, debemos enviarla también aquí
+      if (sigData.folder) {
+        formData.append('folder', sigData.folder);
+      }
 
       const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/video/upload`;
       const uploadRes = await fetch(cloudinaryUrl, {
