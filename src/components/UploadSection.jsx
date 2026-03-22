@@ -7,33 +7,43 @@ const UploadSection = () => {
   const [errors, setErrors] = useState([]);
   const videoRef = useRef(null);
 
-  const validateVideo = (file) => {
+  const validateFile = (file) => {
     return new Promise((resolve) => {
       const newErrors = [];
+      const isVideo = file.type.startsWith('video/');
+      const isImage = file.type.startsWith('image/');
       
-      // 1. Validar Peso (< 50MB)
+      // 1. Validar Peso (< 80MB)
       if (file.size > 80 * 1024 * 1024) {
         newErrors.push("El archivo supera los 80MB permitidos.");
       }
 
-      // 2. Validar Resolución (9:16)
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(video.src);
-        const { videoWidth, videoHeight } = video;
-        const isVertical = videoHeight > videoWidth;
-        const ratio = videoWidth / videoHeight;
-        const expectedRatio = 9 / 16;
-        
-        // Permitimos un margen de error pequeño en el ratio
-        if (!isVertical || Math.abs(ratio - expectedRatio) > 0.05) {
-          newErrors.push("El video debe estar en formato vertical (9:16).");
-        }
+      if (!isVideo && !isImage) {
+        newErrors.push("Formato no permitido. Solo se aceptan videos e imágenes.");
+        return resolve(newErrors);
+      }
 
+      // 2. Validar Resolución (Solo para Videos 9:16)
+      if (isVideo) {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+          window.URL.revokeObjectURL(video.src);
+          const { videoWidth, videoHeight } = video;
+          const isVertical = videoHeight > videoWidth;
+          const ratio = videoWidth / videoHeight;
+          const expectedRatio = 9 / 16;
+          
+          if (!isVertical || Math.abs(ratio - expectedRatio) > 0.05) {
+            newErrors.push("El video debe estar en formato vertical (9:16).");
+          }
+          resolve(newErrors);
+        };
+        video.src = URL.createObjectURL(file);
+      } else {
+        // Para imágenes no aplicamos restricciones de ratio por ahora
         resolve(newErrors);
-      };
-      video.src = URL.createObjectURL(file);
+      }
     });
   };
 
@@ -45,7 +55,7 @@ const UploadSection = () => {
     setStatus('checking');
     setErrors([]);
 
-    const validationErrors = await validateVideo(selectedFile);
+    const validationErrors = await validateFile(selectedFile);
     
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
@@ -59,6 +69,9 @@ const UploadSection = () => {
     setStatus('uploading');
     
     try {
+      const isVideo = file.type.startsWith('video/');
+      const resourceType = isVideo ? 'video' : 'image';
+
       // 0. Obtener info de la agencia desde el localStorage
       const user = JSON.parse(localStorage.getItem('vidalis_user'));
       const agencyFolder = user?.agency ? user.agency.replace(/\s+/g, '_').toLowerCase() : 'general';
@@ -67,7 +80,7 @@ const UploadSection = () => {
       const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}`);
       const sigData = await sigResponse.json();
 
-      // 2. Subir directamente a CLOUDINARY (No consume RAM del servidor)
+      // 2. Subir directamente a CLOUDINARY
       const formData = new FormData();
       formData.append('file', file);
       formData.append('api_key', sigData.apiKey);
@@ -75,12 +88,11 @@ const UploadSection = () => {
       formData.append('signature', sigData.signature);
       formData.append('upload_preset', sigData.uploadPreset);
       
-      // IMPORTANTE: Si la firma incluye carpeta, debemos enviarla también aquí
       if (sigData.folder) {
         formData.append('folder', sigData.folder);
       }
 
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/video/upload`;
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/${resourceType}/upload`;
       const uploadRes = await fetch(cloudinaryUrl, {
         method: 'POST',
         body: formData
@@ -97,7 +109,7 @@ const UploadSection = () => {
           videoData: {
             title: file.name, 
             source_url: uploadData.secure_url,
-            status: 'analyzing'
+            status: isVideo ? 'analyzing' : 'published' // Las imágenes se marcan como publicadas directamente
           }
         })
       });
@@ -120,9 +132,9 @@ const UploadSection = () => {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>Sube tu Video</h2>
+      <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>Sube tu Contenido</h2>
       <p style={{ color: 'var(--text-muted)', marginBottom: '30px' }}>
-        Verificaremos que tu video esté listo para hacerse viral.
+        Aceptamos videos (9:16) e imágenes de alta calidad.
       </p>
 
       {!file && (
@@ -138,11 +150,11 @@ const UploadSection = () => {
         }} onMouseOver={e => e.currentTarget.style.borderColor = 'var(--primary)'}
            onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border-glass)'}>
           <Upload size={48} color="var(--primary)" style={{ marginBottom: '20px' }} />
-          <p style={{ fontWeight: '500' }}>Arrastra tu video aquí o haz clic para buscar</p>
+          <p style={{ fontWeight: '500' }}>Arrastra tus archivos aquí o haz clic para buscar</p>
           <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '10px' }}>
-            MP4, MOV | Max. 80MB | Formato Vertical 9:16
+            MP4, MOV, JPG, PNG | Max. 80MB | Video Vertical 9:16
           </span>
-          <input type="file" accept="video/*" style={{ display: 'none' }} onChange={handleFileChange} />
+          <input type="file" accept="video/*,image/*" style={{ display: 'none' }} onChange={handleFileChange} />
         </label>
       )}
 
@@ -205,8 +217,8 @@ const UploadSection = () => {
               border: '1px solid rgba(74, 222, 128, 0.2)'
             }}>
               <CheckCircle size={40} style={{ marginBottom: '10px' }} />
-              <p style={{ fontWeight: 'bold' }}>¡Video enviado exitosamente!</p>
-              <p style={{ fontSize: '14px' }}>n8n está procesando tu contenido viral ahora mismo.</p>
+              <p style={{ fontWeight: 'bold' }}>¡Archivo enviado exitosamente!</p>
+              <p style={{ fontSize: '14px' }}>El contenido ya está disponible en tu galería.</p>
             </div>
           )}
         </div>
