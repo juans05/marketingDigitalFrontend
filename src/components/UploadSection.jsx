@@ -86,11 +86,7 @@ const UploadSection = () => {
       formData.append('api_key', sigData.apiKey);
       formData.append('timestamp', sigData.timestamp);
       formData.append('signature', sigData.signature);
-      formData.append('upload_preset', sigData.uploadPreset);
-      
-      if (sigData.folder) {
-        formData.append('folder', sigData.folder);
-      }
+      formData.append('folder', sigData.folder);
 
       const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/auto/upload`;
       const uploadRes = await fetch(cloudinaryUrl, {
