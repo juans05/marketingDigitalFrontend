@@ -92,7 +92,7 @@ const UploadSection = () => {
         formData.append('folder', sigData.folder);
       }
 
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/${resourceType}/upload`;
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/auto/upload`;
       const uploadRes = await fetch(cloudinaryUrl, {
         method: 'POST',
         body: formData
