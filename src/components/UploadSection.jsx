@@ -98,6 +98,8 @@ const UploadSection = () => {
       if (!uploadRes.ok) throw new Error("Error subiendo a Cloudinary");
 
       // 3. Registrar en nuestro BACKEND (Base de Datos + n8n)
+      const userData = JSON.parse(localStorage.getItem('vidalis_user') || '{}');
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/upload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,7 +107,8 @@ const UploadSection = () => {
           videoData: {
             title: file.name, 
             source_url: uploadData.secure_url,
-            status: isVideo ? 'analyzing' : 'published' // Las imágenes se marcan como publicadas directamente
+            artist_id: userData.id, // Enviamos el ID del usuario logueado (agencia/artista)
+            status: isVideo ? 'analyzing' : 'published'
           }
         })
       });
