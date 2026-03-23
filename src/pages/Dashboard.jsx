@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Sparkles, Upload, Film, BarChart3, Building2 } from 'lucide-react';
 import UploadSection from '../components/UploadSection';
 import VideoGallery from '../components/VideoGallery';
+import SocialConnect from '../components/SocialConnect';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -121,6 +122,7 @@ const Dashboard = () => {
 
       {/* Secciones principales */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px 60px' }}>
+        <SocialConnect agencyId={user.id} />
         <UploadSection />
         <VideoGallery />
       </div>
