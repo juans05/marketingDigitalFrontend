@@ -1,11 +1,10 @@
-import React, { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
-const UploadSection = () => {
+const UploadSection = ({ artistId }) => {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('idle'); // idle, checking, uploading, success, error
   const [errors, setErrors] = useState([]);
-  const videoRef = useRef(null);
 
   const validateFile = (file) => {
     return new Promise((resolve) => {
@@ -70,11 +69,10 @@ const UploadSection = () => {
     
     try {
       const isVideo = file.type.startsWith('video/');
-      const resourceType = isVideo ? 'video' : 'image';
 
-      // 0. Obtener info de la agencia desde el localStorage
+      // 0. Obtener carpeta de la agencia para Cloudinary
       const user = JSON.parse(localStorage.getItem('vidalis_user'));
-      const agencyFolder = user?.agency ? user.agency.replace(/\s+/g, '_').toLowerCase() : 'general';
+      const agencyFolder = user?.name ? user.name.replace(/\s+/g, '_').toLowerCase() : 'general';
 
       // 1. Obtener FIRMA del Backend (pasando la carpeta)
       const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}`);
@@ -98,16 +96,14 @@ const UploadSection = () => {
       if (!uploadRes.ok) throw new Error("Error subiendo a Cloudinary");
 
       // 3. Registrar en nuestro BACKEND (Base de Datos + n8n)
-      const userData = JSON.parse(localStorage.getItem('vidalis_user') || '{}');
-      
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/upload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           videoData: {
-            title: file.name, 
+            title: file.name,
             source_url: uploadData.secure_url,
-            artist_id: userData.id, // Enviamos el ID del usuario logueado (agencia/artista)
+            artist_id: artistId,
             status: isVideo ? 'analyzing' : 'published'
           }
         })

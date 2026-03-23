@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp } from 'lucide-react';
 import AnalyticsPanel from './AnalyticsPanel';
 
@@ -24,21 +24,19 @@ const ScoreBadge = ({ score }) => {
   );
 };
 
-const VideoGallery = () => {
+const VideoGallery = ({ artistId }) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('vidalis_user') || '{}');
-    const artistId = user.artistId || user.id || 'demo-artist-id';
-
+    if (!artistId) { setLoading(false); return; }
     fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/gallery/${artistId}`)
       .then(r => r.ok ? r.json() : [])
       .then(data => setVideos(data))
       .catch(e => console.error('Gallery error:', e))
       .finally(() => setLoading(false));
-  }, []);
+  }, [artistId]);
 
   const filtered = filter === 'all' ? videos : videos.filter(v => v.status === filter);
 
