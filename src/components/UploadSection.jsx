@@ -85,8 +85,11 @@ const UploadSection = ({ artistId }) => {
       formData.append('timestamp', sigData.timestamp);
       formData.append('signature', sigData.signature);
       formData.append('folder', sigData.folder);
+      // Forzar que sea público y especificar que es video/image
+      formData.append('access_mode', 'public');
+      formData.append('resource_type', isVideo ? 'video' : 'image');
 
-      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/auto/upload`;
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/${isVideo ? 'video' : 'image'}/upload`;
       const uploadRes = await fetch(cloudinaryUrl, {
         method: 'POST',
         body: formData

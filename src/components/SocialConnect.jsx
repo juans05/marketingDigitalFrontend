@@ -49,7 +49,7 @@ const SocialConnect = ({ artistId }) => {
     setVerifying(true);
     setError('');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/social-status/${artistId}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/social-status/${artistId}?refresh=true`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al verificar');
       setConnectedPlatforms(data.platforms || []);
