@@ -108,7 +108,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
             title: file.name,
             source_url: uploadData.secure_url,
             artist_id: artistId,
-            status: isVideo ? 'analyzing' : 'published'
+            status: 'analyzing'
           }
         })
       });

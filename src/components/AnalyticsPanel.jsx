@@ -136,9 +136,13 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
         const updated = await res.json();
         setData(updated);
         if (scheduledDate) {
-          alert(updated.ayrshare_post_id
-            ? '✅ Publicación programada correctamente en tus redes sociales.'
-            : '⚠️ Fecha guardada, pero las redes no están conectadas. Conéctalas para que se publique automáticamente.');
+          if (updated._scheduleStatus === 'success') {
+            alert('✅ Publicación programada correctamente en tus redes sociales.');
+          } else if (updated._scheduleStatus === 'error') {
+            alert(`⚠️ Fecha guardada, pero hubo un error al programar en Ayrshare: ${updated._scheduleError || 'error desconocido'}. Intenta de nuevo.`);
+          } else {
+            alert('⚠️ Fecha guardada, pero el artista no tiene redes sociales conectadas. Conéctalas para que se publique automáticamente.');
+          }
         } else {
           alert('✅ Ajustes guardados correctamente.');
         }
