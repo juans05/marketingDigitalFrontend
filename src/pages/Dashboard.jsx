@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [stats, setStats] = useState({ total: '—', avgScore: '—', published: '—' });
   // Para agencias: artista actualmente seleccionado
   const [activeArtist, setActiveArtist] = useState(null);
+  const [galleryKey, setGalleryKey] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem('vidalis_user');
@@ -108,8 +109,8 @@ const Dashboard = () => {
         {currentArtistId ? (
           <>
             <SocialConnect artistId={currentArtistId} />
-            <UploadSection artistId={currentArtistId} />
-            <VideoGallery artistId={currentArtistId} />
+            <UploadSection artistId={currentArtistId} onUploadSuccess={() => setGalleryKey(k => k + 1)} />
+            <VideoGallery artistId={currentArtistId} refreshKey={galleryKey} />
           </>
         ) : isAgency ? (
           <div className="glass-card" style={{ padding: '50px', textAlign: 'center', color: 'var(--text-muted)' }}>

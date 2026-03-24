@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
-const UploadSection = ({ artistId }) => {
+const UploadSection = ({ artistId, onUploadSuccess }) => {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState('idle'); // idle, checking, uploading, success, error
   const [errors, setErrors] = useState([]);
+  const [platformWarning, setPlatformWarning] = useState(null);
 
   const validateFile = (file) => {
     return new Promise((resolve) => {
@@ -114,7 +115,11 @@ const UploadSection = ({ artistId }) => {
 
       if (!response.ok) throw new Error("Error registrando en el backend");
 
+      const responseData = await response.json();
+      if (responseData.platformWarning) setPlatformWarning(responseData.platformWarning);
+
       setStatus('success');
+      if (onUploadSuccess) onUploadSuccess();
     } catch (err) {
       console.error("Upload Error:", err);
       setStatus('error');
@@ -205,18 +210,34 @@ const UploadSection = ({ artistId }) => {
           )}
 
           {status === 'success' && (
-            <div style={{ 
-              marginTop: '30px', 
-              padding: '20px', 
-              borderRadius: '12px', 
-              background: 'rgba(74, 222, 128, 0.1)', 
-              color: '#4ade80',
-              textAlign: 'center',
-              border: '1px solid rgba(74, 222, 128, 0.2)'
-            }}>
-              <CheckCircle size={40} style={{ marginBottom: '10px' }} />
-              <p style={{ fontWeight: 'bold' }}>¡Archivo enviado exitosamente!</p>
-              <p style={{ fontSize: '14px' }}>El contenido ya está disponible en tu galería.</p>
+            <div style={{ marginTop: '30px' }}>
+              {platformWarning ? (
+                <div style={{
+                  padding: '20px',
+                  borderRadius: '12px',
+                  background: 'rgba(245, 158, 11, 0.08)',
+                  border: '1px solid rgba(245, 158, 11, 0.3)',
+                  color: '#f59e0b',
+                  fontSize: '13px',
+                  lineHeight: '1.6'
+                }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '15px', marginBottom: '8px' }}>⚠️ Aviso de publicación</div>
+                  {platformWarning}
+                </div>
+              ) : (
+                <div style={{
+                  padding: '20px',
+                  borderRadius: '12px',
+                  background: 'rgba(74, 222, 128, 0.1)',
+                  color: '#4ade80',
+                  textAlign: 'center',
+                  border: '1px solid rgba(74, 222, 128, 0.2)'
+                }}>
+                  <CheckCircle size={40} style={{ marginBottom: '10px' }} />
+                  <p style={{ fontWeight: 'bold' }}>¡Archivo enviado exitosamente!</p>
+                  <p style={{ fontSize: '14px' }}>El contenido ya está disponible en tu galería.</p>
+                </div>
+              )}
             </div>
           )}
         </div>

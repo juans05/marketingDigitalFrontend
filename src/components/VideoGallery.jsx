@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp } from 'lucide-react';
+import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles } from 'lucide-react';
 import AnalyticsPanel from './AnalyticsPanel';
 
 const STATUS_CONFIG = {
-  published:    { label: 'Publicado',      icon: <CheckCircle size={12} />,   color: '#4ade80', bg: 'rgba(74,222,128,0.1)' },
-  scheduled:    { label: 'Programado',     icon: <Clock size={12} />,         color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
-  processing:   { label: 'Procesando',     icon: <Clock size={12} />,         color: '#f2c94c', bg: 'rgba(242,201,76,0.1)' },
-  needs_review: { label: 'Revisar',        icon: <AlertTriangle size={12} />, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-  error:        { label: 'Error',          icon: <XCircle size={12} />,       color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+  published:    { label: 'Publicado',           icon: <CheckCircle size={12} />,   color: '#4ade80', bg: 'rgba(74,222,128,0.1)' },
+  scheduled:    { label: 'Programado',          icon: <Clock size={12} />,         color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
+  processing:   { label: 'Procesando',          icon: <Clock size={12} />,         color: '#f2c94c', bg: 'rgba(242,201,76,0.1)' },
+  analyzing:    { label: 'Analizando con IA...', icon: <Sparkles size={12} />,     color: '#a78bfa', bg: 'rgba(167,139,250,0.1)', pulse: true },
+  needs_review: { label: 'Listo para revisar',  icon: <AlertTriangle size={12} />, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+  error:        { label: 'Error',               icon: <XCircle size={12} />,       color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
 };
 
 const ScoreBadge = ({ score }) => {
@@ -24,19 +25,20 @@ const ScoreBadge = ({ score }) => {
   );
 };
 
-const VideoGallery = ({ artistId }) => {
+const VideoGallery = ({ artistId, refreshKey }) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     if (!artistId) { setLoading(false); return; }
+    setLoading(true);
     fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/gallery/${artistId}`)
       .then(r => r.ok ? r.json() : [])
       .then(data => setVideos(data))
       .catch(e => console.error('Gallery error:', e))
       .finally(() => setLoading(false));
-  }, [artistId]);
+  }, [artistId, refreshKey]);
 
   const filtered = filter === 'all' ? videos : videos.filter(v => v.status === filter);
 
@@ -140,7 +142,8 @@ const VideoGallery = ({ artistId }) => {
                   <span style={{
                     fontSize: '12px', padding: '4px 10px', borderRadius: '20px',
                     background: status.bg, color: status.color,
-                    display: 'flex', alignItems: 'center', gap: '5px'
+                    display: 'flex', alignItems: 'center', gap: '5px',
+                    animation: status.pulse ? 'pulse 1.5s ease-in-out infinite' : 'none'
                   }}>
                     {status.icon} {status.label}
                   </span>

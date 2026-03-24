@@ -72,9 +72,9 @@ const PlatformRow = ({ platform, data }) => {
   );
 };
 
-const CopyBlock = ({ label, text, onCopy }) => {
+const EditableCopyBlock = ({ label, value, onChange }) => {
   const [copied, setCopied] = useState(false);
-  const handle = () => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); onCopy?.(); };
+  const handle = () => { navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   return (
     <div style={{ background: 'rgba(155,81,224,0.05)', border: '1px solid rgba(155,81,224,0.15)', borderRadius: '10px', padding: '12px', marginBottom: '10px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -83,7 +83,11 @@ const CopyBlock = ({ label, text, onCopy }) => {
           <Copy size={12} /> {copied ? 'Copiado ✓' : 'Copiar'}
         </button>
       </div>
-      <p style={{ fontSize: '12px', color: 'white', margin: 0, lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{text}</p>
+      <textarea
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{ width: '100%', background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: 'white', padding: '8px', fontSize: '12px', lineHeight: '1.5', height: '90px', resize: 'vertical', fontFamily: 'inherit' }}
+      />
     </div>
   );
 };
@@ -96,6 +100,8 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
   const [publishLoading, setPublishLoading] = useState(false);
   const [scheduledDate, setScheduledDate]   = useState(data?.scheduled_for ? new Date(data.scheduled_for).toISOString().slice(0, 16) : '');
   const [hashtags, setHashtags]             = useState(data?.hashtags || '');
+  const [copyShort, setCopyShort]           = useState(data?.ai_copy_short || '');
+  const [copyLong, setCopyLong]             = useState(data?.ai_copy_long || '');
   const [selectedPlatforms, setSelectedPlatforms] = useState(data?.platforms || ['tiktok', 'instagram', 'youtube']);
   const [showBestTimes, setShowBestTimes]   = useState(false);
 
@@ -120,6 +126,8 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
         body: JSON.stringify({
           scheduled_at: scheduledDate || null,
           hashtags,
+          ai_copy_short: copyShort,
+          ai_copy_long: copyLong,
           platforms: selectedPlatforms,
           status: scheduledDate ? 'scheduled' : data.status
         }),
@@ -203,12 +211,12 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                     </div>
                   )}
 
-                  {data?.ai_copy_short && (
-                    <CopyBlock label="Copy corto — TikTok / Instagram" text={data.ai_copy_short} />
+                  {(data?.ai_copy_short || copyShort) && (
+                    <EditableCopyBlock label="Copy corto — TikTok / Instagram" value={copyShort} onChange={setCopyShort} />
                   )}
 
-                  {data?.ai_copy_long && (
-                    <CopyBlock label="Copy largo — YouTube / Facebook" text={data.ai_copy_long} />
+                  {(data?.ai_copy_long || copyLong) && (
+                    <EditableCopyBlock label="Copy largo — YouTube / Facebook" value={copyLong} onChange={setCopyLong} />
                   )}
                 </div>
               )}
@@ -217,10 +225,9 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
 
                 {/* ─ 2. HASHTAGS ─ */}
                 <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '5px' }}>
-                    Hashtags / Texto del post
-                    {data?.hashtags && hashtags === data.hashtags && <span style={{ color: '#f59e0b', marginLeft: '6px', fontSize: '10px' }}>✨ generado por IA</span>}
-                  </label>
+                  {data?.hashtags && hashtags === data.hashtags && (
+                    <span style={{ display: 'block', color: '#f59e0b', fontSize: '10px', marginBottom: '4px' }}>✨ Hashtags generados por IA</span>
+                  )}
                   <textarea
                     value={hashtags}
                     onChange={e => setHashtags(e.target.value)}
