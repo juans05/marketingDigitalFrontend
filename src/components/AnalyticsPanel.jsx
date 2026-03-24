@@ -298,12 +298,12 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     onClick={handlePublishNow}
-                    disabled={publishLoading || isPublished}
-                    style={{ flex: 1, padding: '10px', background: isPublished ? 'rgba(74,222,128,0.06)' : 'rgba(74,222,128,0.15)', border: `1px solid ${isPublished ? 'rgba(74,222,128,0.2)' : 'rgba(74,222,128,0.4)'}`, borderRadius: '8px', color: '#4ade80', cursor: isPublished ? 'default' : 'pointer', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: publishLoading ? 0.7 : 1 }}
+                    disabled={publishLoading}
+                    style={{ flex: 1, padding: '10px', background: 'rgba(74,222,128,0.15)', border: '1px solid rgba(74,222,128,0.4)', borderRadius: '8px', color: '#4ade80', cursor: publishLoading ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: publishLoading ? 0.7 : 1 }}
                   >
-                    {publishLoading ? <><Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> Publicando...</>
-                      : isPublished ? <><CheckCircle size={14} /> Publicado</>
-                        : <><Zap size={14} /> Publicar Ahora</>}
+                    {publishLoading
+                      ? <><Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> Publicando...</>
+                      : <><Zap size={14} /> Publicar Ahora</>}
                   </button>
 
                   <button
