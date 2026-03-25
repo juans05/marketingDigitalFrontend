@@ -2,19 +2,19 @@ import { useState } from 'react';
 import { Eye, Heart, Share2, MessageCircle, Calendar, Copy, ChevronDown, ChevronUp, Loader, CheckCircle, Clock, Zap, Lightbulb, TrendingUp } from 'lucide-react';
 
 const PLATFORM_CONFIG = {
-  tiktok:    { label: 'TikTok',    color: '#ff0050', bg: 'rgba(255,0,80,0.1)' },
+  tiktok: { label: 'TikTok', color: '#ff0050', bg: 'rgba(255,0,80,0.1)' },
   instagram: { label: 'Instagram', color: '#e1306c', bg: 'rgba(225,48,108,0.1)' },
-  youtube:   { label: 'YouTube',   color: '#ff0000', bg: 'rgba(255,0,0,0.1)' },
-  facebook:  { label: 'Facebook',  color: '#1877f2', bg: 'rgba(24,119,242,0.1)' },
-  twitter:   { label: 'Twitter/X', color: '#1da1f2', bg: 'rgba(29,161,242,0.1)' },
+  youtube: { label: 'YouTube', color: '#ff0000', bg: 'rgba(255,0,0,0.1)' },
+  facebook: { label: 'Facebook', color: '#1877f2', bg: 'rgba(24,119,242,0.1)' },
+  twitter: { label: 'Twitter/X', color: '#1da1f2', bg: 'rgba(29,161,242,0.1)' },
 };
 
 const BEST_TIMES = {
-  tiktok:    { tip: 'Mayor engagement en horas de descanso y tarde/noche', slots: [{ label: 'Mar / Jue / Vie', times: ['9:00', '12:00', '19:00'] }, { label: 'Sábado', times: ['11:00', '17:00'] }] },
+  tiktok: { tip: 'Mayor engagement en horas de descanso y tarde/noche', slots: [{ label: 'Mar / Jue / Vie', times: ['9:00', '12:00', '19:00'] }, { label: 'Sábado', times: ['11:00', '17:00'] }] },
   instagram: { tip: 'Picos a la hora del almuerzo y noche', slots: [{ label: 'Lun / Mar / Mié', times: ['9:00', '12:00', '18:00'] }, { label: 'Jue / Vie', times: ['11:00', '15:00'] }] },
-  youtube:   { tip: 'Audiencia activa tarde/noche entre semana y fin de semana', slots: [{ label: 'Jue / Vie', times: ['14:00', '20:00'] }, { label: 'Sáb / Dom', times: ['10:00', '16:00'] }] },
-  facebook:  { tip: 'Mejor rendimiento a media mañana y almuerzo', slots: [{ label: 'Mar / Mié / Jue', times: ['9:00', '13:00', '15:00'] }, { label: 'Viernes', times: ['10:00', '13:00'] }] },
-  twitter:   { tip: 'Picos en hora punta matutina y mediodía', slots: [{ label: 'Lun / Mar / Mié', times: ['8:00', '12:00', '17:00'] }, { label: 'Jue / Vie', times: ['9:00', '12:00'] }] },
+  youtube: { tip: 'Audiencia activa tarde/noche entre semana y fin de semana', slots: [{ label: 'Jue / Vie', times: ['14:00', '20:00'] }, { label: 'Sáb / Dom', times: ['10:00', '16:00'] }] },
+  facebook: { tip: 'Mejor rendimiento a media mañana y almuerzo', slots: [{ label: 'Mar / Mié / Jue', times: ['9:00', '13:00', '15:00'] }, { label: 'Viernes', times: ['10:00', '13:00'] }] },
+  twitter: { tip: 'Picos en hora punta matutina y mediodía', slots: [{ label: 'Lun / Mar / Mié', times: ['8:00', '12:00', '17:00'] }, { label: 'Jue / Vie', times: ['9:00', '12:00'] }] },
 };
 
 const getBestTimesForPlatforms = (platforms) => {
@@ -63,10 +63,10 @@ const PlatformRow = ({ platform, data }) => {
     <div style={{ background: cfg.bg, border: `1px solid ${cfg.color}30`, borderRadius: '12px', padding: '16px', marginBottom: '10px' }}>
       <div style={{ fontWeight: '600', color: cfg.color, fontSize: '14px', marginBottom: '12px' }}>{cfg.label}</div>
       <div style={{ display: 'flex', gap: '8px' }}>
-        <StatBadge icon={<Eye size={14} />}            value={data?.views ?? data?.impressions ?? data?.reach} label="Views"       color="#9b51e0" />
-        <StatBadge icon={<Heart size={14} />}          value={data?.likes ?? data?.hearts}                    label="Likes"       color="#e1306c" />
-        <StatBadge icon={<Share2 size={14} />}         value={data?.shares ?? data?.reposts ?? data?.retweets} label="Shares"     color="#10b981" />
-        <StatBadge icon={<MessageCircle size={14} />}  value={data?.comments ?? data?.replies}               label="Comentarios" color="#f59e0b" />
+        <StatBadge icon={<Eye size={14} />} value={data?.views ?? data?.impressions ?? data?.reach} label="Views" color="#9b51e0" />
+        <StatBadge icon={<Heart size={14} />} value={data?.likes ?? data?.hearts} label="Likes" color="#e1306c" />
+        <StatBadge icon={<Share2 size={14} />} value={data?.shares ?? data?.reposts ?? data?.retweets} label="Shares" color="#10b981" />
+        <StatBadge icon={<MessageCircle size={14} />} value={data?.comments ?? data?.replies} label="Comentarios" color="#f59e0b" />
       </div>
     </div>
   );
@@ -93,18 +93,18 @@ const EditableCopyBlock = ({ label, value, onChange }) => {
 };
 
 const AnalyticsPanel = ({ videoId, initialData }) => {
-  const [expanded, setExpanded]         = useState(false);
-  const [data, setData]                 = useState(initialData || null);
-  const [loading, setLoading]           = useState(false);
-  const [saveLoading, setSaveLoading]   = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [data, setData] = useState(initialData || null);
+  const [loading, setLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
   const [publishLoading, setPublishLoading] = useState(false);
-  const [scheduledDate, setScheduledDate]   = useState(data?.scheduled_for ? new Date(data.scheduled_for).toISOString().slice(0, 16) : '');
-  const [hashtags, setHashtags]             = useState(data?.hashtags || '');
-  const [copyShort, setCopyShort]           = useState(data?.ai_copy_short || '');
-  const [copyLong, setCopyLong]             = useState(data?.ai_copy_long || '');
+  const [scheduledDate, setScheduledDate] = useState(data?.scheduled_for ? new Date(data.scheduled_for).toISOString().slice(0, 16) : '');
+  const [hashtags, setHashtags] = useState(data?.hashtags || '');
+  const [copyShort, setCopyShort] = useState(data?.ai_copy_short || '');
+  const [copyLong, setCopyLong] = useState(data?.ai_copy_long || '');
   const [selectedPlatforms, setSelectedPlatforms] = useState(data?.platforms || ['tiktok', 'instagram', 'youtube']);
   const [postType, setPostType] = useState(data?.post_type || (data?.source_url?.includes('/video/') ? 'reel' : 'feed'));
-  const [showBestTimes, setShowBestTimes]   = useState(false);
+  const [showBestTimes, setShowBestTimes] = useState(false);
 
   const togglePlatform = (p) => setSelectedPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
 
@@ -169,10 +169,10 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
   };
 
   const handleExpand = () => { if (!expanded) fetchAnalytics(); setExpanded(v => !v); };
-  const bestTimes    = getBestTimesForPlatforms(selectedPlatforms);
-  const analytics    = parseAnalytics(data?.analytics_4h);
-  const isPublished  = data?.status === 'published';
-  const viralScore   = data?.viral_score;
+  const bestTimes = getBestTimesForPlatforms(selectedPlatforms);
+  const analytics = parseAnalytics(data?.analytics_4h);
+  const isPublished = data?.status === 'published';
+  const viralScore = data?.viral_score;
   const hasAiContent = data?.ai_copy_short || data?.ai_copy_long;
 
   return (
@@ -248,18 +248,18 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                     <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>Tipo de post (Instagram):</label>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {['reel', 'story', 'feed'].map(type => (
-                        <button 
-                          key={type} 
+                        <button
+                          key={type}
                           onClick={() => setPostType(type)}
-                          style={{ 
-                            padding: '6px 12px', 
-                            borderRadius: '6px', 
-                            fontSize: '11px', 
-                            fontWeight: '600', 
-                            cursor: 'pointer', 
-                            border: '1px solid', 
-                            borderColor: postType === type ? 'var(--primary)' : 'rgba(255,255,255,0.1)', 
-                            background: postType === type ? 'rgba(155,81,224,0.1)' : 'transparent', 
+                          style={{
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            border: '1px solid',
+                            borderColor: postType === type ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                            background: postType === type ? 'rgba(155,81,224,0.1)' : 'transparent',
                             color: postType === type ? 'var(--primary)' : 'var(--text-muted)',
                             textTransform: 'capitalize'
                           }}
@@ -269,7 +269,7 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                       ))}
                     </div>
                     {postType === 'story' && (
-                        <p style={{ fontSize: '10px', color: '#f59e0b', marginTop: '6px' }}>⚠️ Las Stories no incluyen texto de pie de foto.</p>
+                      <p style={{ fontSize: '10px', color: '#f59e0b', marginTop: '6px' }}>⚠️ Las Stories no incluyen texto de pie de foto.</p>
                     )}
                   </div>
                 )}
@@ -347,8 +347,8 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
               {analytics
                 ? Object.entries(analytics).map(([platform, pData]) => <PlatformRow key={platform} platform={platform} data={pData} />)
                 : <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', marginBottom: '10px' }}>
-                    {isPublished ? 'Analytics disponibles 4h después de publicar' : 'Disponible al publicar'}
-                  </div>
+                  {isPublished ? 'Analytics disponibles 4h después de publicar' : 'Disponible al publicar'}
+                </div>
               }
             </>
           )}
