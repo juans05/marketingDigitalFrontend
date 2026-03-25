@@ -103,6 +103,7 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
   const [copyShort, setCopyShort]           = useState(data?.ai_copy_short || '');
   const [copyLong, setCopyLong]             = useState(data?.ai_copy_long || '');
   const [selectedPlatforms, setSelectedPlatforms] = useState(data?.platforms || ['tiktok', 'instagram', 'youtube']);
+  const [postType, setPostType] = useState(data?.post_type || (data?.source_url?.includes('/video/') ? 'reel' : 'feed'));
   const [showBestTimes, setShowBestTimes]   = useState(false);
 
   const togglePlatform = (p) => setSelectedPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
@@ -129,6 +130,7 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
           ai_copy_short: copyShort,
           ai_copy_long: copyLong,
           platforms: selectedPlatforms,
+          post_type: postType,
           status: scheduledDate ? 'scheduled' : data.status
         }),
       });
@@ -240,20 +242,37 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                   />
                 </div>
 
-                {/* ─ 3. PLATAFORMAS ─ */}
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>Publicar en:</label>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {Object.entries(PLATFORM_CONFIG).map(([id, cfg]) => {
-                      const active = selectedPlatforms.includes(id);
-                      return (
-                        <button key={id} onClick={() => togglePlatform(id)} style={{ padding: '6px 12px', borderRadius: '15px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', border: '1px solid', borderColor: active ? cfg.color : 'rgba(255,255,255,0.1)', background: active ? cfg.bg : 'transparent', color: active ? cfg.color : 'var(--text-muted)', transition: 'all 0.2s' }}>
-                          {cfg.label}
+                {/* ─ 3.5 TIPO DE POST (Instagram) ─ */}
+                {selectedPlatforms.includes('instagram') && (
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px' }}>Tipo de post (Instagram):</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {['reel', 'story', 'feed'].map(type => (
+                        <button 
+                          key={type} 
+                          onClick={() => setPostType(type)}
+                          style={{ 
+                            padding: '6px 12px', 
+                            borderRadius: '6px', 
+                            fontSize: '11px', 
+                            fontWeight: '600', 
+                            cursor: 'pointer', 
+                            border: '1px solid', 
+                            borderColor: postType === type ? 'var(--primary)' : 'rgba(255,255,255,0.1)', 
+                            background: postType === type ? 'rgba(155,81,224,0.1)' : 'transparent', 
+                            color: postType === type ? 'var(--primary)' : 'var(--text-muted)',
+                            textTransform: 'capitalize'
+                          }}
+                        >
+                          {type}
                         </button>
-                      );
-                    })}
+                      ))}
+                    </div>
+                    {postType === 'story' && (
+                        <p style={{ fontSize: '10px', color: '#f59e0b', marginTop: '6px' }}>⚠️ Las Stories no incluyen texto de pie de foto.</p>
+                    )}
                   </div>
-                </div>
+                )}
 
                 {/* ─ 4. PROGRAMAR ─ */}
                 <div style={{ marginBottom: '14px' }}>

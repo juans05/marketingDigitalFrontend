@@ -6,6 +6,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
   const [status, setStatus] = useState('idle'); // idle, checking, uploading, success, error
   const [errors, setErrors] = useState([]);
   const [platformWarning, setPlatformWarning] = useState(null);
+  const [uploadPhase, setUploadPhase] = useState(''); // signing, uploading, registering
 
   const validateFile = (file) => {
     return new Promise((resolve) => {
@@ -67,6 +68,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
 
   const handleUpload = async () => {
     setStatus('uploading');
+    setUploadPhase('signing');
     
     try {
       const isVideo = file.type.startsWith('video/');
@@ -78,6 +80,8 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       // 1. Obtener FIRMA del Backend (pasando la carpeta)
       const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}`);
       const sigData = await sigResponse.json();
+
+      setUploadPhase('uploading');
 
       // 2. Subir directamente a CLOUDINARY
       const formData = new FormData();
@@ -99,6 +103,8 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       
       if (!uploadRes.ok) throw new Error("Error subiendo a Cloudinary");
 
+      setUploadPhase('registering');
+
       // 3. Registrar en nuestro BACKEND (Base de Datos + n8n)
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/upload`, {
         method: 'POST',
@@ -119,6 +125,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       if (responseData.platformWarning) setPlatformWarning(responseData.platformWarning);
 
       setStatus('success');
+      setUploadPhase('');
       if (onUploadSuccess) onUploadSuccess();
     } catch (err) {
       console.error("Upload Error:", err);
@@ -204,8 +211,34 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
           )}
 
           {status === 'uploading' && (
-            <button disabled className="btn-primary" style={{ width: '100%', marginTop: '30px', opacity: 0.7, cursor: 'not-allowed', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-              <Loader2 className="animate-spin" size={20} /> Subiendo a la nube...
+            <button disabled className="btn-primary" style={{ 
+              width: '100%', 
+              marginTop: '30px', 
+              opacity: 0.8, 
+              cursor: 'not-allowed', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              gap: '12px',
+              padding: '24px 20px',
+              height: 'auto'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Loader2 className="animate-spin" size={20} />
+                <span style={{ fontWeight: '600' }}>
+                  {uploadPhase === 'signing' && 'Obteniendo permisos de seguridad...'}
+                  {uploadPhase === 'uploading' && 'Subiendo archivo a la nube...'}
+                  {uploadPhase === 'registering' && 'Procesando contenido con IA...'}
+                </span>
+              </div>
+              <div style={{ width: '100%', maxWidth: '200px', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ 
+                  height: '100%', 
+                  background: 'var(--primary)', 
+                  width: uploadPhase === 'signing' ? '20%' : uploadPhase === 'uploading' ? '50%' : '90%',
+                  transition: 'width 2s ease'
+                }}></div>
+              </div>
             </button>
           )}
 
