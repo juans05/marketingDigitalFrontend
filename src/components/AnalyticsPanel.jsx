@@ -163,15 +163,20 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/publish-now/${videoId}`, { method: 'POST' });
       const result = await res.json();
       if (res.ok) { setData(result); alert('✅ ¡Publicado con éxito en tus redes sociales!'); }
-      else alert('Error: ' + (result.error || 'No se pudo publicar'));
-    } catch { alert('Error de conexión al publicar.'); }
+      else {
+        const detailMsg = result.details?.posts?.[0]?.errors?.[0]?.message || result.details?.message || '';
+        alert(`❌ Error al publicar: ${result.error}${detailMsg ? `\n\nDetalle: ${detailMsg}` : ''}`);
+      }
+    } catch (err) { alert('Error de conexión al publicar: ' + err.message); }
     finally { setPublishLoading(false); }
   };
 
   const handleExpand = () => { if (!expanded) fetchAnalytics(); setExpanded(v => !v); };
   const bestTimes = getBestTimesForPlatforms(selectedPlatforms);
   const analytics = parseAnalytics(data?.analytics_4h);
-  const isPublished = data?.status === 'published';
+  const status = data?.status || 'processing';
+  const isPublished = status === 'published';
+  const isAnalyzing = status === 'analyzing' || status === 'processing';
   const viralScore = data?.viral_score;
   const hasAiContent = data?.ai_copy_short || data?.ai_copy_long;
 
@@ -317,12 +322,26 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     onClick={handlePublishNow}
-                    disabled={publishLoading}
-                    style={{ flex: 1, padding: '10px', background: 'rgba(74,222,128,0.15)', border: '1px solid rgba(74,222,128,0.4)', borderRadius: '8px', color: '#4ade80', cursor: publishLoading ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', opacity: publishLoading ? 0.7 : 1 }}
+                    disabled={publishLoading || isAnalyzing}
+                    style={{ 
+                      flex: 1, padding: '10px', 
+                      background: isAnalyzing ? 'rgba(255,255,255,0.05)' : 'rgba(74,222,128,0.15)', 
+                      border: `1px solid ${isAnalyzing ? 'rgba(255,255,255,0.1)' : 'rgba(74,222,128,0.4)'}`, 
+                      borderRadius: '8px', 
+                      color: isAnalyzing ? 'var(--text-muted)' : '#4ade80', 
+                      cursor: (publishLoading || isAnalyzing) ? 'not-allowed' : 'pointer', 
+                      fontSize: '12px', fontWeight: '700', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', 
+                      opacity: (publishLoading || isAnalyzing) ? 0.7 : 1 
+                    }}
                   >
-                    {publishLoading
-                      ? <><Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> Publicando...</>
-                      : <><Zap size={14} /> Publicar Ahora</>}
+                    {publishLoading ? (
+                      <><Loader size={14} style={{ animation: 'spin 1s linear infinite' }} /> Publicando...</>
+                    ) : isAnalyzing ? (
+                      <><Clock size={14} /> Espere (Analizando...)</>
+                    ) : (
+                      <><Zap size={14} /> Publicar Ahora</>
+                    )}
                   </button>
 
                   <button
