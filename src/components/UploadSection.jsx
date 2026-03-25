@@ -93,6 +93,9 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       // Forzar que sea público y especificar que es video/image
       formData.append('access_mode', 'public');
       formData.append('resource_type', isVideo ? 'video' : 'image');
+      if (isVideo && sigData.eager) {
+        formData.append('eager', sigData.eager);
+      }
 
       const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${sigData.cloudName}/${isVideo ? 'video' : 'image'}/upload`;
       const uploadRes = await fetch(cloudinaryUrl, {
