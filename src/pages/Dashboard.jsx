@@ -108,9 +108,9 @@ const Dashboard = () => {
         {/* Secciones de contenido — solo visibles si hay un artista activo */}
         {currentArtistId ? (
           <>
-            <SocialConnect artistId={currentArtistId} />
+            <SocialConnect artistId={currentArtistId} artistName={activeArtist?.name} />
             <UploadSection artistId={currentArtistId} onUploadSuccess={() => setGalleryKey(k => k + 1)} />
-            <VideoGallery artistId={currentArtistId} refreshKey={galleryKey} />
+            <VideoGallery artistId={currentArtistId} artistName={activeArtist?.name} refreshKey={galleryKey} />
           </>
         ) : isAgency ? (
           <div className="glass-card" style={{ padding: '50px', textAlign: 'center', color: 'var(--text-muted)' }}>

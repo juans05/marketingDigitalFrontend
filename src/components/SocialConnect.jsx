@@ -8,7 +8,7 @@ const PLATFORMS = [
   { key: 'facebook',  label: 'Facebook',  color: '#1877f2' },
 ];
 
-const SocialConnect = ({ artistId }) => {
+const SocialConnect = ({ artistId, artistName }) => {
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState('');
@@ -66,7 +66,7 @@ const SocialConnect = ({ artistId }) => {
         <div style={{ flex: 1 }}>
           <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Link2 size={20} color="var(--primary)" />
-            Conectar Redes Sociales
+            Conectar Redes Sociales {artistName && <span style={{ color: 'white', marginLeft: '8px' }}>para {artistName}</span>}
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '16px' }}>
             Vincula las cuentas de tu agencia para publicar automáticamente.

@@ -25,7 +25,7 @@ const ScoreBadge = ({ score }) => {
   );
 };
 
-const VideoGallery = ({ artistId, refreshKey }) => {
+const VideoGallery = ({ artistId, artistName, refreshKey }) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -53,7 +53,7 @@ const VideoGallery = ({ artistId, refreshKey }) => {
       {/* Header + filtros */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <h2 style={{ fontSize: '24px', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
-          <Film /> Tu Galería Viral
+          <Film /> Galería de {artistName || 'Contenido'}
           <span style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: 'normal' }}>
             ({videos.length} {videos.length === 1 ? 'video' : 'videos'})
           </span>
