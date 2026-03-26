@@ -234,12 +234,12 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                   <button
                     onClick={(e) => handleDelete(e, artist.id)}
                     style={{
-                      background: 'none', border: 'none', color: '#333', cursor: 'pointer',
+                      background: 'none', border: 'none', color: '#666', cursor: 'pointer',
                       padding: '8px', borderRadius: '4px', transition: 'all 0.2s',
                       display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = '#333'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
                   >
                     <Trash2 size={16} />
                   </button>

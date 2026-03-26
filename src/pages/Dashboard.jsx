@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight } from 'lucide-react';
+import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2 } from 'lucide-react';
 import UploadSection from '../components/UploadSection';
 import VideoGallery from '../components/VideoGallery';
 import SocialConnect from '../components/SocialConnect';
@@ -36,6 +36,24 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('vidalis_user');
     navigate('/');
+  };
+  
+  const handleDeleteArtist = async () => {
+    if (!activeArtist) return;
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar a ${activeArtist.name} y TODOS sus videos?`)) return;
+    
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${activeArtist.id}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Error al eliminar');
+      
+      setActiveArtist(null);
+      // Forzar recarga de stats
+      window.location.reload(); 
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   if (!user) return null;
@@ -142,6 +160,20 @@ const Dashboard = () => {
               <span style={{ color: '#FFF' }}>
                 {activeArtist ? activeArtist.name : 'Select Artist'}
               </span>
+              {activeArtist && (
+                <button 
+                  onClick={handleDeleteArtist}
+                  style={{
+                    background: 'none', border: 'none', color: '#444', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', marginLeft: '8px', transition: 'color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#444'}
+                  title="Eliminar Artista"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
             </>
           )}
           {!isAgency && <span style={{ color: '#FFF' }}>Overview</span>}
