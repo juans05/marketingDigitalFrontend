@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Plus, ChevronRight, CheckCircle, Loader2, X } from 'lucide-react';
+import { Users, Plus, ChevronRight, CheckCircle, Loader2, X, Trash2 } from 'lucide-react';
 
 const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
   const [artists, setArtists] = useState([]);
@@ -69,6 +69,23 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
       alert('Error al crear artista: ' + err.message);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleDelete = async (e, artistId) => {
+    e.stopPropagation(); // Evitar seleccionar el artista al querer borrarlo
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este artista y TODOS sus videos? Esta acción no se puede deshacer.')) return;
+    
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${artistId}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Error al eliminar');
+      
+      setArtists(prev => prev.filter(a => a.id !== artistId));
+      if (selectedArtistId === artistId) onSelectArtist(null);
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -213,8 +230,22 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                     </div>
                   </div>
                 </div>
-                {isSelected && <CheckCircle size={18} color="white" />}
-                {!isSelected && <ChevronRight size={18} color="#333" />}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    onClick={(e) => handleDelete(e, artist.id)}
+                    style={{
+                      background: 'none', border: 'none', color: '#333', cursor: 'pointer',
+                      padding: '8px', borderRadius: '4px', transition: 'all 0.2s',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#333'}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  {isSelected && <CheckCircle size={18} color="white" />}
+                  {!isSelected && <ChevronRight size={18} color="#333" />}
+                </div>
               </button>
             );
           })}
