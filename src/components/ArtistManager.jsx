@@ -7,6 +7,24 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newGenero, setNewGenero] = useState('');
+  const [newAudiencia, setNewAudiencia] = useState('');
+  const [newTono, setNewTono] = useState('');
+  
+  const GENRE_OPTIONS = [
+    "Reggaeton / Urbano", "Pop / Comercial", "Hip-Hop / Trap", 
+    "Electronic / EDM", "Rock / Alternative", "Indie / Singer-Songwriter", 
+    "R&B / Soul", "Jazz / Blues", "Classical / Cinematic", 
+    "Folk / Country", "Podcast / Talk Show", "Gaming / Tutorial", 
+    "Lifestyle / Vlogging"
+  ];
+
+  const TONE_OPTIONS = [
+    "Energético / High-Energy", "Inspiracional / Motivating", 
+    "Profesional / Authoritative", "Divertido / Humorístico", 
+    "Lujoso / Premium", "Auténtico / Raw", "Educativo / Informative", 
+    "Provocativo / Edgy", "Minimalista / Clean", "Emocional / Deep"
+  ];
 
   useEffect(() => {
     fetchArtists();
@@ -33,12 +51,18 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agency_id: agencyId, name: newName.trim() })
+        body: JSON.stringify({
+          agency_id: agencyId,
+          name: newName.trim(),
+          ai_genre: newGenero.trim() || null,
+          ai_audience: newAudiencia.trim() || null,
+          ai_tone: newTono.trim() || null,
+        })
       });
       const artist = await res.json();
       if (!res.ok) throw new Error(artist.error);
       setArtists(prev => [...prev, artist]);
-      setNewName('');
+      setNewName(''); setNewGenero(''); setNewAudiencia(''); setNewTono('');
       setShowForm(false);
       onSelectArtist(artist);
     } catch (err) {
@@ -49,64 +73,112 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
   };
 
   return (
-    <div className="glass-card" style={{ padding: '28px', marginBottom: '30px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-          <Users size={20} color="var(--primary)" />
-          Tus Artistas
+    <div className="glass-panel" style={{ padding: '32px', marginBottom: '40px', border: '2px solid var(--border-glass)', background: '#050505', borderRadius: '4px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
+          <Users size={18} color="white" />
+          Gestión de Artistas
         </h3>
         <button
           onClick={() => setShowForm(f => !f)}
           style={{
-            display: 'flex', alignItems: 'center', gap: '6px',
-            background: 'rgba(155,81,224,0.15)', border: '1px solid rgba(155,81,224,0.3)',
-            borderRadius: '10px', padding: '8px 16px',
-            color: 'var(--primary)', cursor: 'pointer', fontSize: '13px', fontWeight: '600'
+            display: 'flex', alignItems: 'center', gap: '8px',
+            background: '#FFF', border: 'none',
+            borderRadius: '4px', padding: '10px 20px',
+            color: '#000', cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase'
           }}
         >
-          {showForm ? <X size={15} /> : <Plus size={15} />}
-          {showForm ? 'Cancelar' : 'Nuevo artista'}
+          {showForm ? <X size={14} /> : <Plus size={14} />}
+          {showForm ? 'CANCELAR' : 'NUEVO ARTISTA'}
         </button>
       </div>
 
-      {/* Formulario crear artista */}
       {showForm && (
-        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <form onSubmit={handleCreate} style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Nombre — requerido */}
           <input
             type="text"
-            placeholder="Nombre del artista..."
+            placeholder="Nombre del artista *"
             value={newName}
             onChange={e => setNewName(e.target.value)}
             required
             autoFocus
             style={{
-              flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '10px', padding: '10px 14px', color: 'white', fontSize: '14px', outline: 'none'
+              background: '#000', border: '2px solid var(--border-glass)',
+              borderRadius: '4px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none'
             }}
           />
-          <button
-            type="submit"
-            disabled={creating}
-            className="btn-primary"
-            style={{ padding: '10px 20px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            {creating ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Plus size={16} />}
-            Crear
-          </button>
+
+          {/* Contexto IA — opcionales */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+            <select
+              value={newGenero}
+              onChange={e => setNewGenero(e.target.value)}
+              style={{
+                background: '#000', border: '2px solid var(--border-glass)',
+                borderRadius: '4px', padding: '10px 14px', color: newGenero ? 'white' : '#6B7280', fontSize: '13px', outline: 'none',
+                appearance: 'none', cursor: 'pointer'
+              }}
+            >
+              <option value="" disabled>Género / nicho</option>
+              {GENRE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+
+            <input
+              type="text"
+              placeholder="Audiencia (ej: jóvenes 18-25)"
+              value={newAudiencia}
+              onChange={e => setNewAudiencia(e.target.value)}
+              style={{
+                background: '#000', border: '2px solid var(--border-glass)',
+                borderRadius: '4px', padding: '10px 14px', color: 'white', fontSize: '13px', outline: 'none'
+              }}
+            />
+
+            <select
+              value={newTono}
+              onChange={e => setNewTono(e.target.value)}
+              style={{
+                background: '#000', border: '2px solid var(--border-glass)',
+                borderRadius: '4px', padding: '10px 14px', color: newTono ? 'white' : '#6B7280', fontSize: '13px', outline: 'none',
+                appearance: 'none', cursor: 'pointer'
+              }}
+            >
+              <option value="" disabled>Tono de la marca</option>
+              {TONE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            </select>
+          </div>
+          <p style={{ fontSize: '11px', color: '#555', margin: 0 }}>
+            Género, audiencia y tono son opcionales. La IA los usa para generar copy más preciso.
+          </p>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              type="submit"
+              disabled={creating}
+              style={{
+                padding: '12px 28px', background: '#FFF', color: '#000', border: 'none',
+                borderRadius: '4px', fontWeight: '700', fontSize: '11px', textTransform: 'uppercase', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px'
+              }}
+            >
+              {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+              CREAR ARTISTA
+            </button>
+          </div>
         </form>
       )}
 
-      {/* Lista de artistas */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-          <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Cargando artistas...
+        <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+          <Loader2 size={20} className="animate-spin" /> Cargando infraestructura...
         </div>
       ) : artists.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
-          No tienes artistas aún. Crea el primero para empezar.
+        <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280', fontSize: '14px' }}>
+          No se han detectado artistas activos. Registra el primero para iniciar el despliegue.
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
           {artists.map(artist => {
             const isSelected = artist.id === selectedArtistId;
             const platformCount = artist.active_platforms?.length || 0;
@@ -116,36 +188,33 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                 onClick={() => onSelectArtist(artist)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '14px 18px', borderRadius: '12px',
-                  border: `1px solid ${isSelected ? 'rgba(155,81,224,0.5)' : 'rgba(255,255,255,0.08)'}`,
-                  background: isSelected ? 'rgba(155,81,224,0.12)' : 'rgba(255,255,255,0.02)',
+                  padding: '24px', borderRadius: '4px',
+                  border: isSelected ? '2px solid #FFF' : '2px solid var(--border-glass)',
+                  background: isSelected ? '#111' : '#0A0A0A',
                   cursor: 'pointer', color: 'white', textAlign: 'left',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.3s ease'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {/* Avatar inicial */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{
-                    width: '38px', height: '38px', borderRadius: '50%',
-                    background: isSelected ? 'rgba(155,81,224,0.3)' : 'rgba(255,255,255,0.08)',
+                    width: '42px', height: '42px', borderRadius: '4px',
+                    background: isSelected ? '#FFF' : '#1A1A1A',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '16px', fontWeight: '700', color: isSelected ? 'var(--primary)' : 'var(--text-muted)'
+                    fontSize: '16px', fontWeight: '700', color: isSelected ? '#000' : '#FFF'
                   }}>
                     {artist.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div style={{ fontWeight: '600', fontSize: '14px' }}>{artist.name}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '4px' }}>{artist.name}</div>
+                    <div style={{ fontSize: '10px', color: '#6B7280', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       {platformCount > 0
-                        ? `${platformCount} red${platformCount > 1 ? 'es' : ''} conectada${platformCount > 1 ? 's' : ''}`
-                        : 'Sin redes conectadas'}
+                        ? `${platformCount} REDES CONECTADAS`
+                        : 'SIN REDES ACTIVAS'}
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {isSelected && <CheckCircle size={16} color="var(--primary)" />}
-                  <ChevronRight size={16} color="var(--text-muted)" />
-                </div>
+                {isSelected && <CheckCircle size={18} color="white" />}
+                {!isSelected && <ChevronRight size={18} color="#333" />}
               </button>
             );
           })}
@@ -156,3 +225,4 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
 };
 
 export default ArtistManager;
+

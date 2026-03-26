@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link2, CheckCircle, Loader2, ExternalLink, RefreshCw } from 'lucide-react';
 
 const PLATFORMS = [
-  { key: 'tiktok',    label: 'TikTok',    color: '#ff0050' },
-  { key: 'instagram', label: 'Instagram', color: '#e1306c' },
-  { key: 'youtube',   label: 'YouTube',   color: '#ff0000' },
-  { key: 'facebook',  label: 'Facebook',  color: '#1877f2' },
+  { key: 'tiktok',    label: 'TikTok',    color: '#666' },
+  { key: 'instagram', label: 'Instagram', color: '#666' },
+  { key: 'youtube',   label: 'YouTube',   color: '#666' },
+  { key: 'facebook',  label: 'Facebook',  color: '#666' },
 ];
 
 const SocialConnect = ({ artistId, artistName }) => {
@@ -61,35 +61,39 @@ const SocialConnect = ({ artistId, artistName }) => {
   };
 
   return (
-    <div className="glass-card" style={{ padding: '28px', marginBottom: '30px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+    <div className="glass-panel" style={{ padding: '32px', marginBottom: '40px', background: '#0A0A0A', border: '2px solid var(--border-glass)', borderRadius: '4px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
         <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Link2 size={20} color="var(--primary)" />
-            Conectar Redes Sociales {artistName && <span style={{ color: 'white', marginLeft: '8px' }}>para {artistName}</span>}
+          <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ border: '2px solid var(--border-glass)', padding: '6px', borderRadius: '4px' }}>
+              <Link2 size={16} color="white" />
+            </div>
+            Canales de Distribución {artistName && <span style={{ color: '#666', marginLeft: '8px' }}>[{artistName}]</span>}
           </h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '16px' }}>
-            Vincula las cuentas de tu agencia para publicar automáticamente.
+          <p style={{ color: '#6B7280', fontSize: '12px', fontWeight: '600', marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Sincronización de activos para despliegue multiplataforma.
           </p>
 
           {/* Plataformas disponibles / conectadas */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             {PLATFORMS.map(p => {
               const isConnected = connectedPlatforms.includes(p.key);
               return (
                 <span key={p.key} style={{
-                  padding: '4px 12px',
-                  borderRadius: '20px',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  background: isConnected ? `${p.color}25` : 'rgba(255,255,255,0.05)',
-                  color: isConnected ? p.color : 'var(--text-muted)',
-                  border: `1px solid ${isConnected ? p.color + '50' : 'rgba(255,255,255,0.1)'}`,
+                  padding: '6px 16px',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  fontWeight: '800',
+                  background: isConnected ? '#FFF' : '#000',
+                  color: isConnected ? '#000' : '#6B7280',
+                  border: isConnected ? '2px solid #FFF' : '2px solid var(--border-glass)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
                 }}>
-                  {isConnected && <CheckCircle size={11} />}
+                  {isConnected && <CheckCircle size={10} />}
                   {p.label}
                 </span>
               );
@@ -97,36 +101,27 @@ const SocialConnect = ({ artistId, artistName }) => {
           </div>
 
           {connectedPlatforms.length > 0 && (
-            <p style={{ color: '#4ade80', fontSize: '12px', marginTop: '10px' }}>
-              ✓ {connectedPlatforms.length} red{connectedPlatforms.length > 1 ? 'es' : ''} conectada{connectedPlatforms.length > 1 ? 's' : ''}
+            <p style={{ color: '#FFF', fontSize: '10px', fontWeight: '800', marginTop: '16px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              • {connectedPlatforms.length} {connectedPlatforms.length > 1 ? 'CANALES ACTIVOS' : 'CANAL ACTIVO'}
             </p>
           )}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
           <button
             onClick={handleConnect}
             disabled={loading}
+            className="btn-action"
             style={{
-              background: 'rgba(155,81,224,0.15)',
-              border: '1px solid rgba(155,81,224,0.3)',
-              borderRadius: '10px',
-              padding: '10px 20px',
-              color: 'var(--primary)',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '14px',
-              fontWeight: '600',
-              opacity: loading ? 0.7 : 1,
-              whiteSpace: 'nowrap'
+              padding: '12px 24px',
+              fontSize: '10px',
+              width: '240px'
             }}
           >
             {loading ? (
-              <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Generando link...</>
+              <><Loader2 size={14} className="animate-spin" /> GENERANDO ENLACE...</>
             ) : (
-              <><ExternalLink size={16} /> Conectar cuentas</>
+              <><ExternalLink size={14} /> VINCULAR CUENTAS</>
             )}
           </button>
 
@@ -135,23 +130,26 @@ const SocialConnect = ({ artistId, artistName }) => {
               onClick={handleVerify}
               disabled={verifying}
               style={{
-                background: 'rgba(74,222,128,0.1)',
-                border: '1px solid rgba(74,222,128,0.3)',
-                borderRadius: '10px',
-                padding: '8px 16px',
-                color: '#4ade80',
+                background: '#000',
+                border: '2px solid var(--border-glass)',
+                borderRadius: '4px',
+                padding: '12px 24px',
+                color: '#FFF',
                 cursor: verifying ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                fontSize: '13px',
-                fontWeight: '600',
+                justifyContent: 'center',
+                gap: '8px',
+                fontSize: '10px',
+                fontWeight: '800',
                 opacity: verifying ? 0.7 : 1,
-                whiteSpace: 'nowrap'
+                width: '240px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
               }}
             >
-              <RefreshCw size={14} style={verifying ? { animation: 'spin 1s linear infinite' } : {}} />
-              {verifying ? 'Verificando...' : 'Verificar conexión'}
+              <RefreshCw size={14} className={verifying ? "animate-spin" : ""} />
+              {verifying ? 'VERIFICANDO...' : 'CONFIRMAR CONEXIÓN'}
             </button>
           )}
         </div>
@@ -159,11 +157,11 @@ const SocialConnect = ({ artistId, artistName }) => {
 
       {error && (
         <div style={{
-          marginTop: '12px', padding: '10px 14px',
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
-          borderRadius: '8px', color: '#ef4444', fontSize: '13px'
+          marginTop: '24px', padding: '16px',
+          background: '#200', border: '1px solid #411',
+          borderRadius: '4px', color: '#ef4444', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase'
         }}>
-          {error}
+          ERROR DE SISTEMA: {error}
         </div>
       )}
     </div>

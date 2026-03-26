@@ -1,87 +1,132 @@
 :root {
-  --primary: #9b51e0;
-  --primary-hover: #7b2cbf;
-  --secondary: #2d9cdb;
-  --accent: #f2c94c;
-  --bg-dark: #0a0a0c;
-  --bg-card: rgba(255, 255, 255, 0.05);
-  --text-main: #f8f9fa;
-  --text-muted: #adb5bd;
-  --glass: rgba(255, 255, 255, 0.03);
-  --border-glass: rgba(255, 255, 255, 0.1);
-  --glow: 0 0 20px rgba(155, 81, 224, 0.3);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Monochromatic Elite Palette */
+  --bg-obsidian: #000000;
+  --bg-card: #0A0A0A;
+  --primary-neon: #FFFFFF;
+  --secondary-neon: #E5E7EB;
+  --accent-gold: #FFFFFF;
+  --text-pure: #FFFFFF;
+  --text-dim: #9CA3AF;
+  --border-glass: #333333;
+  --glass-blur: blur(0);
+  
+  /* Gradientes Neutros - Ultimate Elegance */
+  --grad-premium: linear-gradient(180deg, #FFFFFF 0%, #E5E7EB 100%);
+  --grad-surface: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+  
+  /* Typos - Balanced and Professional */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+
+  /* Shadows - Minimalist */
+  --shadow-elite: 0 4px 20px rgba(0, 0, 0, 0.8);
+  --shadow-subtle: 0 1px 3px rgba(255, 255, 255, 0.05);
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  min-height: 100vh;
+  background-color: #000000;
+  color: var(--text-pure);
+  font-family: var(--font-body);
+  line-height: 1.6;
   overflow-x: hidden;
-  background-image: 
-    radial-gradient(circle at 20% 20%, rgba(155, 81, 224, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(45, 156, 219, 0.15) 0%, transparent 40%);
+  -webkit-font-smoothing: antialiased;
 }
 
-.glass-card {
+#root {
+  background-color: #000000;
+  min-height: 100vh;
+}
+
+h1, h2, h3, .font-heading {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+/* Glass Panel - Architectural Minimalist */
+.glass-panel {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-glass);
-  border-radius: 24px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  border: none;
-  padding: 14px 28px;
-  border-radius: 12px;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
+  border: 2px solid var(--border-glass);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: var(--glow);
 }
 
-.btn-primary:hover {
+.glass-panel:hover {
+  border-color: #333;
+}
+
+/* Elite Action Button */
+.btn-action {
+  background: #FFFFFF;
+  color: #000000;
+  padding: 14px 28px;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-action:hover {
+  background: #E5E7EB;
   transform: translateY(-2px);
-  box-shadow: 0 0 30px rgba(155, 81, 224, 0.5);
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #fff, var(--primary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.btn-action:active {
+  transform: translateY(0);
 }
 
 /* Animations */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+.animate-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-/* Custom Scrollbar */
+/* Utilities */
+.text-dim { color: var(--text-dim); }
+.text-pure { color: var(--text-pure); }
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+  background: #000;
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 10px;
+  background: #222;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: #444;
+}
+
+@media (max-width: 768px) {
+  h1 { font-size: 2.4rem !important; }
+  .glass-panel { padding: 24px !important; }
 }

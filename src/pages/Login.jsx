@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, UserPlus, Mail, Lock, User, Building2, Sparkles, ArrowRight } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, User, Building2, Sparkles, ArrowRight, X } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
 
   // mode: 'login' | 'register'
   const [mode, setMode]           = useState('login');
-  // Registro paso 1 = elegir tipo, paso 2 = formulario
   const [regStep, setRegStep]     = useState(1);
   const [accountType, setAccountType] = useState('');
 
@@ -48,46 +47,88 @@ const Login = () => {
     }
   };
 
-  const inputWrapper = { display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px 16px' };
-  const inputStyle   = { background: 'none', border: 'none', outline: 'none', color: 'white', fontSize: '15px', width: '100%' };
-  const labelStyle   = { color: 'var(--text-muted)', fontSize: '13px', marginBottom: '6px', display: 'block' };
+  const inputWrapper = { 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: '12px', 
+    background: '#000', 
+    border: '1px solid #333', 
+    borderRadius: '4px', 
+    padding: '14px 18px',
+    transition: 'border-color 0.3s ease'
+  };
+  const inputStyle   = { background: 'none', border: 'none', outline: 'none', color: 'white', fontSize: '14px', width: '100%', fontFamily: 'Outfit' };
+  const labelStyle   = { color: '#6B7280', fontSize: '11px', fontWeight: '700', marginBottom: '8px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(155,81,224,0.15), transparent 70%)', top: '-100px', right: '-100px', animation: 'pulse 4s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.1), transparent 70%)', bottom: '-50px', left: '-50px', animation: 'pulse 5s ease-in-out infinite' }} />
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      padding: '80px 20px', 
+      background: '#000', 
+      fontFamily: 'Outfit',
+      overflowY: 'auto' 
+    }}>
+      
+      {/* Structural Background Contrast */}
+      <div style={{ 
+        position: 'absolute', 
+        width: '100%', 
+        height: '100%', 
+        background: '#000000',
+        zIndex: 0,
+        pointerEvents: 'none'
+      }} />
 
-      <div className="glass-card" style={{ width: '100%', maxWidth: '480px', padding: '50px 40px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+      <div className="glass-panel" style={{ 
+        width: '100%', 
+        maxWidth: '450px', 
+        padding: '64px 48px', 
+        textAlign: 'center', 
+        position: 'relative', 
+        zIndex: 1,
+        background: '#050505',
+        border: '1px solid #1A1A1A',
+        borderRadius: '4px',
+        boxShadow: '0 40px 100px rgba(0,0,0,0.8)'
+      }}>
 
-        {/* Logo */}
-        <div style={{ marginBottom: '30px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '8px' }}>
-            <Sparkles size={30} color="var(--primary)" />
-            <span style={{ fontSize: '26px', fontWeight: 'bold', letterSpacing: '1px' }}>
-              VIDALIS<span style={{ color: 'var(--primary)' }}>.AI</span>
+        {/* Logo Section */}
+        <div style={{ marginBottom: '48px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '12px' }}>
+            <div style={{ border: '1px solid #444', padding: '6px', borderRadius: '4px' }}>
+              <svg width="28" height="27" viewBox="0 0 48 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0-3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" fill="white"/>
+              </svg>
+            </div>
+            <span style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+              VIDALIS<span style={{ color: '#666' }}>.AI</span>
             </span>
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-            {mode === 'login' ? 'Accede a tu panel de contenido viral' : 'Crea tu cuenta y empieza a publicar'}
+          <p style={{ color: '#6B7280', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            {mode === 'login' ? 'Workstation de Impacto Viral' : 'Alta de Consultoría Estratégica'}
           </p>
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '4px', marginBottom: '28px' }}>
+        {/* Mode Selector */}
+        <div style={{ display: 'flex', background: '#000', border: '1px solid #222', borderRadius: '4px', padding: '4px', marginBottom: '40px' }}>
           {[
-            { id: 'login',    label: 'Iniciar Sesión', icon: <LogIn size={15} /> },
-            { id: 'register', label: 'Crear Cuenta',   icon: <UserPlus size={15} /> },
+            { id: 'login',    label: 'ACCESO', icon: <LogIn size={14} /> },
+            { id: 'register', label: 'REGISTRO', icon: <UserPlus size={14} /> },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => switchMode(tab.id)}
               style={{
-                flex: 1, padding: '10px', borderRadius: '9px', border: 'none', cursor: 'pointer',
-                fontSize: '13px', fontWeight: '600',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                background: mode === tab.id ? 'var(--primary)' : 'transparent',
-                color: mode === tab.id ? 'white' : 'var(--text-muted)',
-                transition: 'all 0.2s',
+                flex: 1, padding: '12px', borderRadius: '2px', border: 'none', cursor: 'pointer',
+                fontSize: '11px', fontWeight: '700',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                background: mode === tab.id ? '#FFF' : 'transparent',
+                color: mode === tab.id ? '#000' : '#6B7280',
+                transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
+                textTransform: 'uppercase'
               }}
             >
               {tab.icon} {tab.label}
@@ -95,138 +136,127 @@ const Login = () => {
           ))}
         </div>
 
-        {/* ─── LOGIN ─── */}
+        {/* ─── LOGIN FORM ─── */}
         {mode === 'login' && (
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '18px', textAlign: 'left' }}>
-              <label style={labelStyle}>Correo electrónico</label>
+            <div style={{ marginBottom: '24px', textAlign: 'left' }}>
+              <label style={labelStyle}>Identidad (Email)</label>
               <div style={inputWrapper}>
-                <Mail size={18} color="var(--text-muted)" />
-                <input type="email" placeholder="tu@email.com" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+                <Mail size={16} color="#444" />
+                <input type="email" placeholder="agencia@vidalis.ai" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
               </div>
             </div>
-            <div style={{ marginBottom: '28px', textAlign: 'left' }}>
-              <label style={labelStyle}>Contraseña</label>
+            <div style={{ marginBottom: '40px', textAlign: 'left' }}>
+              <label style={labelStyle}>Clave de Seguridad</label>
               <div style={inputWrapper}>
-                <Lock size={18} color="var(--text-muted)" />
+                <Lock size={16} color="#444" />
                 <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} />
               </div>
             </div>
 
             {error && (
-              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px', color: '#ef4444', fontSize: '13px', marginBottom: '18px' }}>
+              <div style={{ background: '#200', border: '1px solid #411', borderRadius: '4px', padding: '14px', color: '#ef4444', fontSize: '12px', fontWeight: '700', marginBottom: '24px', textAlign: 'left' }}>
                 {error}
               </div>
             )}
 
-            <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', padding: '15px', fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', opacity: loading ? 0.7 : 1 }}>
-              {loading ? 'Verificando...' : <><LogIn size={18} /> Iniciar Sesión</>}
+            <button type="submit" className="btn-action" disabled={loading} style={{ width: '100%', height: '56px', fontSize: '12px', padding: 0 }}>
+              {loading ? 'AUTENTICANDO...' : <><LogIn size={18} /> INICIAR SESIÓN</>}
             </button>
 
-            <p style={{ marginTop: '22px', color: 'var(--text-muted)', fontSize: '13px' }}>
-              ¿No tienes cuenta?{' '}
-              <button type="button" onClick={() => switchMode('register')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: '600', fontSize: '13px', padding: 0 }}>
-                Crear una aquí
+            <p style={{ marginTop: '32px', color: '#6B7280', fontSize: '11px', fontWeight: '600' }}>
+              ¿SIN INFRAESTRUCTURA?{' '}
+              <button type="button" onClick={() => switchMode('register')} style={{ background: 'none', border: 'none', color: '#FFF', cursor: 'pointer', fontWeight: '800', fontSize: '11px', padding: 0, textDecoration: 'underline' }}>
+                CREAR CUENTA
               </button>
             </p>
           </form>
         )}
 
-        {/* ─── REGISTRO ─── */}
+        {/* ─── REGISTER FORM ─── */}
         {mode === 'register' && (
           <>
-            {/* Paso 1: tipo de cuenta */}
             {regStep === 1 && (
               <div>
-                <p style={{ fontSize: '15px', fontWeight: '600', marginBottom: '18px' }}>¿Cómo vas a usar Vidalis?</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '24px' }}>
+                <p style={{ fontSize: '14px', fontWeight: '700', marginBottom: '24px', textTransform: 'uppercase', color: '#FFF' }}>Nivel de Operación</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '32px' }}>
                   {[
-                    { type: 'artist', icon: <User size={30} color="var(--primary)" />, title: 'Soy Artista', sub: 'Gestiono mis propias redes', borderColor: 'rgba(155,81,224,0.3)', bg: 'rgba(155,81,224,0.08)', bgHover: 'rgba(155,81,224,0.18)', arrowColor: 'var(--primary)' },
-                    { type: 'agency', icon: <Building2 size={30} color="#6366f1" />,   title: 'Soy Agencia', sub: 'Gestiono varios artistas',  borderColor: 'rgba(99,102,241,0.3)',  bg: 'rgba(99,102,241,0.08)',  bgHover: 'rgba(99,102,241,0.18)',  arrowColor: '#6366f1' },
+                    { type: 'artist', icon: <User size={24} />, title: 'CREADOR / ARTISTA', sub: 'GESTIÓN INDIVIDUAL' },
+                    { type: 'agency', icon: <Building2 size={24} />, title: 'AGENCIA / CORPORATIVO', sub: 'MULTI-ENTIDAD' },
                   ].map(opt => (
                     <button
                       key={opt.type}
                       onClick={() => { setAccountType(opt.type); setRegStep(2); }}
-                      style={{ padding: '22px 14px', borderRadius: '16px', border: `1px solid ${opt.borderColor}`, background: opt.bg, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', color: 'white', transition: 'all 0.2s' }}
-                      onMouseOver={e => e.currentTarget.style.background = opt.bgHover}
-                      onMouseOut={e => e.currentTarget.style.background = opt.bg}
+                      style={{ 
+                        padding: '24px', borderRadius: '4px', border: '1px solid #1A1A1A', background: '#0A0A0A', 
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '20px', color: 'white', transition: 'all 0.3s ease',
+                        textAlign: 'left'
+                      }}
+                      onMouseOver={e => { e.currentTarget.style.borderColor = '#FFF'; e.currentTarget.style.background = '#111'; }}
+                      onMouseOut={e => { e.currentTarget.style.borderColor = '#1A1A1A'; e.currentTarget.style.background = '#0A0A0A'; }}
                     >
-                      {opt.icon}
-                      <div>
-                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{opt.title}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '3px' }}>{opt.sub}</div>
+                      <div style={{ border: '1px solid #222', padding: '12px', borderRadius: '4px' }}>{opt.icon}</div>
+                      <div style={{ flexGrow: 1 }}>
+                        <div style={{ fontWeight: '800', fontSize: '13px', letterSpacing: '0.05em' }}>{opt.title}</div>
+                        <div style={{ fontSize: '10px', color: '#6B7280', fontWeight: '600', marginTop: '4px', letterSpacing: '0.05em' }}>{opt.sub}</div>
                       </div>
-                      <ArrowRight size={14} color={opt.arrowColor} />
+                      <ArrowRight size={16} color="#444" />
                     </button>
                   ))}
                 </div>
-
-                <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-                  ¿Ya tienes cuenta?{' '}
-                  <button type="button" onClick={() => switchMode('login')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: '600', fontSize: '13px', padding: 0 }}>
-                    Inicia sesión
-                  </button>
-                </p>
               </div>
             )}
 
-            {/* Paso 2: datos */}
             {regStep === 2 && (
               <div>
-                {/* Badge tipo */}
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: accountType === 'artist' ? 'rgba(155,81,224,0.12)' : 'rgba(99,102,241,0.12)', border: `1px solid ${accountType === 'artist' ? 'rgba(155,81,224,0.3)' : 'rgba(99,102,241,0.3)'}`, borderRadius: '20px', padding: '5px 14px', marginBottom: '22px', fontSize: '12px', fontWeight: '600', color: accountType === 'artist' ? 'var(--primary)' : '#818cf8' }}>
-                  {accountType === 'artist' ? <User size={13} /> : <Building2 size={13} />}
-                  {accountType === 'artist' ? 'Artista' : 'Agencia'}
-                  <button type="button" onClick={() => setRegStep(1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '15px', lineHeight: 1, padding: '0 0 0 2px' }}>×</button>
+                <div style={{ 
+                  display: 'inline-flex', alignItems: 'center', gap: '10px', 
+                  background: '#111', border: '1px solid #333', 
+                  borderRadius: '4px', padding: '8px 16px', marginBottom: '32px', 
+                  fontSize: '11px', fontWeight: '800', color: '#FFF',
+                  textTransform: 'uppercase', letterSpacing: '0.05em'
+                }}>
+                  {accountType === 'artist' ? <User size={14} /> : <Building2 size={14} />}
+                  MODO {accountType === 'artist' ? 'ARTISTA' : 'AGENCIA'}
+                  <button onClick={() => setRegStep(1)} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', display: 'flex' }}><X size={14} /></button>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                  <div style={{ marginBottom: '16px', textAlign: 'left' }}>
-                    <label style={labelStyle}>{accountType === 'artist' ? 'Tu nombre artístico' : 'Nombre de la agencia'}</label>
+                  <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                    <label style={labelStyle}>{accountType === 'artist' ? 'Nombre Artístico' : 'Razón Social / Agencia'}</label>
                     <div style={inputWrapper}>
-                      {accountType === 'artist' ? <User size={18} color="var(--text-muted)" /> : <Building2 size={18} color="var(--text-muted)" />}
-                      <input type="text" placeholder={accountType === 'artist' ? 'Ej: Juan González' : 'Ej: Suizalab Agency'} value={name} onChange={e => setName(e.target.value)} required style={inputStyle} />
+                      <User size={16} color="#444" />
+                      <input type="text" placeholder="Identificador Público" value={name} onChange={e => setName(e.target.value)} required style={inputStyle} />
                     </div>
                   </div>
-                  <div style={{ marginBottom: '16px', textAlign: 'left' }}>
-                    <label style={labelStyle}>Correo electrónico</label>
+                  <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+                    <label style={labelStyle}>Email Corporativo</label>
                     <div style={inputWrapper}>
-                      <Mail size={18} color="var(--text-muted)" />
-                      <input type="email" placeholder="tu@email.com" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+                      <Mail size={16} color="#444" />
+                      <input type="email" placeholder="tu@empresa.com" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
                     </div>
                   </div>
-                  <div style={{ marginBottom: '26px', textAlign: 'left' }}>
-                    <label style={labelStyle}>Contraseña</label>
+                  <div style={{ marginBottom: '32px', textAlign: 'left' }}>
+                    <label style={labelStyle}>Contraseña Maestra</label>
                     <div style={inputWrapper}>
-                      <Lock size={18} color="var(--text-muted)" />
-                      <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={inputStyle} />
+                      <Lock size={16} color="#444" />
+                      <input type="password" placeholder="Mínimo 6 caracteres" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={inputStyle} />
                     </div>
                   </div>
 
-                  {error && (
-                    <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px', color: '#ef4444', fontSize: '13px', marginBottom: '16px' }}>
-                      {error}
-                    </div>
-                  )}
-
-                  <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', padding: '15px', fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', opacity: loading ? 0.7 : 1 }}>
-                    {loading ? 'Creando cuenta...' : <><UserPlus size={18} /> Crear Cuenta</>}
+                  <button type="submit" className="btn-action" disabled={loading} style={{ width: '100%', height: '56px', fontSize: '12px' }}>
+                    {loading ? 'GENERANDO INFRAESTRUCTURA...' : <><UserPlus size={18} /> CREAR CUENTA</>}
                   </button>
-
-                  <p style={{ marginTop: '18px', color: 'var(--text-muted)', fontSize: '13px' }}>
-                    ¿Ya tienes cuenta?{' '}
-                    <button type="button" onClick={() => switchMode('login')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: '600', fontSize: '13px', padding: 0 }}>
-                      Inicia sesión
-                    </button>
-                  </p>
                 </form>
               </div>
             )}
           </>
         )}
 
-        <div style={{ marginTop: '24px' }}>
-          <a href="/" style={{ color: 'var(--text-muted)', fontSize: '12px', textDecoration: 'none' }}>← Volver al inicio</a>
+        <div style={{ marginTop: '40px', borderTop: '1px solid #1A1A1A', paddingTop: '24px' }}>
+          <a href="/" style={{ color: '#6B7280', fontSize: '11px', textDecoration: 'none', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            ← Volver al Portal de Lanzamiento
+          </a>
         </div>
       </div>
     </div>
