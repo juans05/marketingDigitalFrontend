@@ -8,6 +8,7 @@ const STATUS_CONFIG = {
   processing:   { label: 'Procesando',          icon: <Clock size={12} />,         color: '#FFFFFF', bg: 'rgba(255,255,255,0.05)' },
   analyzing:    { label: 'Estrategia IA',      icon: <Sparkles size={12} />,     color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', pulse: true },
   needs_review: { label: 'Review de Autoridad', icon: <AlertTriangle size={12} />, color: '#FFFFFF', bg: 'rgba(255,255,255,0.05)' },
+  ready:        { label: 'Listo para publicar',  icon: <CheckCircle size={12} />,   color: '#22c55e', bg: 'rgba(34,197,94,0.05)' },
   error:        { label: 'Fallo Crítico',       icon: <XCircle size={12} />,       color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
 };
 
@@ -62,12 +63,13 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
     fetchGallery(true);
   }, [artistId, refreshKey]);
 
-  // Auto-polling mientras haya videos analizando
+  // Auto-polling mientras haya videos analizando (máx 10 min)
   useEffect(() => {
     const hasAnalyzing = videos.some(v => ANALYZING_STATUSES.includes(v.status));
     if (!hasAnalyzing) return;
     const interval = setInterval(() => fetchGallery(false), 5000);
-    return () => clearInterval(interval);
+    const timeout  = setTimeout(() => clearInterval(interval), 10 * 60 * 1000);
+    return () => { clearInterval(interval); clearTimeout(timeout); };
   }, [videos, artistId]);
 
   const filtered = filter === 'all' ? videos : videos.filter(v => v.status === filter);
