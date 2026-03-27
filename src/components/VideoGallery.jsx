@@ -29,16 +29,64 @@ const ScoreBadge = ({ score }) => {
 
 const ANALYZING_STATUSES = ['analyzing', 'processing'];
 
-const AnalysisProgressBar = ({ status }) => {
+/** Extrae el paso actual (ej: 2) del string "[Paso 2/4] ..." */
+const parseStep = (text) => {
+  if (!text) return null;
+  const match = text.match(/\[Paso (\d+)\/(\d+)\]/);
+  if (match) return { current: parseInt(match[1]), total: parseInt(match[2]), message: text.replace(/\[Paso \d+\/\d+\]\s*/, '') };
+  return null;
+};
+
+const AnalysisProgressBar = ({ status, aiCopyShort }) => {
   if (!ANALYZING_STATUSES.includes(status)) return null;
+  const step = parseStep(aiCopyShort);
+  const percent = step ? (step.current / step.total) * 100 : 25;
+  
   return (
-    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
-      <div style={{
-        height: '100%',
-        background: 'linear-gradient(90deg, transparent, #fff, transparent)',
-        animation: 'scanBar 1.6s ease-in-out infinite',
-        width: '40%',
-      }} />
+    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+      {/* Step label */}
+      {step && (
+        <div style={{
+          position: 'absolute', bottom: '8px', left: '8px', right: '8px',
+          fontSize: '9px', fontWeight: '800', color: '#FFF',
+          textTransform: 'uppercase', letterSpacing: '0.05em',
+          textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+          zIndex: 2
+        }}>
+          {step.message}
+        </div>
+      )}
+      {/* Progress bar */}
+      <div style={{ height: '4px', background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+        <div style={{
+          height: '100%',
+          width: `${percent}%`,
+          background: 'linear-gradient(90deg, #6366f1, #a855f7)',
+          transition: 'width 0.8s ease-in-out',
+        }} />
+      </div>
+    </div>
+  );
+};
+
+/** Muestra el detalle del error cuando el status es 'error' */
+const ErrorDetail = ({ errorLog }) => {
+  if (!errorLog) return null;
+  let parsed;
+  try { parsed = JSON.parse(errorLog); } catch { parsed = { message: errorLog }; }
+  return (
+    <div style={{
+      marginTop: '12px', padding: '10px',
+      background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
+      borderRadius: '8px', color: '#ef4444', fontSize: '10px', fontWeight: '700',
+      wordBreak: 'break-word'
+    }}>
+      ❌ {parsed.message}
+      {parsed.timestamp && (
+        <div style={{ marginTop: '4px', fontSize: '9px', color: '#999' }}>
+          {new Date(parsed.timestamp).toLocaleString()}
+        </div>
+      )}
     </div>
   );
 };
@@ -176,7 +224,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
                   )}
                   
                   {/* Barra de progreso de análisis IA */}
-                  <AnalysisProgressBar status={video.status} />
+                  <AnalysisProgressBar status={video.status} aiCopyShort={video.ai_copy_short} />
 
                   {/* Status Overlay for Quick View */}
                   <div style={{
@@ -217,6 +265,9 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
                      <ScoreBadge score={video.viral_score} />
                   </div>
                 </div>
+
+                {/* Error detail */}
+                {video.status === 'error' && <ErrorDetail errorLog={video.error_log} />}
 
                 {/* Detail Integration */}
                 <AnalyticsPanel videoId={video.id} initialData={video} />
