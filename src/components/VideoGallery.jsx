@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter } from 'lucide-react';
+import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter, BarChart2 } from 'lucide-react';
 import AnalyticsPanel from './AnalyticsPanel';
 
 const Loader2 = ({ className, style, size = 24 }) => (
@@ -197,17 +197,15 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
           {filtered.map((video) => {
             const status = STATUS_CONFIG[video.status] || STATUS_CONFIG.processing;
             return (
-              <div key={video.id} className="glass-panel video-card" style={{ padding: '24px', transition: 'all 0.4s ease' }}>
+              <div key={video.id} className="card-pro animate-fade-in" style={{ padding: '0', overflow: 'hidden', transition: 'all 0.4s ease', display: 'flex', flexDirection: 'column' }}>
 
-                {/* Thumbnail / Preview */}
+                {/* Thumbnail / Preview Area */}
                 <div style={{
-                  height: '180px',
-                  background: '#0a0a0b',
-                  borderRadius: '12px',
-                  marginBottom: '20px',
-                  overflow: 'hidden',
+                  height: '200px',
+                  background: '#F3F4FB',
                   position: 'relative',
-                  border: '2px solid var(--border-glass)'
+                  overflow: 'hidden',
+                  borderBottom: '1px solid var(--border-main)'
                 }}>
                   {video.source_url ? (
                     (video.processed_url || video.source_url).match(/\.(mp4|mov|webm)$/i) ? (
@@ -226,32 +224,29 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
                       />
                     )
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', opacity: 0.2 }}>
-                      <Film size={40} />
-                      <span style={{ fontSize: '10px', fontWeight: '800' }}>Cargando Media...</span>
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', opacity: 0.3 }}>
+                      <Film size={40} color="var(--primary)" />
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-main)' }}>PREPARANDO ARCHIVO...</span>
                     </div>
                   )}
                   
-                  {/* Barra de progreso de análisis IA */}
-                  <AnalysisProgressBar status={video.status} aiCopyShort={video.ai_copy_short} />
-
-                  {/* Status Overlay for Quick View */}
+                  {/* Status Badge Over Thumbnail */}
                   <div style={{
                     position: 'absolute',
-                    top: '12px', right: '12px',
-                    padding: '6px 12px',
+                    top: '16px', right: '16px',
+                    padding: '6px 14px',
                     borderRadius: '100px',
-                    background: status.bg,
-                    color: status.color,
+                    background: status.bg === '#000' ? 'rgba(0,0,0,0.8)' : status.bg, 
+                    color: status.color === '#FFF' ? 'white' : status.color,
                     fontSize: '10px',
                     fontWeight: '900',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
-                    backdropFilter: 'blur(8px)',
-                    border: `2px solid ${status.color}`,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    zIndex: 10
                   }}>
                     {status.icon}
                     {status.label}
@@ -259,26 +254,43 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
                 </div>
 
                 {/* Info Area */}
-                <div style={{ marginBottom: '24px' }}>
+                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                   <h3 style={{
-                    fontSize: '15px', fontWeight: '800', marginBottom: '8px',
-                    color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                    fontSize: '15px', fontWeight: '800', marginBottom: '12px',
+                    color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    fontFamily: 'var(--font-heading)'
                   }}>
                     {video.title || 'Producción Sin Nombre'}
                   </h3>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>
-                        Viral Score IA
-                     </p>
-                     <ScoreBadge score={video.viral_score} />
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', fontWeight: '600' }}>
+                        <Clock size={14} />
+                        {new Date(video.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                     </div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Viral IA</span>
+                        <ScoreBadge score={video.viral_score} />
+                     </div>
+                  </div>
+
+                  {/* IA Progress Component (Subtle) */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <AnalysisProgressBar status={video.status} aiCopyShort={video.ai_copy_short} />
+                  </div>
+
+                  {/* Detail Integration */}
+                  <div style={{ marginTop: 'auto' }}>
+                    <AnalyticsPanel videoId={video.id} initialData={video} activePlatforms={activePlatforms} />
                   </div>
                 </div>
 
                 {/* Error detail */}
-                {video.status === 'error' && <ErrorDetail errorLog={video.error_log} />}
-
-                {/* Detail Integration */}
-                <AnalyticsPanel videoId={video.id} initialData={video} activePlatforms={activePlatforms} />
+                {video.status === 'error' && (
+                  <div style={{ padding: '0 24px 24px 24px' }}>
+                    <ErrorDetail errorLog={video.error_log} />
+                  </div>
+                )}
               </div>
             );
           })}
@@ -288,8 +300,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
       <style>{`
         .video-card:hover {
           transform: translateY(-8px);
-          border-color: #444;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.08);
         }
         @keyframes pulse {
           0% { opacity: 1; }
@@ -298,7 +309,14 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
         }
         @keyframes scanBar {
           0%   { transform: translateX(-100%); }
-          100% { transform: translateX(350%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </section>
