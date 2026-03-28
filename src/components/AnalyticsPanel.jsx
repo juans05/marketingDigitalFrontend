@@ -72,7 +72,7 @@ const EditableCopyBlock = ({ label, value, onChange, isReadOnly }) => {
   );
 };
 
-const AnalyticsPanel = ({ videoId, initialData }) => {
+const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const [expanded, setExpanded] = useState(false);
   const [data, setData] = useState(initialData || null);
   const [loading, setLoading] = useState(false);
@@ -82,7 +82,7 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
   const [hashtags, setHashtags] = useState(data?.hashtags || '');
   const [copyShort, setCopyShort] = useState(data?.ai_copy_short || '');
   const [copyLong, setCopyLong] = useState(data?.ai_copy_long || '');
-  const [selectedPlatforms, setSelectedPlatforms] = useState(data?.platforms || ['tiktok', 'instagram', 'youtube']);
+  const [selectedPlatforms, setSelectedPlatforms] = useState(data?.platforms?.length ? data.platforms : activePlatforms.length ? activePlatforms : ['instagram']);
   const [postType, setPostType] = useState(data?.post_type || 'reel');
   const [showBestTimes, setShowBestTimes] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -145,9 +145,20 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
   const handlePublishNow = async () => {
     setPublishLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/publish-now/${videoId}`, { method: 'POST' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/publish-now/${videoId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platforms: selectedPlatforms, postType })
+      });
       const result = await res.json();
-      if (res.ok) { setData(result); setNotification({ type: 'success', message: '¡Despliegue completado!' }); }
+      if (res.ok) { 
+        setData(result); 
+        const isQueued = result.details?.message?.toLowerCase().includes('queued') || result.details?.message?.toLowerCase().includes('durable worker');
+        setNotification({ 
+          type: 'success', 
+          message: isQueued ? '📤 Video en cola de procesamiento. ¡Se publicará en breve!' : '¡Despliegue completado!' 
+        }); 
+      }
       else { setNotification({ type: 'error', message: `Fallo: ${result.error}` }); }
     } catch (err) { setNotification({ type: 'error', message: 'Error de red.' }); }
     finally { setPublishLoading(false); }
@@ -211,6 +222,99 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                   <BrainCircuit size={18} color="white" />
                 </div>
                 <h4 style={{ fontFamily: 'var(--font-heading)', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '0.05em', fontWeight: '700' }}>Estrategia AI Elite</h4>
+              </div>
+
+              {/* Platform Selector */}
+              <div className="glass-panel" style={{ padding: '20px', marginBottom: '24px', background: '#0A0A0A', border: '1px solid #1A1A1A', borderRadius: '4px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#6B7280', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Plataformas de Distribución
+                </label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {Object.entries(PLATFORM_CONFIG).map(([key, cfg]) => {
+                    const isConnected = activePlatforms.includes(key);
+                    const isSelected = selectedPlatforms.includes(key);
+                    const togglePlatform = () => {
+                      if (!isConnected || isReadOnly) return;
+                      setSelectedPlatforms(prev =>
+                        prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key]
+                      );
+                    };
+                    return (
+                      <button
+                        key={key}
+                        onClick={togglePlatform}
+                        disabled={!isConnected || isReadOnly}
+                        title={!isConnected ? `${cfg.label} no está conectado` : ''}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '100px',
+                          border: isSelected && isConnected ? '2px solid #FFF' : '2px solid #333',
+                          background: isSelected && isConnected ? 'rgba(255,255,255,0.1)' : '#111',
+                          color: isSelected && isConnected ? '#FFF' : isConnected ? '#999' : '#444',
+                          cursor: isConnected && !isReadOnly ? 'pointer' : 'not-allowed',
+                          fontSize: '11px',
+                          fontWeight: '800',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.03em',
+                          opacity: isConnected ? 1 : 0.4,
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          boxShadow: isSelected && isConnected ? '0 0 20px rgba(255,255,255,0.1)' : 'none'
+                        }}
+                      >
+                        {isConnected && isSelected && <span style={{ fontSize: '10px' }}>✓</span>}
+                        {!isConnected && <span style={{ fontSize: '10px' }}>⊘</span>}
+                        {cfg.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {activePlatforms.length === 0 && (
+                  <p style={{ fontSize: '10px', color: '#ef4444', marginTop: '8px', fontWeight: '600' }}>
+                    ⚠️ No hay plataformas conectadas. Vincula tus redes en "Canales de Impacto".
+                  </p>
+                )}
+                {selectedPlatforms.length === 0 && activePlatforms.length > 0 && (
+                  <p style={{ fontSize: '10px', color: '#f59e0b', marginTop: '8px', fontWeight: '600' }}>
+                    Selecciona al menos una plataforma para publicar.
+                  </p>
+                )}
+              </div>
+
+              {/* Viral Score & Insights */}
+              {/* Post Format Selector */}
+              <div className="glass-panel" style={{ padding: '20px', marginBottom: '24px', background: '#0A0A0A', border: '1px solid #1A1A1A', borderRadius: '4px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#6B7280', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Formato de Publicación
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {['reel', 'story'].map(type => (
+                    <button
+                      key={type}
+                      onClick={() => !isReadOnly && setPostType(type)}
+                      disabled={isReadOnly}
+                      style={{
+                        padding: '12px 16px',
+                        borderRadius: '4px',
+                        border: postType === type ? '2px solid #FFF' : '2px solid #333',
+                        background: postType === type ? 'rgba(255,255,255,0.1)' : '#111',
+                        color: postType === type ? '#FFF' : '#999',
+                        cursor: isReadOnly ? 'not-allowed' : 'pointer',
+                        fontSize: '11px',
+                        fontWeight: '800',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.03em',
+                        transition: 'all 0.2s ease',
+                        textAlign: 'center',
+                        boxShadow: postType === type ? '0 0 20px rgba(255,255,255,0.1)' : 'none'
+                      }}
+                    >
+                      {type === 'reel' ? '🎬 REELS' : '📱 STORIES'}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Viral Score & Insights */}
@@ -280,10 +384,10 @@ const AnalyticsPanel = ({ videoId, initialData }) => {
                  <div style={{ display: 'flex', gap: '12px' }}>
                     <button 
                       onClick={handlePublishNow}
-                      disabled={publishLoading || isAnalyzing}
-                      style={{ flex: 1, padding: '16px', fontSize: '11px', background: '#FFF', color: '#000', border: 'none', borderRadius: '4px', fontWeight: '700', cursor: 'pointer', textTransform: 'uppercase' }}
+                      disabled={publishLoading || isAnalyzing || selectedPlatforms.length === 0}
+                      style={{ flex: 1, padding: '16px', fontSize: '11px', background: selectedPlatforms.length === 0 ? '#333' : '#FFF', color: selectedPlatforms.length === 0 ? '#666' : '#000', border: 'none', borderRadius: '4px', fontWeight: '700', cursor: selectedPlatforms.length === 0 ? 'not-allowed' : 'pointer', textTransform: 'uppercase' }}
                     >
-                       <Rocket size={16} /> {isPublished ? 'PUBLICADO' : isAnalyzing ? 'ANALIZANDO' : 'PUBLICAR AHORA'}
+                       <Rocket size={16} /> {isPublished ? 'PUBLICADO' : isAnalyzing ? 'ANALIZANDO' : selectedPlatforms.length === 0 ? 'SELECCIONA PLATAFORMA' : `PUBLICAR EN ${selectedPlatforms.length} RED${selectedPlatforms.length > 1 ? 'ES' : ''}`}
                     </button>
                     <button 
                       onClick={handleSaveSettings}

@@ -90,20 +90,16 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
   };
 
   return (
-    <div className="glass-panel" style={{ padding: '32px', marginBottom: '40px', border: '2px solid var(--border-glass)', background: '#050505', borderRadius: '4px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
-          <Users size={18} color="white" />
-          Gestión de Artistas
+    <div className="card-pro animate-fade-in" style={{ padding: '32px', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
+          <Users size={20} color="var(--primary)" />
+          Gestión de Marcas y Artistas
         </h3>
         <button
           onClick={() => setShowForm(f => !f)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            background: '#FFF', border: 'none',
-            borderRadius: '4px', padding: '10px 20px',
-            color: '#000', cursor: 'pointer', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase'
-          }}
+          className={showForm ? 'btn-secondary' : 'btn-primary'}
+          style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px' }}
         >
           {showForm ? <X size={14} /> : <Plus size={14} />}
           {showForm ? 'CANCELAR' : 'NUEVO ARTISTA'}
@@ -111,142 +107,150 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <form onSubmit={handleCreate} style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '24px', borderBottom: '1px solid var(--border-main)' }}>
           {/* Nombre — requerido */}
-          <input
-            type="text"
-            placeholder="Nombre del artista *"
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-            required
-            autoFocus
-            style={{
-              background: '#000', border: '2px solid var(--border-glass)',
-              borderRadius: '4px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none'
-            }}
-          />
-
-          {/* Contexto IA — opcionales */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-            <select
-              value={newGenero}
-              onChange={e => setNewGenero(e.target.value)}
-              style={{
-                background: '#000', border: '2px solid var(--border-glass)',
-                borderRadius: '4px', padding: '10px 14px', color: newGenero ? 'white' : '#6B7280', fontSize: '13px', outline: 'none',
-                appearance: 'none', cursor: 'pointer'
-              }}
-            >
-              <option value="" disabled>Género / nicho</option>
-              {GENRE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
-
+          <div className="input-group">
+            <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px', display: 'block' }}>Nombre Completo</label>
             <input
               type="text"
-              placeholder="Audiencia (ej: jóvenes 18-25)"
-              value={newAudiencia}
-              onChange={e => setNewAudiencia(e.target.value)}
+              placeholder="Ej: Marc Anthony, Warner Music..."
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              required
+              autoFocus
               style={{
-                background: '#000', border: '2px solid var(--border-glass)',
-                borderRadius: '4px', padding: '10px 14px', color: 'white', fontSize: '13px', outline: 'none'
+                width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)',
+                borderRadius: '8px', padding: '12px 16px', color: 'var(--text-main)', fontSize: '14px', outline: 'none'
               }}
             />
-
-            <select
-              value={newTono}
-              onChange={e => setNewTono(e.target.value)}
-              style={{
-                background: '#000', border: '2px solid var(--border-glass)',
-                borderRadius: '4px', padding: '10px 14px', color: newTono ? 'white' : '#6B7280', fontSize: '13px', outline: 'none',
-                appearance: 'none', cursor: 'pointer'
-              }}
-            >
-              <option value="" disabled>Tono de la marca</option>
-              {TONE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-            </select>
           </div>
-          <p style={{ fontSize: '11px', color: '#555', margin: 0 }}>
-            Género, audiencia y tono son opcionales. La IA los usa para generar copy más preciso.
-          </p>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          {/* Contexto IA — opcionales */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px', display: 'block' }}>Género / Nicho</label>
+              <select
+                value={newGenero}
+                onChange={e => setNewGenero(e.target.value)}
+                style={{
+                  width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)',
+                  borderRadius: '8px', padding: '12px 14px', color: newGenero ? 'var(--text-main)' : '#9CA3AF', fontSize: '13px', outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="" disabled>Selecciona género</option>
+                {GENRE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px', display: 'block' }}>Audiencia Objetivo</label>
+              <input
+                type="text"
+                placeholder="Ej: Jóvenes 18-25"
+                value={newAudiencia}
+                onChange={e => setNewAudiencia(e.target.value)}
+                style={{
+                  width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)',
+                  borderRadius: '8px', padding: '12px 14px', color: 'var(--text-main)', fontSize: '13px', outline: 'none'
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px', display: 'block' }}>Tono de Marca</label>
+              <select
+                value={newTono}
+                onChange={e => setNewTono(e.target.value)}
+                style={{
+                  width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)',
+                  borderRadius: '8px', padding: '12px 14px', color: newTono ? 'var(--text-main)' : '#9CA3AF', fontSize: '13px', outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="" disabled>Selecciona tono</option>
+                {TONE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+              </select>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic' }}>
+              * Los campos adicionales ayudan a la IA a generar copy más preciso.
+            </p>
             <button
               type="submit"
               disabled={creating}
-              style={{
-                padding: '12px 28px', background: '#FFF', color: '#000', border: 'none',
-                borderRadius: '4px', fontWeight: '700', fontSize: '11px', textTransform: 'uppercase', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: '8px'
-              }}
+              className="btn-primary"
+              style={{ padding: '12px 32px', borderRadius: '8px', fontSize: '13px' }}
             >
               {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-              CREAR ARTISTA
+              CREAR MARCA
             </button>
           </div>
         </form>
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-          <Loader2 size={20} className="animate-spin" /> Cargando infraestructura...
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+          <Loader2 size={24} className="animate-spin" color="var(--primary)" /> Cargando perfiles...
         </div>
       ) : artists.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#6B7280', fontSize: '14px' }}>
-          No se han detectado artistas activos. Registra el primero para iniciar el despliegue.
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '14px', background: '#F9FAFB', borderRadius: '12px', border: '1px dashed var(--border-main)' }}>
+          No hay marcas activas. Registra la primera para comenzar.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
           {artists.map(artist => {
             const isSelected = artist.id === selectedArtistId;
             const platformCount = artist.active_platforms?.length || 0;
             return (
-              <button
+              <div
                 key={artist.id}
                 onClick={() => onSelectArtist(artist)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '24px', borderRadius: '4px',
-                  border: isSelected ? '2px solid #FFF' : '2px solid var(--border-glass)',
-                  background: isSelected ? '#111' : '#0A0A0A',
-                  cursor: 'pointer', color: 'white', textAlign: 'left',
-                  transition: 'all 0.3s ease'
+                  padding: '16px 20px', borderRadius: '12px',
+                  border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-main)',
+                  background: isSelected ? '#F5F7FF' : '#FFFFFF',
+                  cursor: 'pointer', transition: 'all 0.2s ease',
+                  boxShadow: isSelected ? '0 4px 12px rgba(44, 51, 216, 0.1)' : 'none'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{
-                    width: '42px', height: '42px', borderRadius: '4px',
-                    background: isSelected ? '#FFF' : '#1A1A1A',
+                    width: '40px', height: '40px', borderRadius: '10px',
+                    background: isSelected ? 'var(--primary)' : '#F3F4F6',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '16px', fontWeight: '700', color: isSelected ? '#000' : '#FFF'
+                    fontSize: '16px', fontWeight: '800', color: isSelected ? '#FFF' : 'var(--text-muted)'
                   }}>
                     {artist.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '4px' }}>{artist.name}</div>
-                    <div style={{ fontSize: '10px', color: '#6B7280', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <div style={{ fontWeight: '700', fontSize: '14px', color: 'var(--text-main)' }}>{artist.name}</div>
+                    <div style={{ fontSize: '11px', color: isSelected ? 'var(--primary)' : 'var(--text-muted)', fontWeight: '600' }}>
                       {platformCount > 0
-                        ? `${platformCount} REDES CONECTADAS`
-                        : 'SIN REDES ACTIVAS'}
+                        ? `${platformCount} REDES ACTIVAS`
+                        : 'SIN REDES'}
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <button
                     onClick={(e) => handleDelete(e, artist.id)}
                     style={{
-                      background: 'none', border: 'none', color: '#666', cursor: 'pointer',
-                      padding: '8px', borderRadius: '4px', transition: 'all 0.2s',
+                      background: 'none', border: 'none', color: '#9CA3AF', cursor: 'pointer',
+                      padding: '6px', borderRadius: '6px', transition: 'all 0.2s',
                       display: 'flex', alignItems: 'center', justifyContent: 'center'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = '#666'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#9CA3AF'}
                   >
                     <Trash2 size={16} />
                   </button>
-                  {isSelected && <CheckCircle size={18} color="white" />}
-                  {!isSelected && <ChevronRight size={18} color="#333" />}
+                  {isSelected ? <CheckCircle size={20} color="var(--primary)" /> : <ChevronRight size={18} color="#D1D5DB" />}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

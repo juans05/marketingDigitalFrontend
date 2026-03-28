@@ -2,14 +2,23 @@ import { useEffect, useState } from 'react';
 import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter } from 'lucide-react';
 import AnalyticsPanel from './AnalyticsPanel';
 
+const Loader2 = ({ className, style, size = 24 }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+    className={className} style={style}
+  >
+    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+  </svg>
+);
+
 const STATUS_CONFIG = {
-  published:    { label: 'Publicado',           icon: <CheckCircle size={12} />,   color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
-  scheduled:    { label: 'Programado',          icon: <Clock size={12} />,         color: '#6B7280', bg: 'rgba(255,255,255,0.02)' },
-  processing:   { label: 'Procesando',          icon: <Clock size={12} />,         color: '#FFFFFF', bg: 'rgba(255,255,255,0.05)' },
-  analyzing:    { label: 'Estrategia IA',      icon: <Sparkles size={12} />,     color: '#FFFFFF', bg: 'rgba(255,255,255,0.08)', pulse: true },
-  needs_review: { label: 'Review de Autoridad', icon: <AlertTriangle size={12} />, color: '#FFFFFF', bg: 'rgba(255,255,255,0.05)' },
-  ready:        { label: 'Listo para publicar',  icon: <CheckCircle size={12} />,   color: '#22c55e', bg: 'rgba(34,197,94,0.05)' },
-  error:        { label: 'Fallo Crítico',       icon: <XCircle size={12} />,       color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+  published:    { label: 'Publicado',           icon: <CheckCircle size={12} />,   color: '#22c55e', bg: '#ecfdf5' },
+  scheduled:    { label: 'Programado',          icon: <Clock size={12} />,         color: '#2C33D8', bg: '#eff6ff' },
+  processing:   { label: 'Procesando',          icon: <Loader2 size={12} className="animate-spin" />, color: '#6B7280', bg: '#f9fafb' },
+  analyzing:    { label: 'Estrategia IA',      icon: <Sparkles size={12} />,     color: '#7c3aed', bg: '#f5f3ff', pulse: true },
+  needs_review: { label: 'Review de Autoridad', icon: <AlertTriangle size={12} />, color: '#d97706', bg: '#fffbeb' },
+  ready:        { label: 'Listo para publicar',  icon: <CheckCircle size={12} />,   color: '#22c55e', bg: '#ecfdf5' },
+  error:        { label: 'Fallo Crítico',       icon: <XCircle size={12} />,       color: '#ef4444', bg: '#fef2f2' },
 };
 
 const ScoreBadge = ({ score }) => {
@@ -91,7 +100,7 @@ const ErrorDetail = ({ errorLog }) => {
   );
 };
 
-const VideoGallery = ({ artistId, artistName, refreshKey }) => {
+const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -123,9 +132,9 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
   const filtered = filter === 'all' ? videos : videos.filter(v => v.status === filter);
 
   if (loading) return (
-    <div style={{ textAlign: 'center', padding: '100px 40px', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.02)', borderRadius: '24px' }}>
-      <Loader2 className="animate-spin" style={{ margin: '0 auto 16px', color: 'var(--primary-neon)' }} />
-      <p style={{ fontWeight: '600', letterSpacing: '0.05em' }}>SINCRONIZANDO BIBLIOTECA...</p>
+    <div style={{ textAlign: 'center', padding: '100px 40px', color: 'var(--text-muted)', background: '#F9FAFB', borderRadius: '24px', border: '1px solid var(--border-main)' }}>
+      <Loader2 className="animate-spin" size={32} style={{ margin: '0 auto 16px', color: 'var(--primary)' }} />
+      <p style={{ fontWeight: '700', letterSpacing: '0.05em' }}>SINCRONIZANDO BIBLIOTECA...</p>
     </div>
   );
 
@@ -134,20 +143,20 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
       {/* Header + filtros */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '12px' }}>
-            <Film size={24} className="text-dim" />
+          <div style={{ background: '#F3F4F6', padding: '12px', borderRadius: '12px' }}>
+            <Film size={24} color="var(--primary)" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', textTransform: 'uppercase', marginBottom: '4px' }}>
-              Catálogo Vital
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '4px' }}>
+              Catálogo de Contenido
             </h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', fontWeight: '600' }}>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600' }}>
               Mostrando {filtered.length} de {videos.length} piezas de impacto.
             </p>
           </div>
         </div>
 
-        <div className="glass-panel" style={{ display: 'flex', gap: '4px', padding: '6px', borderRadius: '100px' }}>
+        <div className="card-pro" style={{ display: 'flex', gap: '4px', padding: '6px', borderRadius: '100px', border: '1px solid var(--border-main)' }}>
           {['all', 'published', 'needs_review', 'analyzing'].map(f => (
             <button
               key={f}
@@ -156,11 +165,11 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
                 padding: '8px 20px',
                 borderRadius: '100px',
                 border: 'none',
-                background: filter === f ? 'var(--grad-premium)' : 'transparent',
-                color: filter === f ? 'white' : 'var(--text-dim)',
+                background: filter === f ? 'var(--primary)' : 'transparent',
+                color: filter === f ? 'white' : 'var(--text-muted)',
                 cursor: 'pointer',
                 fontSize: '11px',
-                fontWeight: '900',
+                fontWeight: '800',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 transition: 'all 0.3s ease'
@@ -174,10 +183,10 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
 
       {/* Grid de videos */}
       {filtered.length === 0 ? (
-        <div className="glass-panel" style={{ padding: '100px 40px', textAlign: 'center' }}>
-          <Filter size={48} style={{ opacity: 0.1, marginBottom: '24px' }} />
-          <h3 style={{ fontFamily: 'var(--font-heading)', color: 'white', marginBottom: '8px' }}>Sin resultados dinámicos</h3>
-          <p style={{ color: 'var(--text-dim)' }}>
+        <div className="card-pro" style={{ padding: '100px 40px', textAlign: 'center', border: '1px dashed var(--border-main)' }}>
+          <Filter size={48} style={{ opacity: 0.2, marginBottom: '24px', color: 'var(--primary)' }} />
+          <h3 style={{ fontWeight: '800', color: 'var(--text-main)', marginBottom: '8px' }}>Sin resultados</h3>
+          <p style={{ color: 'var(--text-muted)' }}>
             {filter === 'all'
               ? 'Inicia tu legado subiendo tu primer contenido vertical.'
               : `No se encontraron piezas con el estatus "${STATUS_CONFIG[filter]?.label || filter}"`}
@@ -252,14 +261,13 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
                 {/* Info Area */}
                 <div style={{ marginBottom: '24px' }}>
                   <h3 style={{
-                    fontSize: '1rem', fontWeight: '800', marginBottom: '8px',
-                    fontFamily: 'var(--font-heading)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                    color: 'white'
+                    fontSize: '15px', fontWeight: '800', marginBottom: '8px',
+                    color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                   }}>
                     {video.title || 'Producción Sin Nombre'}
                   </h3>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)', fontWeight: '600' }}>
+                     <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>
                         Viral Score IA
                      </p>
                      <ScoreBadge score={video.viral_score} />
@@ -270,7 +278,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
                 {video.status === 'error' && <ErrorDetail errorLog={video.error_log} />}
 
                 {/* Detail Integration */}
-                <AnalyticsPanel videoId={video.id} initialData={video} />
+                <AnalyticsPanel videoId={video.id} initialData={video} activePlatforms={activePlatforms} />
               </div>
             );
           })}
@@ -297,13 +305,5 @@ const VideoGallery = ({ artistId, artistName, refreshKey }) => {
   );
 };
 
-const Loader2 = ({ className, style }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
-    className={className} style={style}
-  >
-    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-  </svg>
-);
 
 export default VideoGallery;

@@ -51,14 +51,15 @@ const Login = () => {
     display: 'flex', 
     alignItems: 'center', 
     gap: '12px', 
-    background: '#000', 
-    border: '1px solid #333', 
-    borderRadius: '4px', 
-    padding: '14px 18px',
-    transition: 'border-color 0.3s ease'
+    background: '#FFFFFF', 
+    border: '1px solid var(--border-main)', 
+    borderRadius: '8px', 
+    padding: '12px 16px',
+    transition: 'all 0.2s ease',
+    boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)'
   };
-  const inputStyle   = { background: 'none', border: 'none', outline: 'none', color: 'white', fontSize: '14px', width: '100%', fontFamily: 'Outfit' };
-  const labelStyle   = { color: '#6B7280', fontSize: '11px', fontWeight: '700', marginBottom: '8px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' };
+  const inputStyle   = { background: 'none', border: 'none', outline: 'none', color: 'var(--text-main)', fontSize: '14px', width: '100%', fontFamily: 'Inter' };
+  const labelStyle   = { color: 'var(--text-main)', fontSize: '13px', fontWeight: '600', marginBottom: '6px', display: 'block' };
 
   return (
     <div style={{ 
@@ -66,69 +67,56 @@ const Login = () => {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
-      padding: '80px 20px', 
-      background: '#000', 
-      fontFamily: 'Outfit',
+      padding: '40px 20px', 
+      background: 'var(--bg-primary)', 
+      fontFamily: 'Inter',
       overflowY: 'auto' 
     }}>
       
-      {/* Structural Background Contrast */}
-      <div style={{ 
-        position: 'absolute', 
+      <div className="card-pro animate-fade-in" style={{ 
         width: '100%', 
-        height: '100%', 
-        background: '#000000',
-        zIndex: 0,
-        pointerEvents: 'none'
-      }} />
-
-      <div className="glass-panel" style={{ 
-        width: '100%', 
-        maxWidth: '450px', 
-        padding: '64px 48px', 
+        maxWidth: '440px', 
+        padding: '48px 40px', 
         textAlign: 'center', 
-        position: 'relative', 
-        zIndex: 1,
-        background: '#050505',
-        border: '1px solid #1A1A1A',
-        borderRadius: '4px',
-        boxShadow: '0 40px 100px rgba(0,0,0,0.8)'
+        background: '#FFFFFF',
+        borderRadius: '16px',
+        boxShadow: 'var(--shadow-lg)'
       }}>
 
         {/* Logo Section */}
-        <div style={{ marginBottom: '48px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '12px' }}>
-            <div style={{ border: '1px solid #444', padding: '6px', borderRadius: '4px' }}>
-              <svg width="28" height="27" viewBox="0 0 48 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div style={{ marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '8px' }}>
+            <div style={{ background: 'var(--primary)', padding: '8px', borderRadius: '10px' }}>
+              <svg width="24" height="24" viewBox="0 0 48 46" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0-3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" fill="white"/>
               </svg>
             </div>
-            <span style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              VIDALIS<span style={{ color: '#666' }}>.AI</span>
+            <span style={{ fontSize: '24px', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--text-main)', fontFamily: 'Outfit' }}>
+              Vidalis<span style={{ color: 'var(--primary)' }}>.ai</span>
             </span>
           </div>
-          <p style={{ color: '#6B7280', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {mode === 'login' ? 'Workstation de Impacto Viral' : 'Alta de Consultoría Estratégica'}
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500' }}>
+            {mode === 'login' ? 'Gestiona tu impacto en redes sociales' : 'Comienza tu viaje con Vidalis'}
           </p>
         </div>
 
         {/* Mode Selector */}
-        <div style={{ display: 'flex', background: '#000', border: '1px solid #222', borderRadius: '4px', padding: '4px', marginBottom: '40px' }}>
+        <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: '10px', padding: '4px', marginBottom: '32px' }}>
           {[
-            { id: 'login',    label: 'ACCESO', icon: <LogIn size={14} /> },
-            { id: 'register', label: 'REGISTRO', icon: <UserPlus size={14} /> },
+            { id: 'login',    label: 'Ingresar', icon: <LogIn size={16} /> },
+            { id: 'register', label: 'Registrarse', icon: <UserPlus size={16} /> },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => switchMode(tab.id)}
               style={{
-                flex: 1, padding: '12px', borderRadius: '2px', border: 'none', cursor: 'pointer',
-                fontSize: '11px', fontWeight: '700',
+                flex: 1, padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                fontSize: '14px', fontWeight: '600',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 background: mode === tab.id ? '#FFF' : 'transparent',
-                color: mode === tab.id ? '#000' : '#6B7280',
-                transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
-                textTransform: 'uppercase'
+                color: mode === tab.id ? 'var(--primary)' : 'var(--text-muted)',
+                boxShadow: mode === tab.id ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                transition: 'all 0.2s ease'
               }}
             >
               {tab.icon} {tab.label}
@@ -139,35 +127,35 @@ const Login = () => {
         {/* ─── LOGIN FORM ─── */}
         {mode === 'login' && (
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '24px', textAlign: 'left' }}>
-              <label style={labelStyle}>Identidad (Email)</label>
+            <div style={{ marginBottom: '20px', textAlign: 'left' }}>
+              <label style={labelStyle}>Email</label>
               <div style={inputWrapper}>
-                <Mail size={16} color="#444" />
-                <input type="email" placeholder="agencia@vidalis.ai" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+                <Mail size={18} color="#9CA3AF" />
+                <input type="email" placeholder="ejemplo@vidalis.ai" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
               </div>
             </div>
-            <div style={{ marginBottom: '40px', textAlign: 'left' }}>
-              <label style={labelStyle}>Clave de Seguridad</label>
+            <div style={{ marginBottom: '24px', textAlign: 'left' }}>
+              <label style={labelStyle}>Contraseña</label>
               <div style={inputWrapper}>
-                <Lock size={16} color="#444" />
+                <Lock size={18} color="#9CA3AF" />
                 <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} />
               </div>
             </div>
 
             {error && (
-              <div style={{ background: '#200', border: '1px solid #411', borderRadius: '4px', padding: '14px', color: '#ef4444', fontSize: '12px', fontWeight: '700', marginBottom: '24px', textAlign: 'left' }}>
+              <div style={{ background: '#FEF2F2', border: '1px solid #FEE2E2', borderRadius: '8px', padding: '12px', color: '#DC2626', fontSize: '14px', fontWeight: '500', marginBottom: '20px', textAlign: 'left' }}>
                 {error}
               </div>
             )}
 
-            <button type="submit" className="btn-action" disabled={loading} style={{ width: '100%', height: '56px', fontSize: '12px', padding: 0 }}>
-              {loading ? 'AUTENTICANDO...' : <><LogIn size={18} /> INICIAR SESIÓN</>}
+            <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', height: '48px', fontSize: '15px' }}>
+              {loading ? 'Cargando...' : 'Iniciar Sesión'}
             </button>
 
-            <p style={{ marginTop: '32px', color: '#6B7280', fontSize: '11px', fontWeight: '600' }}>
-              ¿SIN INFRAESTRUCTURA?{' '}
-              <button type="button" onClick={() => switchMode('register')} style={{ background: 'none', border: 'none', color: '#FFF', cursor: 'pointer', fontWeight: '800', fontSize: '11px', padding: 0, textDecoration: 'underline' }}>
-                CREAR CUENTA
+            <p style={{ marginTop: '24px', color: 'var(--text-muted)', fontSize: '14px' }}>
+              ¿No tienes cuenta?{' '}
+              <button type="button" onClick={() => switchMode('register')} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: '600', fontSize: '14px', padding: 0 }}>
+                Regístrate gratis
               </button>
             </p>
           </form>
@@ -178,29 +166,29 @@ const Login = () => {
           <>
             {regStep === 1 && (
               <div>
-                <p style={{ fontSize: '14px', fontWeight: '700', marginBottom: '24px', textTransform: 'uppercase', color: '#FFF' }}>Nivel de Operación</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '32px' }}>
+                <p style={{ fontSize: '15px', fontWeight: '600', marginBottom: '20px', color: 'var(--text-main)' }}>¿Cómo usarás Vidalis?</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '24px' }}>
                   {[
-                    { type: 'artist', icon: <User size={24} />, title: 'CREADOR / ARTISTA', sub: 'GESTIÓN INDIVIDUAL' },
-                    { type: 'agency', icon: <Building2 size={24} />, title: 'AGENCIA / CORPORATIVO', sub: 'MULTI-ENTIDAD' },
+                    { type: 'artist', icon: <User size={20} />, title: 'Creador / Artista', sub: 'Para gestionar mi marca personal' },
+                    { type: 'agency', icon: <Building2 size={20} />, title: 'Agencia / Empresa', sub: 'Para gestionar múltiples marcas' },
                   ].map(opt => (
                     <button
                       key={opt.type}
                       onClick={() => { setAccountType(opt.type); setRegStep(2); }}
                       style={{ 
-                        padding: '24px', borderRadius: '4px', border: '1px solid #1A1A1A', background: '#0A0A0A', 
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '20px', color: 'white', transition: 'all 0.3s ease',
+                        padding: '16px 20px', borderRadius: '12px', border: '1px solid var(--border-main)', background: '#FFFFFF', 
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', color: 'var(--text-main)', transition: 'all 0.2s ease',
                         textAlign: 'left'
                       }}
-                      onMouseOver={e => { e.currentTarget.style.borderColor = '#FFF'; e.currentTarget.style.background = '#111'; }}
-                      onMouseOut={e => { e.currentTarget.style.borderColor = '#1A1A1A'; e.currentTarget.style.background = '#0A0A0A'; }}
+                      onMouseOver={e => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.background = '#F9FAFB'; }}
+                      onMouseOut={e => { e.currentTarget.style.borderColor = 'var(--border-main)'; e.currentTarget.style.background = '#FFFFFF'; }}
                     >
-                      <div style={{ border: '1px solid #222', padding: '12px', borderRadius: '4px' }}>{opt.icon}</div>
+                      <div style={{ background: '#F3F4F6', padding: '10px', borderRadius: '8px', color: 'var(--primary)' }}>{opt.icon}</div>
                       <div style={{ flexGrow: 1 }}>
-                        <div style={{ fontWeight: '800', fontSize: '13px', letterSpacing: '0.05em' }}>{opt.title}</div>
-                        <div style={{ fontSize: '10px', color: '#6B7280', fontWeight: '600', marginTop: '4px', letterSpacing: '0.05em' }}>{opt.sub}</div>
+                        <div style={{ fontWeight: '700', fontSize: '14px' }}>{opt.title}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{opt.sub}</div>
                       </div>
-                      <ArrowRight size={16} color="#444" />
+                      <ArrowRight size={16} color="#9CA3AF" />
                     </button>
                   ))}
                 </div>
@@ -210,42 +198,41 @@ const Login = () => {
             {regStep === 2 && (
               <div>
                 <div style={{ 
-                  display: 'inline-flex', alignItems: 'center', gap: '10px', 
-                  background: '#111', border: '1px solid #333', 
-                  borderRadius: '4px', padding: '8px 16px', marginBottom: '32px', 
-                  fontSize: '11px', fontWeight: '800', color: '#FFF',
-                  textTransform: 'uppercase', letterSpacing: '0.05em'
+                  display: 'inline-flex', alignItems: 'center', gap: '8px', 
+                  background: '#F3F4F6', border: '1px solid var(--border-main)', 
+                  borderRadius: '20px', padding: '6px 14px', marginBottom: '24px', 
+                  fontSize: '12px', fontWeight: '600', color: 'var(--text-main)'
                 }}>
                   {accountType === 'artist' ? <User size={14} /> : <Building2 size={14} />}
-                  MODO {accountType === 'artist' ? 'ARTISTA' : 'AGENCIA'}
-                  <button onClick={() => setRegStep(1)} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', display: 'flex' }}><X size={14} /></button>
+                  Cuenta {accountType === 'artist' ? 'Artista' : 'Agencia'}
+                  <button onClick={() => setRegStep(1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}><X size={14} /></button>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                  <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-                    <label style={labelStyle}>{accountType === 'artist' ? 'Nombre Artístico' : 'Razón Social / Agencia'}</label>
+                  <div style={{ marginBottom: '16px', textAlign: 'left' }}>
+                    <label style={labelStyle}>{accountType === 'artist' ? 'Nombre Artístico' : 'Nombre de Agencia'}</label>
                     <div style={inputWrapper}>
-                      <User size={16} color="#444" />
-                      <input type="text" placeholder="Identificador Público" value={name} onChange={e => setName(e.target.value)} required style={inputStyle} />
+                      <User size={18} color="#9CA3AF" />
+                      <input type="text" placeholder="Ej: Juan Pérez" value={name} onChange={e => setName(e.target.value)} required style={inputStyle} />
                     </div>
                   </div>
-                  <div style={{ marginBottom: '20px', textAlign: 'left' }}>
-                    <label style={labelStyle}>Email Corporativo</label>
+                  <div style={{ marginBottom: '16px', textAlign: 'left' }}>
+                    <label style={labelStyle}>Email</label>
                     <div style={inputWrapper}>
-                      <Mail size={16} color="#444" />
-                      <input type="email" placeholder="tu@empresa.com" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+                      <Mail size={18} color="#9CA3AF" />
+                      <input type="email" placeholder="hola@vidalis.ai" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
                     </div>
                   </div>
-                  <div style={{ marginBottom: '32px', textAlign: 'left' }}>
-                    <label style={labelStyle}>Contraseña Maestra</label>
+                  <div style={{ marginBottom: '24px', textAlign: 'left' }}>
+                    <label style={labelStyle}>Contraseña</label>
                     <div style={inputWrapper}>
-                      <Lock size={16} color="#444" />
+                      <Lock size={18} color="#9CA3AF" />
                       <input type="password" placeholder="Mínimo 6 caracteres" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={inputStyle} />
                     </div>
                   </div>
 
-                  <button type="submit" className="btn-action" disabled={loading} style={{ width: '100%', height: '56px', fontSize: '12px' }}>
-                    {loading ? 'GENERANDO INFRAESTRUCTURA...' : <><UserPlus size={18} /> CREAR CUENTA</>}
+                  <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', height: '48px', fontSize: '15px' }}>
+                    {loading ? 'Creando cuenta...' : 'Confirmar Registro'}
                   </button>
                 </form>
               </div>
@@ -253,9 +240,9 @@ const Login = () => {
           </>
         )}
 
-        <div style={{ marginTop: '40px', borderTop: '1px solid #1A1A1A', paddingTop: '24px' }}>
-          <a href="/" style={{ color: '#6B7280', fontSize: '11px', textDecoration: 'none', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            ← Volver al Portal de Lanzamiento
+        <div style={{ marginTop: '32px', borderTop: '1px solid var(--border-main)', paddingTop: '20px' }}>
+          <a href="/" style={{ color: 'var(--text-muted)', fontSize: '13px', textDecoration: 'none', fontWeight: '600' }}>
+            ← Volver al inicio
           </a>
         </div>
       </div>

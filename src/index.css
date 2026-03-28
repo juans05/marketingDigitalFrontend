@@ -1,26 +1,21 @@
 :root {
-  /* Monochromatic Elite Palette */
-  --bg-obsidian: #000000;
-  --bg-card: #0A0A0A;
-  --primary-neon: #FFFFFF;
-  --secondary-neon: #E5E7EB;
-  --accent-gold: #FFFFFF;
-  --text-pure: #FFFFFF;
-  --text-dim: #9CA3AF;
-  --border-glass: #333333;
-  --glass-blur: blur(0);
+  /* Buffer/Metricool Inspired Palette */
+  --bg-primary: #F9FAFB;
+  --bg-secondary: #FFFFFF;
+  --primary: #2C33D8; /* Metricool Blue */
+  --accent: #1FDF64;  /* Buffer Green */
+  --text-main: #111827;
+  --text-muted: #6B7280;
+  --border-main: #E5E7EB;
   
-  /* Gradientes Neutros - Ultimate Elegance */
-  --grad-premium: linear-gradient(180deg, #FFFFFF 0%, #E5E7EB 100%);
-  --grad-surface: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-  
-  /* Typos - Balanced and Professional */
+  /* Typos - Clean and Tech-Focused */
   --font-heading: 'Outfit', sans-serif;
-  --font-body: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
 
-  /* Shadows - Minimalist */
-  --shadow-elite: 0 4px 20px rgba(0, 0, 0, 0.8);
-  --shadow-subtle: 0 1px 3px rgba(255, 255, 255, 0.05);
+  /* Shadows - Soft and Modern */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -31,81 +26,101 @@
 }
 
 body {
-  background-color: #000000;
-  color: var(--text-pure);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
   font-family: var(--font-body);
-  line-height: 1.6;
+  line-height: 1.5;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
 #root {
-  background-color: #000000;
+  background-color: var(--bg-primary);
   min-height: 100vh;
 }
 
 h1, h2, h3, .font-heading {
   font-family: var(--font-heading);
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
   font-weight: 700;
+  color: var(--text-main);
 }
 
-/* Glass Panel - Architectural Minimalist */
-.glass-panel {
-  background: var(--bg-card);
-  border: 2px solid var(--border-glass);
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
+/* Professional Card System */
+.card-pro {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-main);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
 }
 
-.glass-panel:hover {
-  border-color: #333;
+.card-pro:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
 }
 
-/* Elite Action Button */
-.btn-action {
-  background: #FFFFFF;
-  color: #000000;
-  padding: 14px 28px;
-  border-radius: 4px;
+/* Primary Action Button */
+.btn-primary {
+  background: var(--primary);
+  color: #FFFFFF;
+  padding: 12px 24px;
+  border-radius: 8px;
   font-family: var(--font-body);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
+  font-size: 0.95rem;
 }
 
-.btn-action:hover {
-  background: #E5E7EB;
-  transform: translateY(-2px);
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
-.btn-action:active {
-  transform: translateY(0);
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-main);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-primary);
+  border-color: var(--text-muted);
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation: fadeIn 0.4s ease-out forwards;
 }
 
 /* Utilities */
-.text-dim { color: var(--text-dim); }
-.text-pure { color: var(--text-pure); }
+.text-muted { color: var(--text-muted); }
+.text-main { color: var(--text-main); }
+.bg-white { background-color: #FFFFFF; }
 
 html {
   scroll-behavior: smooth;
@@ -113,20 +128,20 @@ html {
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: #222;
-  border-radius: 0;
+  background: #D1D5DB;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #444;
+  background: #9CA3AF;
 }
 
 @media (max-width: 768px) {
-  h1 { font-size: 2.4rem !important; }
-  .glass-panel { padding: 24px !important; }
+  h1 { font-size: 2rem !important; }
+  .card-pro { padding: 20px !important; }
 }
