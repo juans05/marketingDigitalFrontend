@@ -3,6 +3,7 @@ import { User, Building2, Users, ChevronRight, ChevronLeft, Instagram, Youtube, 
 
 const OnboardingWizard = ({ userId, userType, onComplete }) => {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [data, setData] = useState({
     persona: '', // individual, agency
     teamSize: 'Solo yo',
@@ -19,9 +20,34 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
 
-  const handleFinish = () => {
-    // In search of perfection, we'll save this to the DB later
-    onComplete();
+  const handleFinish = async () => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/onboarding`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          persona: data.persona,
+          teamSize: data.teamSize,
+          goals: data.goals,
+          firstArtist: data.firstArtist
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Fallo el registro del onboarding');
+      }
+
+      onComplete();
+    } catch (error) {
+      console.error('Error al guardar onboarding:', error);
+      // Continuamos de igual forma para no bloquear al usuario en el UI
+      onComplete();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStep = () => {
@@ -211,7 +237,7 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
             <button 
               className="btn-continue" 
               onClick={step === 4 ? handleFinish : nextStep}
-              disabled={step === 1 && !data.persona}
+              disabled={(step === 1 && !data.persona) || isSubmitting}
               style={{
                 background: (step === 1 && !data.persona) ? '#E5E7EB' : '#111827',
                 padding: '16px 32px',
@@ -219,7 +245,7 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
                 boxShadow: (step === 1 && !data.persona) ? 'none' : '0 10px 20px rgba(0,0,0,0.1)'
               }}
             >
-              {step === 4 ? 'Finalizar Configuración' : 'Continuar al siguiente paso'}
+              {step === 4 ? (isSubmitting ? 'Guardando...' : 'Finalizar Configuración') : 'Continuar al siguiente paso'}
               {step < 4 && <ChevronRight size={18} />}
             </button>
           </div>

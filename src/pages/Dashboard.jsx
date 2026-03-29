@@ -7,6 +7,7 @@ import UploadSection from '../components/UploadSection';
 import VideoGallery from '../components/VideoGallery';
 import SocialConnect from '../components/SocialConnect';
 import ArtistManager from '../components/ArtistManager';
+import AIStatusIndicator from '../components/AIStatusIndicator';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -118,6 +119,7 @@ const Dashboard = () => {
         </div>
 
         <div className="header-actions">
+          {currentArtistId && <AIStatusIndicator artistId={currentArtistId} />}
           {isAgency && availableArtists.length > 0 && (
             <div className="brand-selector-wrapper">
               <span className="selector-label hide-mobile">CANAL ACTIVO:</span>

@@ -76,14 +76,17 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const [notification, setNotification] = useState(null);
   const pollIntervalRef = useRef(null);
 
-  const fetchAnalytics = async (silent = false) => {
+  const fetchAnalytics = async (silent = false, isOpening = false) => {
     if (!silent) setLoading(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics/${videoId}`);
       if (res.ok) {
         const newData = await res.json();
-        if (data?.status === 'analyzing' && newData.status !== 'analyzing') {
-          setNotification({ type: 'success', message: 'Estratégia IA Generada.' });
+        const justFinished = data?.status === 'analyzing' && newData.status !== 'analyzing';
+        
+        // Sincronizar siempre al abrir o cuando recién termina la IA
+        if (justFinished || isOpening) {
+          if (justFinished) setNotification({ type: 'success', message: 'Estratégia IA Generada.' });
           setHashtags(newData.hashtags || '');
           setCopyShort(newData.ai_copy_short || '');
           setCopyLong(newData.ai_copy_long || '');
@@ -141,10 +144,9 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
       const result = await res.json();
       if (res.ok) { 
         setData(result); 
-        const isQueued = result.details?.message?.toLowerCase().includes('queued') || result.details?.message?.toLowerCase().includes('durable worker');
         setNotification({ 
           type: 'success', 
-          message: isQueued ? '📤 Video en cola de procesamiento. ¡Se publicará en breve!' : '¡Despliegue completado!' 
+          message: '🚀 ¡Despliegue iniciado! Demora de 5 a 10 minutos en la publicación de cada red social.' 
         }); 
       }
       else { setNotification({ type: 'error', message: `Fallo: ${result.error}` }); }
@@ -159,7 +161,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const isReadOnly = isPublished;
 
   const toggleDrawer = () => {
-    if (!isOpen) fetchAnalytics();
+    if (!isOpen) fetchAnalytics(false, true);
     setIsOpen(!isOpen);
   };
 
@@ -373,15 +375,15 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                           className="btn-primary"
                           style={{ flex: 1, height: '56px', fontSize: '12px' }}
                         >
-                           {isPublished ? 'PUBLICADO' : isAnalyzing ? 'ANALIZANDO' : `LANZAR AHORA`}
+                           {isPublished ? 'RE-PUBLICAR' : isAnalyzing ? 'ANALIZANDO' : `LANZAR AHORA`}
                         </button>
                         <button 
                           onClick={handleSaveSettings}
                           disabled={saveLoading || isReadOnly}
                           className="btn-secondary"
-                          style={{ flex: 1, height: '56px', fontSize: '12px' }}
+                          style={{ flex: 1, height: '56px', fontSize: '12px', opacity: isReadOnly ? 0.5 : 1 }}
                         >
-                           {saveLoading ? '...' : 'GUARDAR AJUSTES'}
+                           {saveLoading ? '...' : isReadOnly ? 'BLOQUEADO' : 'GUARDAR AJUSTES'}
                         </button>
                      </div>
                   </div>
