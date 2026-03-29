@@ -466,6 +466,25 @@ const AnalyticsView = ({ userId, activeArtist }) => {
           .insight-body { grid-template-columns: 1fr; }
           .insight-divider { display: none; }
         }
+        @media (max-width: 768px) {
+          .analytics-header { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+          .analytics-header > div:last-child { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+          .analytics-header > div:last-child button { width: 100%; justify-content: center; height: 44px; }
+          
+          .chart-wrapper { height: 220px; padding: 0; }
+          .chart-card-pro, .content-list-card-pro { padding: 20px 16px; margin-left: -20px; margin-right: -20px; border-radius: 0; border-left: 0; border-right: 0; width: calc(100% + 40px); max-width: 100vw; }
+          .stat-card-pro { padding: 20px; }
+          
+          .community-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+          .mini-stat-card-pro { padding: 12px; }
+          .mini-val { font-size: 16px; }
+          
+          .insight-card { padding: 20px 16px; margin-left: -20px; margin-right: -20px; border-radius: 0; border-right: 0; width: calc(100% + 40px); max-width: 100vw; }
+          .insight-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+          .insight-badge { align-self: flex-start; }
+          
+          .posts-table-pro th, .posts-table-pro td { white-space: nowrap; padding: 12px 10px; }
+        }
       `}</style>
     </div>
   );

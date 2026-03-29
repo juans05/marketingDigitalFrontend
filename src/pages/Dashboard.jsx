@@ -286,6 +286,8 @@ const Dashboard = () => {
           .hide-mobile { display: none !important; }
           .main-header-pro { padding: 0 20px; }
           .main-content-pro { padding: 20px; padding-bottom: 100px; }
+          .view-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+          .active-artist-tag { align-self: flex-start; font-size: 11px; padding: 4px 10px; }
           .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #FFF; border-top: 1px solid var(--border-main); display: flex; justify-content: space-around; align-items: center; z-index: 2000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
           .mobile-nav button { background: none; border: none; color: var(--text-muted); padding: 15px; }
           .mobile-nav button.active { color: var(--primary); }
