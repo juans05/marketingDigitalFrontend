@@ -472,7 +472,13 @@ const AnalyticsView = ({ userId, activeArtist }) => {
           .analytics-header > div:last-child button { width: 100%; justify-content: center; height: 44px; }
           
           .chart-wrapper { height: 220px; padding: 0; }
-          .chart-card-pro, .content-list-card-pro { padding: 20px 16px; margin-left: -20px; margin-right: -20px; border-radius: 0; border-left: 0; border-right: 0; width: calc(100% + 40px); max-width: 100vw; }
+          .chart-card-pro, .content-list-card-pro { 
+            padding: 20px 16px; 
+            margin: 0 0 24px 0; 
+            border-radius: 16px;
+            width: 100%; 
+            max-width: 100%;
+          }
           .stat-card-pro { padding: 20px; }
           
           .community-grid { grid-template-columns: 1fr 1fr; gap: 12px; }

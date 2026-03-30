@@ -234,7 +234,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
           </div>
         </div>
 
-        <div className="card-pro" style={{ display: 'flex', gap: '4px', padding: '6px', borderRadius: '100px', border: '1px solid var(--border-main)' }}>
+        <div className="card-pro filter-pills-bar" style={{ display: 'flex', gap: '4px', padding: '6px', borderRadius: '100px', border: '1px solid var(--border-main)' }}>
           {['all', 'published', 'needs_review', 'analyzing'].map(f => (
             <button
               key={f}
@@ -271,7 +271,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
           </p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+        <div className="video-grid-pro" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
           {filtered.map((video) => {
             const status = STATUS_CONFIG[video.status] || STATUS_CONFIG.processing;
             return (
@@ -416,6 +416,19 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+          .video-grid-pro {
+            grid-template-columns: 1fr !important;
+          }
+          .filter-pills-bar {
+            flex-wrap: wrap !important;
+            border-radius: 16px !important;
+            justify-content: center !important;
+          }
+          .filter-pills-bar button {
+            flex: 1 1 auto;
+          }
         }
       `}</style>
     </section>

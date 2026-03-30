@@ -66,7 +66,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [publishLoading, setPublishLoading] = useState(false);
-  const [scheduledDate, setScheduledDate] = useState(data?.scheduled_for ? new Date(data.scheduled_for).toISOString().slice(0, 16) : '');
+  const [scheduledDate, setScheduledDate] = useState(data?.scheduled_at ? new Date(data.scheduled_at).toISOString().slice(0, 16) : '');
   const [hashtags, setHashtags] = useState(data?.hashtags || '');
   const [copyShort, setCopyShort] = useState(data?.ai_copy_short || '');
   const [copyLong, setCopyLong] = useState(data?.ai_copy_long || '');
@@ -90,12 +90,27 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
           setHashtags(newData.hashtags || '');
           setCopyShort(newData.ai_copy_short || '');
           setCopyLong(newData.ai_copy_long || '');
+          if (newData.scheduled_at) setScheduledDate(new Date(newData.scheduled_at).toISOString().slice(0, 16));
+          if (newData.platforms) setSelectedPlatforms(newData.platforms);
+          if (newData.post_type) setPostType(newData.post_type);
         }
         setData(newData);
       }
     } catch (e) { console.error(e); }
     finally { if (!silent) setLoading(false); }
   };
+
+  useEffect(() => {
+    if (initialData) {
+      setData(initialData);
+      setHashtags(initialData.hashtags || '');
+      setCopyShort(initialData.ai_copy_short || '');
+      setCopyLong(initialData.ai_copy_long || '');
+      setScheduledDate(initialData.scheduled_at ? new Date(initialData.scheduled_at).toISOString().slice(0, 16) : '');
+      setSelectedPlatforms(initialData.platforms?.length ? initialData.platforms : activePlatforms.length ? activePlatforms : ['instagram']);
+      setPostType(initialData.post_type || 'reel');
+    }
+  }, [videoId, initialData]);
 
   useEffect(() => {
     const status = data?.status || initialData?.status;
@@ -330,7 +345,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                     <div style={{ marginTop: '24px' }}>
                       <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase' }}>Formato</label>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        {['reel', 'story'].map(type => (
+                        {['reel', 'story', 'feed'].map(type => (
                           <button
                             key={type}
                             onClick={() => !isReadOnly && setPostType(type)}
@@ -344,7 +359,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                               fontSize: '11px', fontWeight: '800', textTransform: 'uppercase'
                             }}
                           >
-                            {type === 'reel' ? '🎬 REELS' : '📱 STORIES'}
+                            {type === 'reel' ? '🎬 REELS' : type === 'story' ? '📱 STORIES' : '📰 FEED'}
                           </button>
                         ))}
                       </div>

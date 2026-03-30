@@ -138,10 +138,9 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
   };
 
   return (
-    <div className="card-pro animate-fade-in" style={{ 
+    <div className="card-pro animate-fade-in upload-card-pro" style={{ 
       maxWidth: '850px', 
-      margin: '20px auto', 
-      padding: '48px',
+      margin: '0 auto', 
       position: 'relative',
       border: 'none',
       boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
@@ -342,6 +341,10 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
         .upload-zone:hover {
           border-color: var(--primary) !important;
           background: #F5F7FF !important;
+        }
+        @media (max-width: 600px) {
+          .upload-card-pro { padding: 24px !important; }
+          .upload-zone { padding: 24px 16px !important; }
         }
       `}</style>
     </div>

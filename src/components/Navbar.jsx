@@ -65,12 +65,7 @@ const Navbar = () => {
         
         <button 
           onClick={() => navigate('/login')} 
-          className="btn-primary" 
-          style={{ 
-            padding: '10px 20px', 
-            fontSize: '14px',
-            borderRadius: '8px'
-          }}
+          className="btn-primary btn-nav-login"
         >
           <LogIn size={16} />
           <span>Acceso Directo</span>
@@ -79,9 +74,16 @@ const Navbar = () => {
 
       <style>{`
         .nav-link:hover { color: var(--primary); }
+        .btn-nav-login { padding: 10px 20px; font-size: 14px; border-radius: 8px; white-space: nowrap; }
+        
         @media (max-width: 768px) {
-          nav { padding: 0 20px; }
+          nav { padding: 0 16px; }
           .nav-link { display: none; }
+          .btn-nav-login { padding: 8px 14px; font-size: 13px; }
+          .btn-nav-login span { display: inline; }
+        }
+        @media (max-width: 400px) {
+          .btn-nav-login span { display: none; }
         }
       `}</style>
     </nav>

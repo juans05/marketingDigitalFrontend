@@ -8,6 +8,7 @@ import VideoGallery from '../components/VideoGallery';
 import SocialConnect from '../components/SocialConnect';
 import ArtistManager from '../components/ArtistManager';
 import AIStatusIndicator from '../components/AIStatusIndicator';
+import PlanningView from '../components/PlanningView';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -33,10 +34,8 @@ const Dashboard = () => {
       console.log("👤 User loaded:", parsedUser.email, "| Type:", parsedUser.account_type);
       setUser(parsedUser);
       
-      // Onboarding check
-      if (!parsedUser.onboarding_completed) {
-        setShowOnboarding(true);
-      }
+      // Comprobación inicial de onboarding
+      let needsOnboarding = !parsedUser.onboarding_completed;
 
       // Logic for Agency vs Artist
       if (parsedUser.account_type === 'agency') {
@@ -45,7 +44,10 @@ const Dashboard = () => {
         // Individual artist: auto-select their own profile
         console.log("🎨 Auto-selecting artist profile:", parsedUser.name);
         setActiveArtist({ id: parsedUser.artist_id, name: parsedUser.name });
+        needsOnboarding = false; // ¡El artista ya está creado! Bypasear onboarding forzosamente
       }
+
+      setShowOnboarding(needsOnboarding);
 
     } catch (err) {
       console.error("❌ Error loading dashboard session:", err);
@@ -64,9 +66,14 @@ const Dashboard = () => {
       if (res.ok) {
         const data = await res.json();
         console.log("✅ Artists loaded:", data.length);
-        setAvailableArtists(data);
-        if (data.length > 0 && !activeArtist) {
-          setActiveArtist(data[0]);
+        if (data.length > 0) {
+          if (!activeArtist) {
+            setActiveArtist(data[0]);
+            setActiveView('artists'); // Mostrar su dashboard de clientes primero
+          }
+          setShowOnboarding(false);
+        } else {
+          setActiveView('artists'); // Si no tiene, que los cree
         }
       }
     } catch (err) {
@@ -184,27 +191,24 @@ const Dashboard = () => {
            {activeView === 'analytics' && <AnalyticsView userId={user.id} activeArtist={activeArtist} />}
            
            {activeView === 'planning' && (
-             <div className="view-placeholder card-pro">
-               <Calendar size={48} color="var(--border-main)" />
-               <h3>Calendario de Publicaciones</h3>
-               <p>Visualiza y organiza tus próximos lanzamientos de forma estratégica.</p>
-               <button className="btn-primary" style={{marginTop: '20px'}}>Nueva Programación</button>
+             <div className="view-planning" style={{ width: '100%' }}>
+               <PlanningView artistId={currentArtistId} activeArtist={activeArtist} onNavigateToContent={() => setActiveView('content')} />
              </div>
            )}
 
            {activeView === 'content' && (
              <div className="view-content" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-               <section className="card-pro">
-                 <h2 className="section-title">Nueva Publicación</h2>
-                 <UploadSection artistId={currentArtistId} onUploadSuccess={() => setGalleryKey(k => k + 1)} />
-               </section>
+                <section style={{ marginBottom: '40px' }}>
+                  <h2 className="section-title">Nueva Publicación</h2>
+                  <UploadSection artistId={currentArtistId} onUploadSuccess={() => setGalleryKey(k => k + 1)} />
+                </section>
 
-               {currentArtistId && (
-                 <section className="card-pro">
-                   <h2 className="section-title">Biblioteca de Medios</h2>
-                   <VideoGallery artistId={currentArtistId} artistName={activeArtist?.name} refreshKey={galleryKey} activePlatforms={activeArtist?.active_platforms || []} />
-                 </section>
-               )}
+                {currentArtistId && (
+                  <section>
+                    <h2 className="section-title">Biblioteca de Medios</h2>
+                    <VideoGallery artistId={currentArtistId} artistName={activeArtist?.name} refreshKey={galleryKey} activePlatforms={activeArtist?.active_platforms || []} />
+                  </section>
+                )}
              </div>
            )}
 
@@ -246,18 +250,17 @@ const Dashboard = () => {
           background: #FFFFFF; border-bottom: 1px solid var(--border-main); position: sticky; top: 0; z-index: 1000;
         }
         .header-brand { display: flex; align-items: center; gap: 12px; }
-        .logo-box { background: var(--primary); padding: 6px; border-radius: 8px; display: flex; }
+        .logo-box { background: var(--primary); padding: 6px; border-radius: 8px; display: flex; box-shadow: 0 4px 10px rgba(44, 51, 216, 0.2); }
         .brand-text { font-size: 20px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; }
         .dot { color: var(--primary); }
 
-        .header-actions { display: flex; align-items: center; gap: 20px; }
-        .selector-label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
-        .brand-dropdown-pro { background: #F3F4F6; color: var(--text-main); border: 1px solid var(--border-main); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; outline: none; transition: all 0.2s; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .brand-dropdown-pro { background: #F3F4F6; color: var(--text-main); border: 1px solid var(--border-main); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; outline: none; transition: all 0.2s; max-width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
         .brand-dropdown-pro:hover { border-color: var(--primary); background: #FFF; }
 
         .user-profile-box { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-main); }
         .user-email { font-size: 13px; font-weight: 500; color: var(--text-muted); }
-        .btn-exit-pro { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .btn-exit-pro { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-exit-pro:hover { background: #FEE2E2; }
 
         .sidebar-pro { width: 260px; background: #FFFFFF; border-right: 1px solid var(--border-main); padding: 32px 16px; display: flex; flex-direction: column; gap: 4px; }
@@ -269,8 +272,8 @@ const Dashboard = () => {
         .sidebar-pro button:hover { color: var(--primary); background: #F9FAFB; }
         .sidebar-pro button.active { background: #EEF2FF; color: var(--primary); font-weight: 700; }
 
-        .main-content-pro { flex-grow: 1; padding: 32px 40px; overflow-y: auto; max-width: 1400px; margin: 0 auto; width: 100%; }
-        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .main-content-pro { flex-grow: 1; padding: 32px 40px; overflow-y: auto; max-width: 1400px; margin: 0 auto; width: 100%; min-width: 0; }
+        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
         .view-title { font-size: 24px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; }
         .active-artist-tag { font-size: 12px; font-weight: 600; color: var(--primary); background: #EEF2FF; padding: 4px 12px; border-radius: 20px; border: 1px solid #C7D2FE; }
 
@@ -284,13 +287,33 @@ const Dashboard = () => {
 
         @media (max-width: 768px) {
           .hide-mobile { display: none !important; }
-          .main-header-pro { padding: 0 20px; }
+          .brand-text { display: none !important; } /* Ocultar texto Vidalis.ai para liberar espacio */
+          .main-header-pro { padding: 0 16px; border-bottom: none; background: transparent; }
+          .header-actions { gap: 8px; }
+          .brand-dropdown-pro { font-size: 12px; padding: 6px 10px; max-width: 140px; margin-left: auto; }
+          .btn-exit-pro { padding: 8px; }
           .main-content-pro { padding: 20px; padding-bottom: 100px; }
           .view-header { flex-direction: column; align-items: flex-start; gap: 12px; }
           .active-artist-tag { align-self: flex-start; font-size: 11px; padding: 4px 10px; }
-          .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #FFF; border-top: 1px solid var(--border-main); display: flex; justify-content: space-around; align-items: center; z-index: 2000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
-          .mobile-nav button { background: none; border: none; color: var(--text-muted); padding: 15px; }
-          .mobile-nav button.active { color: var(--primary); }
+          .mobile-nav { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            height: calc(75px + env(safe-area-inset-bottom)); 
+            padding-bottom: env(safe-area-inset-bottom);
+            background: #FFFFFF; border-top: 1px solid var(--border-main); 
+            display: flex; justify-content: space-between; align-items: center; 
+            z-index: 2000; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); 
+            padding: 0 24px; box-sizing: border-box;
+          }
+          .mobile-nav button { 
+             background: transparent; border: none; color: #9CA3AF; 
+             padding: 12px 20px; border-radius: 16px; 
+             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+             transition: all 0.2s ease; cursor: pointer;
+          }
+          .mobile-nav button.active { 
+             color: var(--primary); background: #EEF2FF; transform: translateY(-2px);
+          }
+          .mobile-nav button:hover { background: #F9FAFB; }
         }
       `}</style>
     </div>

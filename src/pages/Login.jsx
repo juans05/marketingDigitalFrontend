@@ -246,6 +246,12 @@ const Login = () => {
           </a>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .card-pro { padding: 32px 20px !important; margin: 0; width: 100%; max-width: 100%; border-radius: 12px; }
+        }
+      `}</style>
     </div>
   );
 };
