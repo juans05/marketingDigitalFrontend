@@ -141,9 +141,14 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className="user-profile-box hide-mobile">
-             <User size={14} color="var(--text-muted)" />
-             <span className="user-email">{user.email}</span>
+          <div className="user-profile-box hide-mobile" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <User size={12} color="var(--primary)" />
+                <span className="user-email" style={{ fontWeight: '700' }}>{user.email}</span>
+             </div>
+             <span style={{ fontSize: '9px', fontWeight: '900', color: 'var(--primary)', background: '#EEF2FF', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                PLAN {user.plan || 'FREE'}
+             </span>
           </div>
 
           <button onClick={handleLogout} className="btn-exit-pro">
@@ -159,9 +164,11 @@ const Dashboard = () => {
           <button className={activeView === 'analytics' ? 'active' : ''} onClick={() => setActiveView('analytics')}>
             <BarChart3 size={20} /> Analítica
           </button>
-          <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}>
-            <Calendar size={20} /> Calendario
-          </button>
+          {((user.plan !== 'Free' && user.plan !== 'Creator') || import.meta.env.VITE_BYPASS_PLAN_LIMITS === 'true') && (
+            <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}>
+              <Calendar size={20} /> Calendario
+            </button>
+          )}
           <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}>
             <Film size={20} /> Contenido
           </button>

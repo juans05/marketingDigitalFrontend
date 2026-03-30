@@ -10,6 +10,11 @@ const PLATFORM_CONFIG = {
   linkedin: { label: 'LinkedIn' },
 };
 
+const PLAN_RESTRICTIONS = {
+  'Free': ['instagram'],
+  'Creator': ['instagram', 'facebook'],
+};
+
 const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePlatforms = [], onSuccess }) => {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -266,7 +271,14 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
           <div style={{ marginBottom: '32px' }}>
             <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-main)', marginBottom: '12px', textTransform: 'uppercase' }}>Selecciona Plataformas</label>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {activePlatforms.map(platform => {
+              {activePlatforms
+                .filter(p => {
+                  const user = JSON.parse(localStorage.getItem('vidalis_user'));
+                  if (import.meta.env.VITE_BYPASS_PLAN_LIMITS === 'true') return true;
+                  const allowed = PLAN_RESTRICTIONS[user?.plan];
+                  return !allowed || allowed.includes(p.toLowerCase());
+                })
+                .map(platform => {
                 const isSelected = selectedPlatforms.includes(platform);
                 return (
                   <button

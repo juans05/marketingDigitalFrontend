@@ -7,7 +7,12 @@ const PLATFORM_CONFIG = {
   instagram: { label: 'Instagram', color: '#000', bg: '#F3F4F6' },
   youtube: { label: 'YouTube', color: '#000', bg: '#F3F4F6' },
   facebook: { label: 'Facebook', color: '#000', bg: '#F3F4F6' },
-  twitter: { label: 'Twitter/X', color: '#000', bg: '#F3F4F6' },
+  linkedin: { label: 'LinkedIn', color: '#000', bg: '#F3F4F6' },
+};
+
+const PLAN_RESTRICTIONS = {
+  'Free': ['instagram'],
+  'Creator': ['instagram', 'facebook'],
 };
 
 const StatBadge = ({ icon, value, label }) => (
@@ -307,7 +312,14 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                   <div className="card-pro" style={{ padding: '24px', marginBottom: '32px' }}>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase' }}>Plataformas Seleccionadas</label>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {Object.entries(PLATFORM_CONFIG).map(([key, cfg]) => {
+                      {Object.entries(PLATFORM_CONFIG)
+                        .filter(([key]) => {
+                           const user = JSON.parse(localStorage.getItem('vidalis_user'));
+                           if (import.meta.env.VITE_BYPASS_PLAN_LIMITS === 'true') return true;
+                           const allowed = PLAN_RESTRICTIONS[user?.plan];
+                           return !allowed || allowed.includes(key);
+                        })
+                        .map(([key, cfg]) => {
                         const isConnected = activePlatforms.includes(key);
                         const isSelected = selectedPlatforms.includes(key);
                         const togglePlatformBtn = () => {
