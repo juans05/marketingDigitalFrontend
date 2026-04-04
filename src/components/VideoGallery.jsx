@@ -1,24 +1,25 @@
 import { useEffect, useState } from 'react';
-import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter } from 'lucide-react';
+import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter, RefreshCw } from 'lucide-react';
 import AnalyticsPanel from './AnalyticsPanel';
 
 const Loader2 = ({ className, style, size = 24 }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
     className={className} style={style}
   >
-    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
   </svg>
 );
 
 const STATUS_CONFIG = {
-  published:    { label: 'Publicado',           icon: <CheckCircle size={12} />,   color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)' },
-  scheduled:    { label: 'Programado',          icon: <Clock size={12} />,         color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.15)' },
-  processing:   { label: 'Procesando',          icon: <Loader2 size={12} className="animate-spin" />, color: '#94A3B8', bg: 'rgba(148, 163, 184, 0.1)' },
-  analyzing:    { label: 'IA Analizando',       icon: <Sparkles size={12} />,     color: '#A855F7', bg: 'rgba(168, 85, 247, 0.15)', pulse: true },
-  needs_review: { label: 'Revisión',            icon: <AlertTriangle size={12} />, color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)' },
-  ready:        { label: 'Listo',               icon: <CheckCircle size={12} />,   color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)' },
-  error:        { label: 'Error',               icon: <XCircle size={12} />,       color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)' },
+  published: { label: 'Enviando... (5-10m)', icon: <CheckCircle size={12} />, color: '#22c55e', bg: '#ecfdf5' },
+  scheduled: { label: 'Programado', icon: <Clock size={12} />, color: '#2C33D8', bg: '#eff6ff' },
+  processing: { label: 'Procesando', icon: <Loader2 size={12} className="animate-spin" />, color: '#6B7280', bg: '#f9fafb' },
+  analyzing: { label: 'Estrategia IA', icon: <Sparkles size={12} />, color: '#7c3aed', bg: '#f5f3ff', pulse: true },
+  needs_review: { label: 'Pendiente de Enviar', icon: <AlertTriangle size={12} />, color: '#d97706', bg: '#fffbeb' },
+  ready: { label: 'Listo para publicar', icon: <CheckCircle size={12} />, color: '#22c55e', bg: '#ecfdf5' },
+  error: { label: 'Fallo Crítico', icon: <XCircle size={12} />, color: '#ef4444', bg: '#fef2f2' },
+  canceled: { label: 'Cancelado', icon: <XCircle size={12} />, color: '#6B7280', bg: '#F3F4F6' },
 };
 
 const ScoreBadge = ({ score }) => {
@@ -45,14 +46,75 @@ const parseStep = (text) => {
   return null;
 };
 
-const AnalysisProgressBar = ({ status, aiCopyShort }) => {
-  if (!ANALYZING_STATUSES.includes(status)) return null;
-  const step = parseStep(aiCopyShort);
-  const percent = step ? (step.current / step.total) * 100 : 25;
-  
+const AnalysisProgressBar = ({ video, onCancel }) => {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    if (!ANALYZING_STATUSES.includes(video?.status)) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [video?.status]);
+
+  if (!ANALYZING_STATUSES.includes(video?.status)) return null;
+
+  const rawText = video?.ai_copy_short || '';
+  let percent = 0;
+  let text = 'Preparando...';
+
+  const step = parseStep(rawText);
+  if (step) {
+    percent = (step.current / step.total) * 100;
+    text = `Paso ${step.current}/4: ${step.message}`;
+  } else if (!rawText) {
+    // Fallback simulado por tiempo (al igual que el navbar)
+    const createdDate = new Date(video.created_at).getTime();
+    const elapsedSeconds = (now - createdDate) / 1000;
+
+    if (elapsedSeconds < 15) {
+      percent = 25;
+      text = 'Paso 1/4: Transcripción...';
+    } else if (elapsedSeconds < 30) {
+      percent = 50;
+      text = 'Paso 2/4: Entendimiento...';
+    } else if (elapsedSeconds < 45) {
+      percent = 75;
+      text = 'Paso 3/4: Creación de datos...';
+    } else {
+      percent = 90;
+      text = 'Paso 4/4: Envío / Guardando...';
+    }
+  } else {
+    percent = 95;
+    text = rawText;
+  }
+
   return (
-    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-      <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+    <div style={{ marginTop: '12px', background: '#F9FAFB', border: '1px solid var(--border-main)', padding: '12px', borderRadius: '12px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Sparkles size={14} color="#7c3aed" />
+          <span style={{ fontSize: '10px', fontWeight: '800', color: '#7c3aed', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            {text}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '11px', fontWeight: '800', color: '#6B7280' }}>
+            {Math.round(percent)}%
+          </span>
+          <button
+            onClick={() => onCancel(video.id)}
+            style={{
+              background: 'transparent', border: 'none', cursor: 'pointer', color: '#ef4444',
+              display: 'flex', alignItems: 'center', padding: '2px', borderRadius: '4px'
+            }}
+            title="Cancelar procesamiento"
+          >
+            <XCircle size={14} />
+          </button>
+        </div>
+      </div>
+      {/* Barra de progreso real */}
+      <div style={{ height: '6px', background: 'rgba(124, 58, 237, 0.1)', borderRadius: '100px', overflow: 'hidden' }}>
         <div style={{
           height: '100%',
           width: `${percent}%`,
@@ -94,6 +156,36 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
       .finally(() => { if (showLoader) setLoading(false); });
   };
 
+  const handleCancelVideo = async (videoId) => {
+    if (!window.confirm("¿Estás seguro de que deseas cancelar de inmediato el procesamiento de este análisis?")) return;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/video/${videoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'canceled', error_log: '{"message":"Cancelado manualmente por el usuario"}' })
+      });
+      if (res.ok) fetchGallery(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRetryVideo = async (videoId) => {
+    // Si la lista tiene videos en progreso, no reintentes si quieres hacer UI state, pero es opcional.
+    try {
+      setLoading(true);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/video/${videoId}/retry`, {
+        method: 'POST'
+      });
+      if (res.ok) fetchGallery(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carga inicial / cambio de artista
   useEffect(() => {
     fetchGallery(true);
   }, [artistId, refreshKey]);
@@ -102,7 +194,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
     const hasAnalyzing = videos.some(v => ANALYZING_STATUSES.includes(v.status));
     if (!hasAnalyzing) return;
     const interval = setInterval(() => fetchGallery(false), 5000);
-    const timeout  = setTimeout(() => clearInterval(interval), 10 * 60 * 1000);
+    const timeout = setTimeout(() => clearInterval(interval), 10 * 60 * 1000);
     return () => { clearInterval(interval); clearTimeout(timeout); };
   }, [videos, artistId]);
 
@@ -130,7 +222,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
           </div>
         </div>
 
-        <div className="glass-morph" style={{ display: 'flex', gap: '6px', padding: '6px', borderRadius: '16px' }}>
+        <div className="card-pro filter-pills-bar" style={{ display: 'flex', gap: '4px', padding: '6px', borderRadius: '100px', border: '1px solid var(--border-main)' }}>
           {['all', 'published', 'needs_review', 'analyzing'].map(f => (
             <button
               key={f}
@@ -160,7 +252,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
           <p style={{ color: 'var(--text-dim)' }}>Inicia tu legado subiendo tu primer contenido vertical.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '32px' }}>
+        <div className="video-grid-pro" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
           {filtered.map((video) => {
             const status = STATUS_CONFIG[video.status] || STATUS_CONFIG.processing;
             return (
@@ -183,7 +275,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
                       <Film size={48} color="var(--text-main)" />
                     </div>
                   )}
-                  
+
                   <div className="glass-morph" style={{
                     position: 'absolute', top: '16px', right: '16px',
                     padding: '8px 14px', borderRadius: '12px',
@@ -199,13 +291,21 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
                   <h3 style={{ fontSize: '17px', fontWeight: '900', marginBottom: '8px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {video.title || 'Inyección Viral'}
                   </h3>
-                  
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dim)', fontSize: '12px', fontWeight: '600' }}>
-                        <Clock size={14} />
-                        {new Date(video.created_at).toLocaleDateString()}
-                     </div>
-                     <ScoreBadge score={video.viral_score} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dim)', fontSize: '12px', fontWeight: '600' }}>
+                      <Clock size={14} />
+                      {new Date(video.created_at).toLocaleDateString()}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Viral IA</span>
+                      <ScoreBadge score={video.viral_score} />
+                    </div>
+                  </div>
+
+                  {/* IA Progress Component (Subtle) */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <AnalysisProgressBar video={video} onCancel={handleCancelVideo} />
                   </div>
 
                   <div style={{ marginTop: 'auto' }}>
@@ -213,11 +313,75 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
                   </div>
                   {video.status === 'error' && <ErrorDetail errorLog={video.error_log} />}
                 </div>
+
+                {/* Error detail */}
+                {video.status === 'error' && (
+                  <div style={{ padding: '0 24px', paddingBottom: '12px' }}>
+                    <ErrorDetail errorLog={video.error_log} />
+                  </div>
+                )}
+
+                {/* Retry Button */}
+                {['error', 'canceled'].includes(video.status) && (
+                  <div style={{ padding: '0 24px 24px 24px' }}>
+                    <button
+                      onClick={() => handleRetryVideo(video.id)}
+                      style={{
+                        width: '100%', padding: '12px',
+                        background: '#e0e7ff', color: '#4338ca',
+                        border: '1px solid #c7d2fe', borderRadius: '8px',
+                        fontWeight: '800', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em',
+                        cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = '#c7d2fe'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = '#e0e7ff'; }}
+                    >
+                      <RefreshCw size={14} /> Reintentar Motor IA
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       )}
+
+      <style>{`
+        .video-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.6; }
+          100% { opacity: 1; }
+        }
+        @keyframes scanBar {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+          .video-grid-pro {
+            grid-template-columns: 1fr !important;
+          }
+          .filter-pills-bar {
+            flex-wrap: wrap !important;
+            border-radius: 16px !important;
+            justify-content: center !important;
+          }
+          .filter-pills-bar button {
+            flex: 1 1 auto;
+          }
+        }
+      `}</style>
     </section>
   );
 };

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { User, Building2, Users, ChevronRight, ChevronLeft, Instagram, Youtube, Facebook, CheckCircle2, LayoutDashboard, Calendar, BarChart3, MessageSquare, Link, Sparkles } from 'lucide-react';
+import { User, Building2, Users, ChevronRight, ChevronLeft, Instagram, Youtube, Facebook, CheckCircle2, LayoutDashboard, Calendar, BarChart3, MessageSquare, Link, Sparkles, X } from 'lucide-react';
 
 const OnboardingWizard = ({ userId, userType, onComplete }) => {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [data, setData] = useState({
     persona: '', // individual, agency
     teamSize: 'Solo yo',
@@ -19,9 +20,50 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
 
-  const handleFinish = () => {
-    // In search of perfection, we'll save this to the DB later
-    onComplete();
+  const handleFinish = async () => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/onboarding`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          persona: data.persona,
+          teamSize: data.teamSize,
+          goals: data.goals,
+          firstArtist: data.firstArtist
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Fallo el registro del onboarding');
+      }
+
+      onComplete();
+    } catch (error) {
+      console.error('Error al guardar onboarding:', error);
+      // Continuamos de igual forma para no bloquear al usuario en el UI
+      onComplete();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    setIsSubmitting(true);
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/onboarding`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, persona: 'skipped', teamSize: 'solo', goals: [], firstArtist: {} })
+      });
+    } catch (error) {
+      console.error('Error al omitir onboarding:', error);
+    } finally {
+      setIsSubmitting(false);
+      onComplete();
+    }
   };
 
   const renderStep = () => {
@@ -194,7 +236,34 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
           <div className="progress-bar" style={{ width: `${(step / 4) * 100}%` }}></div>
         </div>
         
-        <div className="modal-inner">
+        <div className="modal-inner" style={{ position: 'relative' }}>
+          <button 
+            onClick={handleSkip}
+            title="Omitir Onboarding"
+            disabled={isSubmitting}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: '#F3F4F6',
+              border: 'none',
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: '#9CA3AF',
+              transition: 'all 0.2s ease',
+              zIndex: 10
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#E5E7EB'; e.currentTarget.style.color = '#4B5563'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#F3F4F6'; e.currentTarget.style.color = '#9CA3AF'; }}
+          >
+            <X size={20} />
+          </button>
+          
           {renderStep()}
 
           <div className="modal-footer">
@@ -211,15 +280,21 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
             <button 
               className="btn-continue" 
               onClick={step === 4 ? handleFinish : nextStep}
-              disabled={step === 1 && !data.persona}
+              disabled={(step === 1 && !data.persona) || isSubmitting}
               style={{
                 background: (step === 1 && !data.persona) ? '#E5E7EB' : '#111827',
-                padding: '16px 32px',
+                padding: '16px 24px',
                 borderRadius: '100px',
-                boxShadow: (step === 1 && !data.persona) ? 'none' : '0 10px 20px rgba(0,0,0,0.1)'
+                boxShadow: (step === 1 && !data.persona) ? 'none' : '0 10px 20px rgba(0,0,0,0.1)',
+                whiteSpace: 'nowrap'
               }}
             >
-              {step === 4 ? 'Finalizar Configuración' : 'Continuar al siguiente paso'}
+              <span className="btn-continue-text-desktop">
+                {step === 4 ? (isSubmitting ? 'Guardando...' : 'Finalizar Configuración') : 'Continuar al siguiente'}
+              </span>
+              <span className="btn-continue-text-mobile">
+                {step === 4 ? (isSubmitting ? 'Guardando...' : 'Finalizar') : 'Continuar'}
+              </span>
               {step < 4 && <ChevronRight size={18} />}
             </button>
           </div>
@@ -234,9 +309,11 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
           backdrop-filter: blur(8px);
           z-index: 9999;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
-          padding: 20px;
+          padding: 40px 20px;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
         }
 
         .onboarding-modal {
@@ -250,6 +327,7 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
           display: flex;
           flex-direction: column;
           border: 1px solid var(--border-main);
+          margin: auto; 
         }
 
         .progress-bar-container {
@@ -509,13 +587,51 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
           background: #FFF;
           box-shadow: 0 0 0 4px rgba(44, 51, 216, 0.1);
         }
-        .input-row { display: flex; gap: 20px; }
+        .btn-continue-text-mobile { display: none; }
+        .btn-continue-text-desktop { display: inline; }
 
         @media (max-width: 640px) {
-          .grid-selection, .social-grid { grid-template-columns: 1fr; }
-          .modal-inner { padding: 24px; }
+          .onboarding-overlay { padding: 20px 12px; }
+          .grid-selection, .social-grid { grid-template-columns: 1fr; gap: 12px; }
+          .modal-inner { padding: 24px 16px; min-height: unset; }
           .title { font-size: 22px; }
+          .subtitle { font-size: 14px; margin-bottom: 24px; }
           .hide-mobile { display: none; }
+          
+          .modal-footer { flex-wrap: wrap; gap: 12px; padding-top: 20px; }
+          .footer-status { display: none; }
+          .btn-continue { flex: 1; justify-content: center; padding: 14px 20px !important; }
+          .btn-continue-text-desktop { display: none; }
+          .btn-continue-text-mobile { display: inline; }
+          .btn-back { padding: 14px 20px; flex: 1; max-width: 120px; justify-content: center; }
+
+          /* Hacer las tarjetas principales horizontales y apiladas */
+          .card-option {
+            padding: 16px;
+            flex-direction: row;
+            text-align: left;
+            border-radius: 16px;
+            gap: 16px;
+            align-items: center;
+          }
+          .card-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 12px;
+          }
+          .card-icon svg { width: 24px; height: 24px; }
+          .card-label { font-size: 14px; }
+          
+          .card-option.small-flat, .card-option.small {
+            padding: 12px 16px;
+          }
+          .card-icon.mini, .card-icon.small {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+          }
+          .card-icon.mini svg, .card-icon.small svg { width: 18px; height: 18px; }
         }
       `}</style>
     </div>

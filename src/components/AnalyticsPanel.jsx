@@ -7,7 +7,12 @@ const PLATFORM_CONFIG = {
   instagram: { label: 'Instagram', color: '#000', bg: '#F3F4F6' },
   youtube: { label: 'YouTube', color: '#000', bg: '#F3F4F6' },
   facebook: { label: 'Facebook', color: '#000', bg: '#F3F4F6' },
-  twitter: { label: 'Twitter/X', color: '#000', bg: '#F3F4F6' },
+  linkedin: { label: 'LinkedIn', color: '#000', bg: '#F3F4F6' },
+};
+
+const PLAN_RESTRICTIONS = {
+  'Free': ['instagram'],
+  'Creator': ['instagram', 'facebook'],
 };
 
 const StatBadge = ({ icon, value, label }) => (
@@ -66,7 +71,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [publishLoading, setPublishLoading] = useState(false);
-  const [scheduledDate, setScheduledDate] = useState(data?.scheduled_for ? new Date(data.scheduled_for).toISOString().slice(0, 16) : '');
+  const [scheduledDate, setScheduledDate] = useState(data?.scheduled_at ? new Date(data.scheduled_at).toISOString().slice(0, 16) : '');
   const [hashtags, setHashtags] = useState(data?.hashtags || '');
   const [copyShort, setCopyShort] = useState(data?.ai_copy_short || '');
   const [copyLong, setCopyLong] = useState(data?.ai_copy_long || '');
@@ -76,23 +81,41 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const [notification, setNotification] = useState(null);
   const pollIntervalRef = useRef(null);
 
-  const fetchAnalytics = async (silent = false) => {
+  const fetchAnalytics = async (silent = false, isOpening = false) => {
     if (!silent) setLoading(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics/${videoId}`);
       if (res.ok) {
         const newData = await res.json();
-        if (data?.status === 'analyzing' && newData.status !== 'analyzing') {
-          setNotification({ type: 'success', message: 'Estratégia IA Generada.' });
+        const justFinished = data?.status === 'analyzing' && newData.status !== 'analyzing';
+        
+        // Sincronizar siempre al abrir o cuando recién termina la IA
+        if (justFinished || isOpening) {
+          if (justFinished) setNotification({ type: 'success', message: 'Estratégia IA Generada.' });
           setHashtags(newData.hashtags || '');
           setCopyShort(newData.ai_copy_short || '');
           setCopyLong(newData.ai_copy_long || '');
+          if (newData.scheduled_at) setScheduledDate(new Date(newData.scheduled_at).toISOString().slice(0, 16));
+          if (newData.platforms) setSelectedPlatforms(newData.platforms);
+          if (newData.post_type) setPostType(newData.post_type);
         }
         setData(newData);
       }
     } catch (e) { console.error(e); }
     finally { if (!silent) setLoading(false); }
   };
+
+  useEffect(() => {
+    if (initialData) {
+      setData(initialData);
+      setHashtags(initialData.hashtags || '');
+      setCopyShort(initialData.ai_copy_short || '');
+      setCopyLong(initialData.ai_copy_long || '');
+      setScheduledDate(initialData.scheduled_at ? new Date(initialData.scheduled_at).toISOString().slice(0, 16) : '');
+      setSelectedPlatforms(initialData.platforms?.length ? initialData.platforms : activePlatforms.length ? activePlatforms : ['instagram']);
+      setPostType(initialData.post_type || 'reel');
+    }
+  }, [videoId, initialData]);
 
   useEffect(() => {
     const status = data?.status || initialData?.status;
@@ -141,10 +164,9 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
       const result = await res.json();
       if (res.ok) { 
         setData(result); 
-        const isQueued = result.details?.message?.toLowerCase().includes('queued') || result.details?.message?.toLowerCase().includes('durable worker');
         setNotification({ 
           type: 'success', 
-          message: isQueued ? '📤 Video en cola de procesamiento. ¡Se publicará en breve!' : '¡Despliegue completado!' 
+          message: '🚀 ¡Despliegue iniciado! Demora de 5 a 10 minutos en la publicación de cada red social.' 
         }); 
       }
       else { setNotification({ type: 'error', message: `Fallo: ${result.error}` }); }
@@ -159,7 +181,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const isReadOnly = isPublished;
 
   const toggleDrawer = () => {
-    if (!isOpen) fetchAnalytics();
+    if (!isOpen) fetchAnalytics(false, true);
     setIsOpen(!isOpen);
   };
 
@@ -290,7 +312,14 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                   <div className="card-pro" style={{ padding: '24px', marginBottom: '32px' }}>
                     <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase' }}>Plataformas Seleccionadas</label>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {Object.entries(PLATFORM_CONFIG).map(([key, cfg]) => {
+                      {Object.entries(PLATFORM_CONFIG)
+                        .filter(([key]) => {
+                           const user = JSON.parse(localStorage.getItem('vidalis_user'));
+                           if (import.meta.env.VITE_BYPASS_PLAN_LIMITS === 'true') return true;
+                           const allowed = PLAN_RESTRICTIONS[user?.plan];
+                           return !allowed || allowed.includes(key);
+                        })
+                        .map(([key, cfg]) => {
                         const isConnected = activePlatforms.includes(key);
                         const isSelected = selectedPlatforms.includes(key);
                         const togglePlatformBtn = () => {
@@ -328,7 +357,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                     <div style={{ marginTop: '24px' }}>
                       <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase' }}>Formato</label>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        {['reel', 'story'].map(type => (
+                        {['reel', 'story', 'feed'].map(type => (
                           <button
                             key={type}
                             onClick={() => !isReadOnly && setPostType(type)}
@@ -342,7 +371,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                               fontSize: '11px', fontWeight: '800', textTransform: 'uppercase'
                             }}
                           >
-                            {type === 'reel' ? '🎬 REELS' : '📱 STORIES'}
+                            {type === 'reel' ? '🎬 REELS' : type === 'story' ? '📱 STORIES' : '📰 FEED'}
                           </button>
                         ))}
                       </div>
@@ -373,15 +402,15 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                           className="btn-primary"
                           style={{ flex: 1, height: '56px', fontSize: '12px' }}
                         >
-                           {isPublished ? 'PUBLICADO' : isAnalyzing ? 'ANALIZANDO' : `LANZAR AHORA`}
+                           {isPublished ? 'RE-PUBLICAR' : isAnalyzing ? 'ANALIZANDO' : `LANZAR AHORA`}
                         </button>
                         <button 
                           onClick={handleSaveSettings}
                           disabled={saveLoading || isReadOnly}
                           className="btn-secondary"
-                          style={{ flex: 1, height: '56px', fontSize: '12px' }}
+                          style={{ flex: 1, height: '56px', fontSize: '12px', opacity: isReadOnly ? 0.5 : 1 }}
                         >
-                           {saveLoading ? '...' : 'GUARDAR AJUSTES'}
+                           {saveLoading ? '...' : isReadOnly ? 'BLOQUEADO' : 'GUARDAR AJUSTES'}
                         </button>
                      </div>
                   </div>

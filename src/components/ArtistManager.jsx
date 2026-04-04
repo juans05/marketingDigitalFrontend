@@ -90,16 +90,16 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
   };
 
   return (
-    <div className="card-pro animate-fade-in" style={{ padding: '32px', marginBottom: '40px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
+    <div className="card-pro animate-fade-in artist-manager-card" style={{ padding: '32px', marginBottom: '40px' }}>
+      <div className="artist-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, lineHeight: '1.2' }}>
           <Users size={20} color="var(--primary)" />
           Gestión de Marcas y Artistas
         </h3>
         <button
           onClick={() => setShowForm(f => !f)}
           className={showForm ? 'btn-secondary' : 'btn-primary'}
-          style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px' }}
+          style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '12px', whiteSpace: 'nowrap', flexShrink: 0 }}
         >
           {showForm ? <X size={14} /> : <Plus size={14} />}
           {showForm ? 'CANCELAR' : 'NUEVO ARTISTA'}
@@ -126,7 +126,7 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
           </div>
 
           {/* Contexto IA — opcionales */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+          <div className="artist-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
             <div>
               <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '6px', display: 'block' }}>Género / Nicho</label>
               <select
@@ -174,15 +174,15 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
             </div>
           </div>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic' }}>
+          <div className="form-footer-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p className="form-legend" style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, fontStyle: 'italic' }}>
               * Los campos adicionales ayudan a la IA a generar copy más preciso.
             </p>
             <button
               type="submit"
               disabled={creating}
               className="btn-primary"
-              style={{ padding: '12px 32px', borderRadius: '8px', fontSize: '13px' }}
+              style={{ padding: '12px 32px', borderRadius: '8px', fontSize: '13px', whiteSpace: 'nowrap' }}
             >
               {creating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               CREAR MARCA
@@ -200,7 +200,7 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
           No hay marcas activas. Registra la primera para comenzar.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+        <div className="artist-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
           {artists.map(artist => {
             const isSelected = artist.id === selectedArtistId;
             const platformCount = artist.active_platforms?.length || 0;
@@ -255,6 +255,19 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
           })}
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .artist-manager-card { padding: 20px 16px !important; }
+          .artist-header { flex-direction: column; align-items: flex-start !important; gap: 16px; }
+          .artist-header button { width: 100%; justify-content: center; }
+          .artist-grid-3 { grid-template-columns: 1fr !important; }
+          .artist-list { grid-template-columns: 1fr !important; }
+          .form-footer-actions { flex-direction: column !important; align-items: stretch !important; gap: 16px; margin-top: 12px; }
+          .form-legend { text-align: center; }
+          .form-footer-actions button { width: 100%; justify-content: center; }
+        }
+      `}</style>
     </div>
   );
 };

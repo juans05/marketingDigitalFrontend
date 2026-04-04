@@ -13,7 +13,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       const newErrors = [];
       const isVideo = file.type.startsWith('video/');
       const isImage = file.type.startsWith('image/');
-      
+
       if (file.size > 80 * 1024 * 1024) {
         newErrors.push("Exceso de peso (>80MB). Optimiza tu exportación.");
       }
@@ -32,7 +32,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
           const isVertical = videoHeight > videoWidth;
           const ratio = videoWidth / videoHeight;
           const expectedRatio = 9 / 16;
-          
+
           if (!isVertical || Math.abs(ratio - expectedRatio) > 0.05) {
             newErrors.push("Geometría incorrecta. Se requiere formato vertical (9:16).");
           }
@@ -54,7 +54,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
     setErrors([]);
 
     const validationErrors = await validateFile(selectedFile);
-    
+
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setStatus('error');
@@ -66,7 +66,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
   const handleUpload = async () => {
     setStatus('uploading');
     setUploadPhase('signing');
-    
+
     try {
       const isVideo = file.type.startsWith('video/');
       const user = JSON.parse(localStorage.getItem('vidalis_user'));
@@ -96,7 +96,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
         body: formData
       });
       const uploadData = await uploadRes.json();
-      
+
       if (!uploadRes.ok) throw new Error("Error en el despliegue a Cloudinary");
 
       setUploadPhase('registering');
@@ -130,18 +130,18 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
   };
 
   const STATUS_CONFIG = {
-    published:    { label: 'Publicado',           icon: <CheckCircle size={12} />,   color: '#22c55e', bg: '#ecfdf5' },
-    scheduled:    { label: 'Programado',          icon: <Clock size={12} />,         color: '#2C33D8', bg: '#eff6ff' },
-    processing:   { label: 'Procesando',          icon: <Loader2 size={12} className="animate-spin" />, color: '#6B7280', bg: '#f9fafb' },
-    analyzing:    { label: 'Estrategia IA',      icon: <Sparkles size={12} />,     color: '#7c3aed', bg: '#f5f3ff', pulse: true },
+    published: { label: 'Publicado', icon: <CheckCircle size={12} />, color: '#22c55e', bg: '#ecfdf5' },
+    scheduled: { label: 'Programado', icon: <Clock size={12} />, color: '#2C33D8', bg: '#eff6ff' },
+    processing: { label: 'Procesando', icon: <Loader2 size={12} className="animate-spin" />, color: '#6B7280', bg: '#f9fafb' },
+    analyzing: { label: 'Estrategia IA', icon: <Sparkles size={12} />, color: '#7c3aed', bg: '#f5f3ff', pulse: true },
     needs_review: { label: 'Review de Autoridad', icon: <AlertTriangle size={12} />, color: '#d97706', bg: '#fffbeb' },
-    error:        { label: 'Fallo Crítico',       icon: <XCircle size={12} />,       color: '#ef4444', bg: '#fef2f2' },
+    error: { label: 'Fallo Crítico', icon: <XCircle size={12} />, color: '#ef4444', bg: '#fef2f2' },
   };
 
   return (
-    <div className="card-pro animate-fade-in" style={{ 
-      maxWidth: '850px', 
-      margin: '40px auto', 
+    <div className="card-pro animate-fade-in upload-card-pro" style={{
+      maxWidth: '850px',
+      margin: '40px auto',
       padding: '48px',
       position: 'relative',
       background: 'var(--bg-secondary)',
@@ -149,11 +149,11 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       boxShadow: 'var(--shadow-premium)'
     }}>
       <div style={{ marginBottom: '40px' }}>
-        <h2 className="gradient-text" style={{ 
-          fontSize: '32px', 
+        <h2 className="gradient-text" style={{
+          fontSize: '32px',
           fontFamily: 'var(--font-heading)',
           fontWeight: '900',
-          marginBottom: '12px' 
+          marginBottom: '12px'
         }}>Sube tu Contenido Premium</h2>
         <p style={{ color: 'var(--text-dim)', fontSize: '16px', fontWeight: '500' }}>
           Formatos optimizados para impacto vertical (9:16).
@@ -161,18 +161,18 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       </div>
 
       {!file && (
-        <label className="upload-zone" style={{ 
-          border: '2px dashed var(--border-main)', 
-          borderRadius: '24px', 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center', 
-          padding: '80px 40px', 
+        <label className="upload-zone" style={{
+          border: '2px dashed var(--border-main)',
+          borderRadius: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '80px 40px',
           cursor: 'pointer',
           background: 'rgba(255,255,255,0.02)',
           transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
-          <div style={{ 
+          <div style={{
             width: '80px', height: '80px',
             background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
             borderRadius: '18px',
@@ -196,9 +196,9 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       )}
 
       {file && (
-        <div className="glass-morph" style={{ 
-          padding: '32px', 
-          borderRadius: '24px', 
+        <div className="glass-morph" style={{
+          padding: '32px',
+          borderRadius: '24px',
           border: '1px solid var(--border-active)',
           boxShadow: 'var(--shadow-premium)'
         }}>
@@ -214,8 +214,8 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
                 </p>
               </div>
             </div>
-            <button 
-              onClick={() => { setFile(null); setStatus('idle'); }} 
+            <button
+              onClick={() => { setFile(null); setStatus('idle'); }}
               style={{ background: '#F3F4F6', border: 'none', color: '#9CA3AF', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}
             >
               <X size={18} />
@@ -245,9 +245,9 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
           </div>
 
           {status === 'ready' && (
-            <button 
-              onClick={handleUpload} 
-              className="btn-primary" 
+            <button
+              onClick={handleUpload}
+              className="btn-primary"
               style={{ width: '100%', marginTop: '40px', height: '60px', borderRadius: '12px', fontSize: '1.1rem' }}
             >
               Procesar y Publicar
@@ -256,9 +256,9 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
 
           {status === 'uploading' && (
             <div style={{ marginTop: '40px' }}>
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
                 gap: '12px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
@@ -271,17 +271,17 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
                     {uploadPhase === 'signing' ? '25%' : uploadPhase === 'uploading' ? '65%' : '95%'}
                   </span>
                 </div>
-                <div style={{ 
-                  width: '100%', 
-                  height: '10px', 
-                  background: '#F3F4F6', 
-                  borderRadius: '10px', 
+                <div style={{
+                  width: '100%',
+                  height: '10px',
+                  background: '#F3F4F6',
+                  borderRadius: '10px',
                   overflow: 'hidden',
                   border: '1px solid var(--border-main)'
                 }}>
-                  <div style={{ 
-                    height: '100%', 
-                    background: 'var(--primary)', 
+                  <div style={{
+                    height: '100%',
+                    background: 'var(--primary)',
                     width: uploadPhase === 'signing' ? '25%' : uploadPhase === 'uploading' ? '65%' : '95%',
                     transition: 'width 0.8s ease-in-out'
                   }} className="animate-shimmer"></div>
@@ -316,12 +316,12 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
                   border: '1px solid #dcfce7',
                   textAlign: 'center'
                 }}>
-                  <div style={{ 
-                    width: '56px', height: '56px', 
-                    background: '#22c55e', 
-                    borderRadius: '12px', 
-                    display: 'inline-flex', 
-                    alignItems: 'center', 
+                  <div style={{
+                    width: '56px', height: '56px',
+                    background: '#22c55e',
+                    borderRadius: '12px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: '16px',
                     color: '#FFF',
@@ -347,6 +347,10 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
         @media (max-width: 768px) {
           .card-pro { padding: 32px 20px !important; margin: 20px !important; }
           .upload-zone { padding: 60px 20px !important; }
+        }
+        @media (max-width: 600px) {
+          .upload-card-pro { padding: 24px !important; }
+          .upload-zone { padding: 24px 16px !important; }
         }
       `}</style>
     </div>
