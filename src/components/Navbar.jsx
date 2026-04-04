@@ -6,9 +6,9 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   return (
-    <nav style={{ 
+    <nav className="glass-morph" style={{ 
       width: '100%',
-      height: '72px',
+      height: '80px',
       padding: '0 40px', 
       display: 'flex', 
       justifyContent: 'space-between', 
@@ -16,71 +16,63 @@ const Navbar = () => {
       position: 'sticky',
       top: '0',
       zIndex: 1000,
-      background: '#FFFFFF',
       borderBottom: '1px solid var(--border-main)',
-      fontFamily: 'Inter, sans-serif'
+      transition: 'all 0.3s ease'
     }}>
       <div 
-        style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} 
+        style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer' }} 
         onClick={() => navigate('/')}
       >
         <div style={{ 
-          background: 'var(--primary)', 
-          padding: '6px', 
-          borderRadius: '8px',
+          background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)', 
+          padding: '8px', 
+          borderRadius: '12px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
         }}>
-          <svg width="22" height="21" viewBox="0 0 48 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0-3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" fill="white"/>
-          </svg>
+          <Sparkles size={20} color="white" />
         </div>
-        <span style={{ 
-          fontFamily: 'Outfit, sans-serif',
-          fontSize: '22px', 
-          fontWeight: '800', 
-          letterSpacing: '-0.02em',
-          color: 'var(--text-main)'
+        <span className="accent-text" style={{ 
+          fontFamily: 'var(--font-heading)',
+          fontSize: '24px', 
+          fontWeight: '900', 
+          letterSpacing: '-0.03em'
         }}>
-          Vidalis<span style={{ color: 'var(--primary)' }}>.ai</span>
+          Vidalis
         </span>
       </div>
       
-      <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-        <a href="#features" style={{ 
-          color: 'var(--text-muted)', 
-          textDecoration: 'none', 
-          fontWeight: '600',
-          fontSize: '14px',
-          transition: 'color 0.2s ease'
-        }} className="nav-link">Funciones</a>
-        <a href="#about" style={{ 
-          color: 'var(--text-muted)', 
-          textDecoration: 'none', 
-          fontWeight: '600',
-          fontSize: '14px',
-          transition: 'color 0.2s ease'
-        }} className="nav-link">Nosotros</a>
+      <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
+        <a href="#features" className="nav-link">Funciones</a>
+        <a href="#about" className="nav-link">Nosotros</a>
         
         <button 
           onClick={() => navigate('/login')} 
           className="btn-primary" 
-          style={{ 
-            padding: '10px 20px', 
-            fontSize: '14px',
-            borderRadius: '8px'
-          }}
+          style={{ height: '44px' }}
         >
-          <LogIn size={16} />
+          <LogIn size={18} />
           <span>Acceso Directo</span>
         </button>
       </div>
 
       <style>{`
-        .nav-link:hover { color: var(--primary); }
+        .nav-link {
+          color: var(--text-muted);
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 14px;
+          transition: all 0.2s ease;
+          letter-spacing: 0.02em;
+        }
+        .nav-link:hover { 
+          color: var(--text-main);
+          transform: translateY(-1px);
+        }
         @media (max-width: 768px) {
-          nav { padding: 0 20px; }
+          nav { padding: 0 20px; height: 72px; }
           .nav-link { display: none; }
         }
       `}</style>

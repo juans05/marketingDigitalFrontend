@@ -108,60 +108,62 @@ const Dashboard = () => {
         />
       )}
 
-      {/* Header Pro */}
-      <header className="main-header-pro">
+      {/* Header Pro Premium */}
+      <header className="main-header-pro glass-morph">
         <div className="header-brand">
-          <div className="logo-box">
+          <div className="logo-box" style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)', boxShadow: '0 4px 15px rgba(79, 70, 229, 0.4)' }}>
              <Sparkles size={18} color="white" />
           </div>
-          <span className="brand-text">Vidalis<span className="dot">.ai</span></span>
+          <span className="accent-text" style={{ fontSize: '22px', fontWeight: '900', fontFamily: 'var(--font-heading)', letterSpacing: '-0.03em' }}>
+            Vidalis
+          </span>
         </div>
 
         <div className="header-actions">
           {isAgency && availableArtists.length > 0 && (
             <div className="brand-selector-wrapper">
-              <span className="selector-label hide-mobile">CANAL ACTIVO:</span>
               <select 
-                className="brand-dropdown-pro"
+                className="brand-dropdown-pro glass-morph"
                 value={activeArtist?.id || ''}
                 onChange={(e) => setActiveArtist(availableArtists.find(a => a.id === e.target.value))}
+                style={{ border: '1px solid var(--border-main)', color: 'var(--text-main)', padding: '10px 16px', borderRadius: '12px' }}
               >
                 <option value="">Resumen Global</option>
-                {availableArtists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                {availableArtists.map(a => <option key={a.id} value={a.id} style={{ background: 'var(--bg-secondary)', color: 'var(--text-main)' }}>{a.name}</option>)}
               </select>
             </div>
           )}
 
-          <div className="user-profile-box hide-mobile">
-             <User size={14} color="var(--text-muted)" />
-             <span className="user-email">{user.email}</span>
+          <div className="user-profile-box hide-mobile glass-morph" style={{ border: '1px solid var(--border-main)', padding: '8px 16px', borderRadius: '12px' }}>
+             <User size={14} color="var(--primary)" />
+             <span className="user-email" style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-muted)' }}>{user.email}</span>
           </div>
 
-          <button onClick={handleLogout} className="btn-exit-pro">
-            <LogOut size={14} /> <span className="hide-mobile">Cerrar Sesión</span>
+          <button onClick={handleLogout} className="btn-exit-pro glass-morph" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#EF4444', height: '40px' }}>
+            <LogOut size={14} /> <span className="hide-mobile">Salir</span>
           </button>
         </div>
       </header>
 
       <div className="dashboard-container">
-        {/* Sidebar Pro */}
-        <aside className="sidebar-pro hide-mobile">
-          <div className="sidebar-section-label">PRINCIPAL</div>
+        {/* Sidebar Pro Premium */}
+        <aside className="sidebar-pro hide-mobile glass-morph" style={{ background: 'transparent', borderRight: '1px solid var(--border-main)' }}>
+          <div className="sidebar-section-label" style={{ padding: '0 24px 12px' }}>PLATAFORMA</div>
           <button className={activeView === 'analytics' ? 'active' : ''} onClick={() => setActiveView('analytics')}>
-            <BarChart3 size={20} /> Analítica
-          </button>
-          <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}>
-            <Calendar size={20} /> Calendario
+            <BarChart3 size={20} /> <span style={{ fontWeight: '600' }}>Analítica</span>
           </button>
           <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}>
-            <Film size={20} /> Contenido
+            <Film size={20} /> <span style={{ fontWeight: '600' }}>Producción</span>
+          </button>
+          <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}>
+            <Calendar size={20} /> <span style={{ fontWeight: '600' }}>Calendario</span>
           </button>
           
           {isAgency && (
             <>
-              <div className="sidebar-section-label" style={{marginTop: '20px'}}>GESTIÓN</div>
+              <div className="sidebar-section-label" style={{marginTop: '32px', padding: '0 24px 12px'}}>AGENCIA</div>
               <button className={activeView === 'artists' ? 'active' : ''} onClick={() => setActiveView('artists')}>
-                <Users size={20} /> Mis Marcas
+                <Users size={20} /> <span style={{ fontWeight: '600' }}>Mis Marcas</span>
               </button>
             </>
           )}
@@ -226,67 +228,49 @@ const Dashboard = () => {
            )}
         </main>
 
-        {/* Mobile Nav */}
-        <nav className="mobile-nav">
-          <button className={activeView === 'analytics' ? 'active' : ''} onClick={() => setActiveView('analytics')}><BarChart3 size={20} /></button>
-          <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}><Calendar size={20} /></button>
-          <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}><Film size={20} /></button>
-          {isAgency && <button className={activeView === 'artists' ? 'active' : ''} onClick={() => setActiveView('artists')}><Users size={20} /></button>}
+        {/* Mobile Nav Premium */}
+        <nav className="mobile-nav glass-morph">
+          <button className={activeView === 'analytics' ? 'active' : ''} onClick={() => setActiveView('analytics')}><BarChart3 size={22} /></button>
+          <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}><Film size={22} /></button>
+          <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}><Calendar size={22} /></button>
+          {isAgency && <button className={activeView === 'artists' ? 'active' : ''} onClick={() => setActiveView('artists')}><Users size={22} /></button>}
         </nav>
       </div>
 
       <style>{`
-        .dashboard-root { min-height: 100vh; background: var(--bg-primary); color: var(--text-main); font-family: 'Inter', sans-serif; }
-        .dashboard-container { display: flex; min-height: calc(100vh - 70px); }
+        .dashboard-root { min-height: 100vh; background: var(--bg-primary); color: var(--text-main); }
+        .dashboard-container { display: flex; min-height: calc(100vh - 80px); }
         
         .main-header-pro {
-          height: 70px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center;
-          background: #FFFFFF; border-bottom: 1px solid var(--border-main); position: sticky; top: 0; z-index: 1000;
+          height: 80px; padding: 0 40px; display: flex; justify-content: space-between; align-items: center;
+          position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-main);
         }
-        .header-brand { display: flex; align-items: center; gap: 12px; }
-        .logo-box { background: var(--primary); padding: 6px; border-radius: 8px; display: flex; }
-        .brand-text { font-size: 20px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; }
-        .dot { color: var(--primary); }
-
-        .header-actions { display: flex; align-items: center; gap: 20px; }
-        .selector-label { font-size: 11px; font-weight: 700; color: var(--text-muted); }
-        .brand-dropdown-pro { background: #F3F4F6; color: var(--text-main); border: 1px solid var(--border-main); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; outline: none; transition: all 0.2s; }
-        .brand-dropdown-pro:hover { border-color: var(--primary); background: #FFF; }
-
-        .user-profile-box { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-main); }
-        .user-email { font-size: 13px; font-weight: 500; color: var(--text-muted); }
-        .btn-exit-pro { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
-        .btn-exit-pro:hover { background: #FEE2E2; }
-
-        .sidebar-pro { width: 260px; background: #FFFFFF; border-right: 1px solid var(--border-main); padding: 32px 16px; display: flex; flex-direction: column; gap: 4px; }
-        .sidebar-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); padding: 0 16px 8px; letter-spacing: 0.05em; }
+        
+        .sidebar-pro { width: 280px; padding: 40px 16px; display: flex; flex-direction: column; gap: 8px; }
         .sidebar-pro button {
-          display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px;
-          border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 14px; font-weight: 500; text-align: left; transition: all 0.2s;
+          display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-radius: 12px;
+          border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 14px; text-align: left; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .sidebar-pro button:hover { color: var(--primary); background: #F9FAFB; }
-        .sidebar-pro button.active { background: #EEF2FF; color: var(--primary); font-weight: 700; }
+        .sidebar-pro button:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.03); transform: translateX(4px); }
+        .sidebar-pro button.active { background: var(--primary); color: white; box-shadow: var(--shadow-glow); }
 
-        .main-content-pro { flex-grow: 1; padding: 32px 40px; overflow-y: auto; max-width: 1400px; margin: 0 auto; width: 100%; }
-        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .view-title { font-size: 24px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; }
-        .active-artist-tag { font-size: 12px; font-weight: 600; color: var(--primary); background: #EEF2FF; padding: 4px 12px; border-radius: 20px; border: 1px solid #C7D2FE; }
+        .main-content-pro { flex-grow: 1; padding: 48px; overflow-y: auto; max-width: 1600px; margin: 0 auto; width: 100%; }
+        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 48px; border-bottom: 1px solid var(--border-main); padding-bottom: 24px; }
+        .view-title { font-size: 32px; font-weight: 900; letter-spacing: -0.02em; font-family: var(--font-heading); background: linear-gradient(135deg, #FFF 0%, #A1A1AA 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .active-artist-tag { font-size: 12px; font-weight: 700; color: var(--primary); background: rgba(79, 70, 229, 0.1); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-main); text-transform: uppercase; letter-spacing: 0.05em; }
 
-        .section-title { font-size: 14px; font-weight: 700; margin-bottom: 20px; color: var(--text-main); border-left: 3px solid var(--primary); padding-left: 12px; }
-
-        .view-placeholder { padding: 80px 40px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .view-placeholder h3 { color: var(--text-main); font-size: 18px; margin: 20px 0 10px; }
-        .view-placeholder p { color: var(--text-muted); font-size: 14px; max-width: 400px; line-height: 1.6; }
-
-        .mobile-nav { display: none; }
+        .section-title { font-size: 16px; font-weight: 800; margin-bottom: 24px; color: var(--text-main); display: flex; align-items: center; gap: 12px; }
+        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--primary); border-radius: 2px; }
 
         @media (max-width: 768px) {
           .hide-mobile { display: none !important; }
-          .main-header-pro { padding: 0 20px; }
-          .main-content-pro { padding: 20px; padding-bottom: 100px; }
-          .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: #FFF; border-top: 1px solid var(--border-main); display: flex; justify-content: space-around; align-items: center; z-index: 2000; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
-          .mobile-nav button { background: none; border: none; color: var(--text-muted); padding: 15px; }
-          .mobile-nav button.active { color: var(--primary); }
+          .main-header-pro { padding: 0 20px; height: 72px; }
+          .main-content-pro { padding: 24px; padding-bottom: 120px; }
+          .view-header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 32px; }
+          .view-title { font-size: 24px; }
+          .mobile-nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 70px; border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; border: 1px solid var(--border-active); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+          .mobile-nav button { background: none; border: none; color: var(--text-dim); padding: 15px; transition: all 0.3s ease; }
+          .mobile-nav button.active { color: var(--primary); transform: translateY(-4px); }
         }
       `}</style>
     </div>

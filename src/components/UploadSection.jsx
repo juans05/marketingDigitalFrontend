@@ -71,8 +71,9 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       const isVideo = file.type.startsWith('video/');
       const user = JSON.parse(localStorage.getItem('vidalis_user'));
       const agencyFolder = user?.name ? user.name.replace(/\s+/g, '_').toLowerCase() : 'general';
+      const resourceType = isVideo ? 'video' : 'image';
 
-      const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}`);
+      const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}&resourceType=${resourceType}`);
       const sigData = await sigResponse.json();
 
       setUploadPhase('uploading');
@@ -140,54 +141,54 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
   return (
     <div className="card-pro animate-fade-in" style={{ 
       maxWidth: '850px', 
-      margin: '20px auto', 
+      margin: '40px auto', 
       padding: '48px',
       position: 'relative',
-      border: 'none',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
+      background: 'var(--bg-secondary)',
+      border: '1px solid var(--border-main)',
+      boxShadow: 'var(--shadow-premium)'
     }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h2 style={{ 
-          fontSize: '24px', 
-          fontFamily: 'Outfit, sans-serif',
-          fontWeight: '800',
-          color: 'var(--text-main)',
-          marginBottom: '8px' 
+      <div style={{ marginBottom: '40px' }}>
+        <h2 className="gradient-text" style={{ 
+          fontSize: '32px', 
+          fontFamily: 'var(--font-heading)',
+          fontWeight: '900',
+          marginBottom: '12px' 
         }}>Sube tu Contenido Premium</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '15px' }}>
-          Solo aceptamos archivos optimizados para impacto vertical (9:16).
+        <p style={{ color: 'var(--text-dim)', fontSize: '16px', fontWeight: '500' }}>
+          Formatos optimizados para impacto vertical (9:16).
         </p>
       </div>
 
       {!file && (
         <label className="upload-zone" style={{ 
           border: '2px dashed var(--border-main)', 
-          borderRadius: '16px', 
+          borderRadius: '24px', 
           display: 'flex', 
           flexDirection: 'column', 
           alignItems: 'center', 
           padding: '80px 40px', 
           cursor: 'pointer',
-          background: '#F9FAFB',
-          transition: 'all 0.3s ease'
+          background: 'rgba(255,255,255,0.02)',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
           <div style={{ 
-            width: '64px', height: '64px',
-            background: 'var(--primary)',
-            borderRadius: '12px',
+            width: '80px', height: '80px',
+            background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+            borderRadius: '18px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '24px',
+            marginBottom: '32px',
             color: '#FFF',
-            boxShadow: '0 4px 12px rgba(44, 51, 216, 0.2)'
+            boxShadow: 'var(--shadow-glow)'
           }}>
-            <Upload size={32} />
+            <Upload size={36} />
           </div>
-          <p style={{ fontWeight: '800', fontSize: '1.2rem', color: 'var(--text-main)', marginBottom: '8px' }}>
+          <p style={{ fontWeight: '800', fontSize: '1.4rem', color: 'var(--text-main)', marginBottom: '12px' }}>
             Despliega tus archivos aquí
           </p>
-          <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             MP4, MOV | Max. 80MB | Full Vertical 9:16
           </span>
           <input type="file" accept="video/*,image/*" style={{ display: 'none' }} onChange={handleFileChange} />
@@ -195,12 +196,11 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       )}
 
       {file && (
-        <div style={{ 
+        <div className="glass-morph" style={{ 
           padding: '32px', 
-          borderRadius: '16px', 
-          background: '#FFFFFF',
-          border: '1px solid var(--border-main)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+          borderRadius: '24px', 
+          border: '1px solid var(--border-active)',
+          boxShadow: 'var(--shadow-premium)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
@@ -341,7 +341,12 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       <style>{`
         .upload-zone:hover {
           border-color: var(--primary) !important;
-          background: #F5F7FF !important;
+          background: rgba(79, 70, 229, 0.05) !important;
+          transform: scale(1.01);
+        }
+        @media (max-width: 768px) {
+          .card-pro { padding: 32px 20px !important; margin: 20px !important; }
+          .upload-zone { padding: 60px 20px !important; }
         }
       `}</style>
     </div>

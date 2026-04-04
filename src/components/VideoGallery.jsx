@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter, BarChart2 } from 'lucide-react';
+import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter } from 'lucide-react';
 import AnalyticsPanel from './AnalyticsPanel';
 
 const Loader2 = ({ className, style, size = 24 }) => (
@@ -12,18 +12,18 @@ const Loader2 = ({ className, style, size = 24 }) => (
 );
 
 const STATUS_CONFIG = {
-  published:    { label: 'Publicado',           icon: <CheckCircle size={12} />,   color: '#22c55e', bg: '#ecfdf5' },
-  scheduled:    { label: 'Programado',          icon: <Clock size={12} />,         color: '#2C33D8', bg: '#eff6ff' },
-  processing:   { label: 'Procesando',          icon: <Loader2 size={12} className="animate-spin" />, color: '#6B7280', bg: '#f9fafb' },
-  analyzing:    { label: 'Estrategia IA',      icon: <Sparkles size={12} />,     color: '#7c3aed', bg: '#f5f3ff', pulse: true },
-  needs_review: { label: 'Review de Autoridad', icon: <AlertTriangle size={12} />, color: '#d97706', bg: '#fffbeb' },
-  ready:        { label: 'Listo para publicar',  icon: <CheckCircle size={12} />,   color: '#22c55e', bg: '#ecfdf5' },
-  error:        { label: 'Fallo Crítico',       icon: <XCircle size={12} />,       color: '#ef4444', bg: '#fef2f2' },
+  published:    { label: 'Publicado',           icon: <CheckCircle size={12} />,   color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)' },
+  scheduled:    { label: 'Programado',          icon: <Clock size={12} />,         color: '#3B82F6', bg: 'rgba(59, 130, 246, 0.15)' },
+  processing:   { label: 'Procesando',          icon: <Loader2 size={12} className="animate-spin" />, color: '#94A3B8', bg: 'rgba(148, 163, 184, 0.1)' },
+  analyzing:    { label: 'IA Analizando',       icon: <Sparkles size={12} />,     color: '#A855F7', bg: 'rgba(168, 85, 247, 0.15)', pulse: true },
+  needs_review: { label: 'Revisión',            icon: <AlertTriangle size={12} />, color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)' },
+  ready:        { label: 'Listo',               icon: <CheckCircle size={12} />,   color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)' },
+  error:        { label: 'Error',               icon: <XCircle size={12} />,       color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)' },
 };
 
 const ScoreBadge = ({ score }) => {
   if (!score) return null;
-  const color = score >= 8 ? '#22c55e' : score >= 6 ? 'var(--accent-gold)' : '#ef4444';
+  const color = score >= 8 ? '#10B981' : score >= 6 ? '#F59E0B' : '#EF4444';
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: '6px',
@@ -38,7 +38,6 @@ const ScoreBadge = ({ score }) => {
 
 const ANALYZING_STATUSES = ['analyzing', 'processing'];
 
-/** Extrae el paso actual (ej: 2) del string "[Paso 2/4] ..." */
 const parseStep = (text) => {
   if (!text) return null;
   const match = text.match(/\[Paso (\d+)\/(\d+)\]/);
@@ -53,24 +52,11 @@ const AnalysisProgressBar = ({ status, aiCopyShort }) => {
   
   return (
     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-      {/* Step label */}
-      {step && (
-        <div style={{
-          position: 'absolute', bottom: '8px', left: '8px', right: '8px',
-          fontSize: '9px', fontWeight: '800', color: '#FFF',
-          textTransform: 'uppercase', letterSpacing: '0.05em',
-          textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-          zIndex: 2
-        }}>
-          {step.message}
-        </div>
-      )}
-      {/* Progress bar */}
-      <div style={{ height: '4px', background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+      <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
         <div style={{
           height: '100%',
           width: `${percent}%`,
-          background: 'linear-gradient(90deg, #6366f1, #a855f7)',
+          background: 'linear-gradient(90deg, var(--primary), var(--accent))',
           transition: 'width 0.8s ease-in-out',
         }} />
       </div>
@@ -78,24 +64,17 @@ const AnalysisProgressBar = ({ status, aiCopyShort }) => {
   );
 };
 
-/** Muestra el detalle del error cuando el status es 'error' */
 const ErrorDetail = ({ errorLog }) => {
   if (!errorLog) return null;
   let parsed;
   try { parsed = JSON.parse(errorLog); } catch { parsed = { message: errorLog }; }
   return (
     <div style={{
-      marginTop: '12px', padding: '10px',
-      background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-      borderRadius: '8px', color: '#ef4444', fontSize: '10px', fontWeight: '700',
-      wordBreak: 'break-word'
+      marginTop: '12px', padding: '12px',
+      background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.1)',
+      borderRadius: '12px', color: '#EF4444', fontSize: '11px', fontWeight: '600'
     }}>
       ❌ {parsed.message}
-      {parsed.timestamp && (
-        <div style={{ marginTop: '4px', fontSize: '9px', color: '#999' }}>
-          {new Date(parsed.timestamp).toLocaleString()}
-        </div>
-      )}
     </div>
   );
 };
@@ -115,12 +94,10 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
       .finally(() => { if (showLoader) setLoading(false); });
   };
 
-  // Carga inicial / cambio de artista
   useEffect(() => {
     fetchGallery(true);
   }, [artistId, refreshKey]);
 
-  // Auto-polling mientras haya videos analizando (máx 10 min)
   useEffect(() => {
     const hasAnalyzing = videos.some(v => ANALYZING_STATUSES.includes(v.status));
     if (!hasAnalyzing) return;
@@ -132,46 +109,41 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
   const filtered = filter === 'all' ? videos : videos.filter(v => v.status === filter);
 
   if (loading) return (
-    <div style={{ textAlign: 'center', padding: '100px 40px', color: 'var(--text-muted)', background: '#F9FAFB', borderRadius: '24px', border: '1px solid var(--border-main)' }}>
+    <div style={{ textAlign: 'center', padding: '100px 40px', background: 'var(--bg-secondary)', borderRadius: '24px', border: '1px solid var(--border-main)' }}>
       <Loader2 className="animate-spin" size={32} style={{ margin: '0 auto 16px', color: 'var(--primary)' }} />
-      <p style={{ fontWeight: '700', letterSpacing: '0.05em' }}>SINCRONIZANDO BIBLIOTECA...</p>
+      <p style={{ fontWeight: '700', letterSpacing: '0.1em', fontSize: '12px', color: 'var(--text-muted)' }}>SINCRONIZANDO BIBLIOTECA...</p>
     </div>
   );
 
   return (
     <section>
-      {/* Header + filtros */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ background: '#F3F4F6', padding: '12px', borderRadius: '12px' }}>
-            <Film size={24} color="var(--primary)" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ background: 'var(--bg-tertiary)', padding: '14px', borderRadius: '16px', border: '1px solid var(--border-main)' }}>
+            <Film size={28} color="var(--primary)" />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '4px' }}>
-              Catálogo de Contenido
-            </h2>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600' }}>
-              Mostrando {filtered.length} de {videos.length} piezas de impacto.
+            <h2 className="gradient-text" style={{ fontSize: '1.8rem', fontWeight: '900', marginBottom: '4px' }}>Catálogo Viral</h2>
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-dim)', fontWeight: '600' }}>
+              <span className="accent-text">{filtered.length} piezas</span> activas en tu biblioteca.
             </p>
           </div>
         </div>
 
-        <div className="card-pro" style={{ display: 'flex', gap: '4px', padding: '6px', borderRadius: '100px', border: '1px solid var(--border-main)' }}>
+        <div className="glass-morph" style={{ display: 'flex', gap: '6px', padding: '6px', borderRadius: '16px' }}>
           {['all', 'published', 'needs_review', 'analyzing'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               style={{
-                padding: '8px 20px',
-                borderRadius: '100px',
+                padding: '10px 24px',
+                borderRadius: '12px',
                 border: 'none',
                 background: filter === f ? 'var(--primary)' : 'transparent',
-                color: filter === f ? 'white' : 'var(--text-muted)',
+                color: filter === f ? 'white' : 'var(--text-dim)',
                 cursor: 'pointer',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: '800',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
                 transition: 'all 0.3s ease'
               }}
             >
@@ -181,147 +153,73 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
         </div>
       </div>
 
-      {/* Grid de videos */}
       {filtered.length === 0 ? (
-        <div className="card-pro" style={{ padding: '100px 40px', textAlign: 'center', border: '1px dashed var(--border-main)' }}>
-          <Filter size={48} style={{ opacity: 0.2, marginBottom: '24px', color: 'var(--primary)' }} />
+        <div className="card-pro" style={{ padding: '80px 40px', textAlign: 'center', border: '1px dashed var(--border-main)', background: 'transparent' }}>
+          <Filter size={48} style={{ opacity: 0.1, marginBottom: '24px', color: 'var(--text-main)' }} />
           <h3 style={{ fontWeight: '800', color: 'var(--text-main)', marginBottom: '8px' }}>Sin resultados</h3>
-          <p style={{ color: 'var(--text-muted)' }}>
-            {filter === 'all'
-              ? 'Inicia tu legado subiendo tu primer contenido vertical.'
-              : `No se encontraron piezas con el estatus "${STATUS_CONFIG[filter]?.label || filter}"`}
-          </p>
+          <p style={{ color: 'var(--text-dim)' }}>Inicia tu legado subiendo tu primer contenido vertical.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '32px' }}>
           {filtered.map((video) => {
             const status = STATUS_CONFIG[video.status] || STATUS_CONFIG.processing;
             return (
-              <div key={video.id} className="card-pro animate-fade-in" style={{ padding: '0', overflow: 'hidden', transition: 'all 0.4s ease', display: 'flex', flexDirection: 'column' }}>
-
-                {/* Thumbnail / Preview Area */}
-                <div style={{
-                  height: '200px',
-                  background: '#F3F4FB',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  borderBottom: '1px solid var(--border-main)'
-                }}>
+              <div key={video.id} className="card-pro animate-fade-in" style={{ padding: '0', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ height: '400px', background: 'var(--bg-tertiary)', position: 'relative', overflow: 'hidden' }}>
                   {video.source_url ? (
                     (video.processed_url || video.source_url).match(/\.(mp4|mov|webm)$/i) ? (
                       <video
                         src={video.processed_url || video.source_url}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        muted
+                        muted loop
                         onMouseOver={e => e.target.play()}
                         onMouseOut={e => { e.target.pause(); e.target.currentTime = 0; }}
                       />
                     ) : (
-                      <img
-                        src={video.source_url}
-                        alt={video.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
+                      <img src={video.source_url} alt={video.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     )
                   ) : (
-                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', opacity: 0.3 }}>
-                      <Film size={40} color="var(--primary)" />
-                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-main)' }}>PREPARANDO ARCHIVO...</span>
+                    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', opacity: 0.1 }}>
+                      <Film size={48} color="var(--text-main)" />
                     </div>
                   )}
                   
-                  {/* Status Badge Over Thumbnail */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '16px', right: '16px',
-                    padding: '6px 14px',
-                    borderRadius: '100px',
-                    background: status.bg === '#000' ? 'rgba(0,0,0,0.8)' : status.bg, 
-                    color: status.color === '#FFF' ? 'white' : status.color,
-                    fontSize: '10px',
-                    fontWeight: '900',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    zIndex: 10
+                  <div className="glass-morph" style={{
+                    position: 'absolute', top: '16px', right: '16px',
+                    padding: '8px 14px', borderRadius: '12px',
+                    color: status.color, fontSize: '11px', fontWeight: '900',
+                    display: 'flex', alignItems: 'center', gap: '8px'
                   }}>
-                    {status.icon}
-                    {status.label}
+                    {status.icon} {status.label}
                   </div>
+                  <AnalysisProgressBar status={video.status} aiCopyShort={video.ai_copy_short} />
                 </div>
 
-                {/* Info Area */}
                 <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                  <h3 style={{
-                    fontSize: '15px', fontWeight: '800', marginBottom: '12px',
-                    color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                    fontFamily: 'var(--font-heading)'
-                  }}>
-                    {video.title || 'Producción Sin Nombre'}
+                  <h3 style={{ fontSize: '17px', fontWeight: '900', marginBottom: '8px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {video.title || 'Inyección Viral'}
                   </h3>
                   
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '12px', fontWeight: '600' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-dim)', fontSize: '12px', fontWeight: '600' }}>
                         <Clock size={14} />
-                        {new Date(video.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                        {new Date(video.created_at).toLocaleDateString()}
                      </div>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Viral IA</span>
-                        <ScoreBadge score={video.viral_score} />
-                     </div>
+                     <ScoreBadge score={video.viral_score} />
                   </div>
 
-                  {/* IA Progress Component (Subtle) */}
-                  <div style={{ marginBottom: '20px' }}>
-                    <AnalysisProgressBar status={video.status} aiCopyShort={video.ai_copy_short} />
-                  </div>
-
-                  {/* Detail Integration */}
                   <div style={{ marginTop: 'auto' }}>
                     <AnalyticsPanel videoId={video.id} initialData={video} activePlatforms={activePlatforms} />
                   </div>
+                  {video.status === 'error' && <ErrorDetail errorLog={video.error_log} />}
                 </div>
-
-                {/* Error detail */}
-                {video.status === 'error' && (
-                  <div style={{ padding: '0 24px 24px 24px' }}>
-                    <ErrorDetail errorLog={video.error_log} />
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       )}
-
-      <style>{`
-        .video-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-        }
-        @keyframes pulse {
-          0% { opacity: 1; }
-          50% { opacity: 0.6; }
-          100% { opacity: 1; }
-        }
-        @keyframes scanBar {
-          0%   { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.5s ease forwards;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </section>
   );
 };
-
 
 export default VideoGallery;
