@@ -294,8 +294,8 @@ const Dashboard = () => {
 
         @media (max-width: 768px) {
           .hide-mobile { display: none !important; }
-          .brand-text { display: none !important; } /* Ocultar texto Vidalis.ai para liberar espacio */
-          .main-header-pro { padding: 0 16px; border-bottom: none; background: transparent; }
+          .brand-text { display: none !important; }
+          .main-header-pro { padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.08); background: #121214; }
           .header-actions { gap: 8px; }
           .brand-dropdown-pro { font-size: 12px; padding: 6px 10px; max-width: 140px; margin-left: auto; }
           .btn-exit-pro { padding: 8px; }
@@ -308,19 +308,19 @@ const Dashboard = () => {
             padding-bottom: env(safe-area-inset-bottom);
             background: #121214; border-top: 1px solid rgba(255,255,255,0.08); 
             display: flex; justify-content: space-between; align-items: center; 
-            z-index: 2000; box-shadow: 0 -4px 20px rgba(0,0,0,0.4); 
+            z-index: 2000; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); 
             padding: 0 24px; box-sizing: border-box;
           }
           .mobile-nav button { 
-             background: transparent; border: none; color: #9CA3AF; 
+             background: transparent; border: none; color: #71717A; 
              padding: 12px 20px; border-radius: 16px; 
              display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
              transition: all 0.2s ease; cursor: pointer;
           }
           .mobile-nav button.active { 
-             color: var(--primary); background: #EEF2FF; transform: translateY(-2px);
+             color: #4F46E5; background: rgba(79, 70, 229, 0.15); transform: translateY(-2px);
           }
-          .mobile-nav button:hover { background: #F9FAFB; }
+          .mobile-nav button:hover { background: rgba(255,255,255,0.06); }
         }
       `}</style>
     </div>

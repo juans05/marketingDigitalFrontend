@@ -98,9 +98,13 @@ const SocialConnect = ({ artistId, artistName }) => {
               <button 
                 className={`platform-btn ${isConnected ? 'connected' : ''}`}
                 style={{ 
-                  backgroundColor: isConnected ? '#f3f4f6' : p.bg,
-                  color: isConnected ? '#6b7280' : (p.textColor || '#FFF'),
-                  border: p.isPremium && !isConnected ? '1px solid #FDE68A' : 'none'
+                  backgroundColor: isConnected 
+                    ? 'rgba(255,255,255,0.04)' 
+                    : p.bg,
+                  color: isConnected ? '#52525B' : '#FFF',
+                  border: isConnected 
+                    ? '1px solid rgba(255,255,255,0.08)'
+                    : p.isPremium && !isConnected ? '1px solid rgba(253,230,138,0.3)' : '1px solid rgba(255,255,255,0.06)'
                 }}
                 disabled={isConnected || loading}
                 onClick={handleConnect}
@@ -127,11 +131,12 @@ const SocialConnect = ({ artistId, artistName }) => {
 
       <style>{`
         .social-connect-container {
-          background: #FFF;
+          background: #121214;
           padding: 40px;
-          border-radius: 12px;
-          color: #111;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+          border-radius: 16px;
+          border: 1px solid rgba(255,255,255,0.08);
+          color: #FAFAFA;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4);
           margin-bottom: 40px;
         }
         .header-flex {
@@ -140,8 +145,8 @@ const SocialConnect = ({ artistId, artistName }) => {
           align-items: flex-start;
           margin-bottom: 32px;
         }
-        .main-title { font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-        .main-subtitle { color: #6B7280; font-size: 14px; }
+        .main-title { font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 8px; color: #FAFAFA; }
+        .main-subtitle { color: #71717A; font-size: 14px; }
         
         .platforms-grid {
           display: grid;
@@ -172,7 +177,7 @@ const SocialConnect = ({ artistId, artistName }) => {
         .platform-btn {
           width: 100%;
           min-height: 56px;
-          border-radius: 8px;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -180,20 +185,34 @@ const SocialConnect = ({ artistId, artistName }) => {
           font-weight: 700;
           font-size: 13px;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.25s ease;
           position: relative;
           overflow: hidden;
+          letter-spacing: 0.02em;
+          border: 1px solid rgba(255,255,255,0.06);
         }
 
+        .platform-btn::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(255,255,255,0.04);
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+
+        .platform-btn:hover:not(:disabled)::before { opacity: 1; }
         .platform-btn:hover:not(:disabled) {
-          filter: brightness(1.1);
-          transform: translateY(-1px);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+          border-color: rgba(255,255,255,0.15);
         }
 
         .platform-btn.connected {
           cursor: default;
-          background: #F9FAFB !important;
-          border: 1px solid #E5E7EB !important;
+          background: rgba(255,255,255,0.04) !important;
+          border: 1px solid rgba(255,255,255,0.08) !important;
+          color: #52525B !important;
         }
 
         .btn-text { flex-grow: 1; text-align: left; }
@@ -203,34 +222,36 @@ const SocialConnect = ({ artistId, artistName }) => {
         .platform-icon-hover { opacity: 0.8; }
 
         .btn-verify-top {
-          background: #111827;
-          color: #FFF;
+          background: rgba(79,70,229,0.15);
+          color: #818CF8;
+          border: 1px solid rgba(79,70,229,0.3);
           padding: 10px 20px;
-          border-radius: 6px;
-          border: none;
+          border-radius: 10px;
           font-weight: 700;
           font-size: 12px;
           display: flex;
           align-items: center;
           gap: 8px;
           cursor: pointer;
+          transition: all 0.2s;
         }
+        .btn-verify-top:hover { background: rgba(79,70,229,0.25); }
 
         .footer-vidalis {
           margin-top: 40px;
           padding-top: 24px;
-          border-top: 1px solid #F3F4F6;
+          border-top: 1px solid rgba(255,255,255,0.06);
           text-align: center;
         }
 
-        .footer-vidalis p { font-size: 11px; color: #9CA3AF; margin-bottom: 12px; font-weight: 600; }
+        .footer-vidalis p { font-size: 11px; color: #52525B; margin-bottom: 12px; font-weight: 600; }
         
         .partner-icons {
           display: flex;
           justify-content: center;
           gap: 20px;
-          color: #9CA3AF;
-          opacity: 0.5;
+          color: #52525B;
+          opacity: 0.6;
         }
 
         @media (max-width: 768px) {
