@@ -148,7 +148,7 @@ const Dashboard = () => {
               <User size={12} color="var(--primary)" />
               <span className="user-email" style={{ fontWeight: '700' }}>{user.email}</span>
             </div>
-            <span style={{ fontSize: '9px', fontWeight: '900', color: 'var(--primary)', background: '#EEF2FF', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '9px', fontWeight: '900', color: 'var(--primary)', background: 'rgba(79, 70, 229, 0.15)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
               PLAN {user.plan || 'FREE'}
             </span>
           </div>
@@ -259,7 +259,7 @@ const Dashboard = () => {
         
         .main-header-pro {
           height: 70px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center;
-          background: #FFFFFF; border-bottom: 1px solid var(--border-main); position: sticky; top: 0; z-index: 1000;
+          background: #121214; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 1000;
         }
         .header-brand { display: flex; align-items: center; gap: 12px; }
         .logo-box { background: var(--primary); padding: 6px; border-radius: 8px; display: flex; box-shadow: 0 4px 10px rgba(44, 51, 216, 0.2); }
@@ -267,27 +267,27 @@ const Dashboard = () => {
         .dot { color: var(--primary); }
 
         .header-actions { display: flex; align-items: center; gap: 12px; }
-        .brand-dropdown-pro { background: #F3F4F6; color: var(--text-main); border: 1px solid var(--border-main); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; outline: none; transition: all 0.2s; max-width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-        .brand-dropdown-pro:hover { border-color: var(--primary); background: #FFF; }
+        .brand-dropdown-pro { background: #1C1C1F; color: #FAFAFA; border: 1px solid rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; outline: none; transition: all 0.2s; max-width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        .brand-dropdown-pro:hover { border-color: #4F46E5; background: #27272A; }
 
         .user-profile-box { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-main); }
         .user-email { font-size: 13px; font-weight: 500; color: var(--text-muted); }
         .btn-exit-pro { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-exit-pro:hover { background: #FEE2E2; }
 
-        .sidebar-pro { width: 260px; background: #FFFFFF; border-right: 1px solid var(--border-main); padding: 32px 16px; display: flex; flex-direction: column; gap: 4px; }
-        .sidebar-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); padding: 0 16px 8px; letter-spacing: 0.05em; }
+        .sidebar-pro { width: 260px; background: #121214; border-right: 1px solid rgba(255,255,255,0.08); padding: 32px 16px; display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-section-label { font-size: 11px; font-weight: 700; color: #A1A1AA; padding: 0 16px 8px; letter-spacing: 0.05em; }
         .sidebar-pro button {
           display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-radius: 12px;
-          border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 14px; text-align: left; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border: none; background: transparent; color: #A1A1AA; cursor: pointer; font-size: 14px; text-align: left; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .sidebar-pro button:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.03); transform: translateX(4px); }
-        .sidebar-pro button.active { background: var(--primary); color: white; box-shadow: var(--shadow-glow); }
+        .sidebar-pro button:hover { color: #FAFAFA; background: rgba(255, 255, 255, 0.06); transform: translateX(4px); }
+        .sidebar-pro button.active { background: #4F46E5; color: white; box-shadow: 0 0 20px rgba(79, 70, 229, 0.15); }
 
         .main-content-pro { flex-grow: 1; padding: 32px 40px; overflow-y: auto; max-width: 1400px; margin: 0 auto; width: 100%; min-width: 0; }
         .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
         .view-title { font-size: 24px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; }
-        .active-artist-tag { font-size: 12px; font-weight: 600; color: var(--primary); background: #EEF2FF; padding: 4px 12px; border-radius: 20px; border: 1px solid #C7D2FE; }
+        .active-artist-tag { font-size: 12px; font-weight: 600; color: var(--primary); background: rgba(79, 70, 229, 0.12); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(79, 70, 229, 0.3); }
 
         .section-title { font-size: 16px; font-weight: 800; margin-bottom: 24px; color: var(--text-main); display: flex; align-items: center; gap: 12px; }
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--primary); border-radius: 2px; }
@@ -306,9 +306,9 @@ const Dashboard = () => {
             position: fixed; bottom: 0; left: 0; width: 100%; 
             height: calc(75px + env(safe-area-inset-bottom)); 
             padding-bottom: env(safe-area-inset-bottom);
-            background: #FFFFFF; border-top: 1px solid var(--border-main); 
+            background: #121214; border-top: 1px solid rgba(255,255,255,0.08); 
             display: flex; justify-content: space-between; align-items: center; 
-            z-index: 2000; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); 
+            z-index: 2000; box-shadow: 0 -4px 20px rgba(0,0,0,0.4); 
             padding: 0 24px; box-sizing: border-box;
           }
           .mobile-nav button { 

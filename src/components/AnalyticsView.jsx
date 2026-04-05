@@ -91,12 +91,12 @@ const InsightCard = ({ insights, decisions, bestPlatform, bestPostTitle, engagem
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           {bestPlatform && bestPlatform !== 'sin datos' && (
-            <div className="insight-badge" style={{ background: '#F0FDF4', color: '#16A34A', borderColor: '#BBF7D0' }}>
+            <div className="insight-badge" style={{ background: 'rgba(22, 163, 74, 0.12)', color: '#4ADE80', borderColor: 'rgba(22, 163, 74, 0.3)' }}>
               Mejor: {bestPlatform}
             </div>
           )}
           {engagementRate > 0 && (
-            <div className="insight-badge" style={{ background: '#EEF2FF', color: 'var(--primary)', borderColor: '#C7D2FE' }}>
+            <div className="insight-badge" style={{ background: 'rgba(79, 70, 229, 0.12)', color: 'var(--primary)', borderColor: 'rgba(79, 70, 229, 0.3)' }}>
               {Number(engagementRate).toFixed(1)}% engagement
             </div>
           )}
@@ -406,11 +406,11 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         
         .stat-card-pro { padding: 24px; }
         .stat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-        .stat-card-icon-box { background: #EEF2FF; color: var(--primary); padding: 8px; border-radius: 8px; }
+        .stat-card-icon-box { background: rgba(79, 70, 229, 0.15); color: var(--primary); padding: 8px; border-radius: 8px; }
         .stat-card-trend-box { 
           display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 20px;
         }
-        .stat-card-trend-box.up { background: #F0FDF4; color: #16A34A; }
+        .stat-card-trend-box.up { background: rgba(22, 163, 74, 0.12); color: #4ADE80; }
 
         .stat-card-value { font-size: 32px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; margin-bottom: 4px; }
         .stat-card-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
@@ -430,7 +430,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         .posts-table-pro td { padding: 12px; border-bottom: 1px solid var(--bg-primary); vertical-align: middle; }
         .post-icon-box { width: 32px; height: 32px; background: var(--bg-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); flex-shrink: 0; }
         .post-title-cell-pro { font-weight: 600; color: var(--text-main); font-size: 13px; }
-        .platform-pill { padding: 2px 7px; background: #F3F4F6; border-radius: 4px; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .platform-pill { padding: 2px 7px; background: var(--bg-tertiary); border: 1px solid var(--border-main); border-radius: 4px; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
         .score-pill { display: inline-block; padding: 3px 10px; border: 1px solid var(--border-main); border-radius: 8px; font-size: 12px; font-weight: 700; }
 
         .metric-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; border: 1px solid; font-size: 12px; font-weight: 700; }
@@ -447,7 +447,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         .insight-col { display: flex; flex-direction: column; gap: 12px; }
         .insight-col-title { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
         .insight-item { display: flex; gap: 8px; font-size: 13px; color: var(--text-main); line-height: 1.5; }
-        .insight-item.decision { color: #15803D; }
+        .insight-item.decision { color: #4ADE80; }
         .insight-best-post { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-main); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
         @media (max-width: 1024px) {

@@ -72,7 +72,7 @@ const PlanningView = ({ artistId, activeArtist }) => {
       {/* HEADER DEL CALENDARIO */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ background: '#F3F4F6', padding: '12px', borderRadius: '12px' }}>
+          <div style={{ background: '#1C1C1F', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
             <CalendarIcon size={24} color="var(--primary)" />
           </div>
           <div>
@@ -85,9 +85,9 @@ const PlanningView = ({ artistId, activeArtist }) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFF', padding: '4px 8px', borderRadius: '12px', border: '1px solid var(--border-main)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#1C1C1F', padding: '4px 8px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
           <button onClick={prevMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}><ChevronLeft size={18} color="var(--text-main)" /></button>
-          <span style={{ fontSize: '14px', fontWeight: '800', margin: '0 12px', minWidth: '100px', textAlign: 'center' }}>
+          <span style={{ fontSize: '14px', fontWeight: '800', margin: '0 12px', minWidth: '100px', textAlign: 'center', color: '#FAFAFA' }}>
             {monthNames[month]} {year}
           </span>
           <button onClick={nextMonth} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}><ChevronRight size={18} color="var(--text-main)" /></button>
@@ -114,7 +114,7 @@ const PlanningView = ({ artistId, activeArtist }) => {
           {/* Grilla principal */}
           <div className="calendar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
             {days.map((day, idx) => {
-              if (!day) return <div key={`empty-${idx}`} style={{ minHeight: '100px', background: '#F9FAFB', borderRadius: '12px' }}></div>;
+              if (!day) return <div key={`empty-${idx}`} style={{ minHeight: '100px', background: '#111113', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.04)' }}></div>;
 
               // Buscar posts del día
               const dayStr = `${year}-${String(month+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -134,8 +134,8 @@ const PlanningView = ({ artistId, activeArtist }) => {
                   style={{ 
                     minHeight: '100px', 
                     minWidth: 0,
-                    background: '#FFF', 
-                    border: isToday ? '2px solid var(--primary)' : '1px solid var(--border-main)', 
+                    background: '#1C1C1F', 
+                    border: isToday ? '2px solid #4F46E5' : '1px solid rgba(255,255,255,0.08)', 
                     borderRadius: '12px', 
                     padding: '8px',
                     cursor: 'pointer',
@@ -143,12 +143,12 @@ const PlanningView = ({ artistId, activeArtist }) => {
                     position: 'relative',
                     display: 'flex', flexDirection: 'column'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
-                  onMouseOut={(e) => e.currentTarget.style.borderColor = isToday ? 'var(--primary)' : 'var(--border-main)'}
+                  onMouseOver={(e) => { e.currentTarget.style.borderColor = '#4F46E5'; e.currentTarget.style.background = '#27272A'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.borderColor = isToday ? '#4F46E5' : 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = '#1C1C1F'; }}
                 >
                   <span style={{ 
                     fontSize: '12px', fontWeight: '800', 
-                    color: isToday ? 'var(--primary)' : 'var(--text-main)',
+                    color: isToday ? '#4F46E5' : '#FAFAFA',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                   }}>
                     {day}
@@ -171,7 +171,7 @@ const PlanningView = ({ artistId, activeArtist }) => {
                   {/* Botón flotante al hacer hover, por CSS en estilo inyectado */}
                   <div className="add-btn" style={{ 
                     position: 'absolute', top: '8px', right: '8px', 
-                    background: '#F3F4F6', color: 'var(--text-main)', borderRadius: '50%', padding: '4px',
+                    background: 'var(--bg-secondary)', color: 'var(--text-main)', borderRadius: '50%', padding: '4px',
                     opacity: 0, transition: 'opacity 0.2s', display: 'none'
                   }}>
                     <Plus size={12} />
