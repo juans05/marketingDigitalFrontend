@@ -16,7 +16,7 @@ const PLAN_RESTRICTIONS = {
 };
 
 const StatBadge = ({ icon, value, label }) => (
-  <div style={{ textAlign: 'center', flex: 1, padding: '16px 12px', background: '#F9FAFB', border: '1px solid var(--border-main)', borderRadius: '12px' }}>
+  <div style={{ textAlign: 'center', flex: 1, padding: '16px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px' }}>
     <div style={{ color: 'var(--primary)', marginBottom: '8px', display: 'flex', justifyContent: 'center' }}>{icon}</div>
     <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-main)', fontFamily: 'var(--font-heading)', letterSpacing: '-0.02em' }}>
       {value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value ?? '0'}
@@ -32,7 +32,7 @@ const EditableCopyBlock = ({ label, value, onChange, isReadOnly }) => {
     <div className="card-pro" style={{ padding: '24px', marginBottom: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <span style={{ fontSize: '11px', color: 'var(--text-main)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
-        <button onClick={handle} style={{ background: '#F3F4F6', border: '1px solid var(--border-main)', borderRadius: '8px', padding: '6px 14px', cursor: 'pointer', color: copied ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '700' }}>
+        <button onClick={handle} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px 14px', cursor: 'pointer', color: copied ? '#818CF8' : '#71717A', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '700' }}>
           <Copy size={12} /> {copied ? 'COPIADO' : 'COPIAR'}
         </button>
       </div>
@@ -41,10 +41,10 @@ const EditableCopyBlock = ({ label, value, onChange, isReadOnly }) => {
         onChange={e => onChange(e.target.value)}
         disabled={isReadOnly}
         style={{ 
-          width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)', 
-          borderRadius: '12px', color: 'var(--text-main)', padding: '16px', fontSize: '14px', 
+          width: '100%', background: '#1C1C1F', border: '1px solid rgba(255,255,255,0.08)', 
+          borderRadius: '12px', color: '#FAFAFA', padding: '16px', fontSize: '14px', 
           lineHeight: '1.6', height: '140px', resize: 'vertical', fontFamily: 'var(--font-body)',
-          opacity: isReadOnly ? 0.6 : 1, outline: 'none'
+          opacity: isReadOnly ? 0.5 : 1, outline: 'none'
         }}
       />
     </div>
@@ -225,21 +225,22 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
             position: 'relative',
             width: 'min(500px, 95vw)',
             height: '100%',
-            background: '#FFFFFF',
-            boxShadow: '-10px 0 40px rgba(0,0,0,0.1)',
+            background: '#121214',
+            boxShadow: '-10px 0 60px rgba(0,0,0,0.6)',
+            borderLeft: '1px solid rgba(255,255,255,0.08)',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
             pointerEvents: 'auto',
             animation: 'slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
             {/* Drawer Header */}
-            <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F9FAFB' }}>
+            <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1C1C1F' }}>
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--text-main)', marginBottom: '4px' }}>Resultados IA</h3>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>{initialData?.title}</p>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: '#FAFAFA', marginBottom: '4px' }}>Resultados IA</h3>
+                <p style={{ fontSize: '12px', color: '#71717A', fontWeight: '600' }}>{initialData?.title}</p>
               </div>
-              <button onClick={toggleDrawer} style={{ background: '#FFF', border: '1px solid var(--border-main)', borderRadius: '8px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                <X size={20} color="var(--text-main)" />
+              <button onClick={toggleDrawer} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <X size={20} color="#71717A" />
               </button>
             </div>
 
@@ -255,9 +256,9 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                   {notification && (
                     <div style={{ 
                       marginBottom: '24px', padding: '16px', borderRadius: '12px',
-                      background: notification.type === 'success' ? '#ecfdf5' : '#fef2f2',
-                      border: `1px solid ${notification.type === 'success' ? '#10b981' : '#fecaca'}`,
-                      color: notification.type === 'success' ? '#065f46' : '#991b1b',
+                      background: notification.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                      border: `1px solid ${notification.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                      color: notification.type === 'success' ? '#34D399' : '#F87171',
                       fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px'
                     }}>
                       <CheckCircle size={18} /> {notification.message}
@@ -266,7 +267,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
 
                   {/* 1. Score de Viralidad Card */}
                   {viralScore && (
-                    <div className="card-pro" style={{ padding: '24px', marginBottom: '32px', border: '2px solid var(--primary)', background: '#F5F7FF' }}>
+                    <div className="card-pro" style={{ padding: '24px', marginBottom: '32px', border: '1px solid rgba(79,70,229,0.4)', background: 'rgba(79,70,229,0.08)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
                           <p style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '8px' }}>Potencial de IMPACTO</p>
@@ -336,9 +337,9 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                             style={{
                               padding: '10px 18px',
                               borderRadius: '100px',
-                              border: isSelected && isConnected ? '2px solid var(--primary)' : '1px solid var(--border-main)',
-                              background: isSelected && isConnected ? '#EEF2FF' : '#FFF',
-                              color: isSelected && isConnected ? 'var(--primary)' : isConnected ? 'var(--text-muted)' : '#CCC',
+                              border: isSelected && isConnected ? '1px solid rgba(79,70,229,0.6)' : '1px solid rgba(255,255,255,0.08)',
+                              background: isSelected && isConnected ? 'rgba(79,70,229,0.15)' : 'rgba(255,255,255,0.04)',
+                              color: isSelected && isConnected ? '#818CF8' : isConnected ? '#71717A' : '#3F3F46',
                               cursor: isConnected && !isReadOnly ? 'pointer' : 'not-allowed',
                               fontSize: '11px',
                               fontWeight: '800',
@@ -364,9 +365,9 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                             disabled={isReadOnly}
                             style={{
                               flex: 1, padding: '14px', borderRadius: '12px',
-                              border: postType === type ? '2px solid var(--primary)' : '1px solid var(--border-main)',
-                              background: postType === type ? '#EEF2FF' : '#FFF',
-                              color: postType === type ? 'var(--primary)' : 'var(--text-muted)',
+                              border: postType === type ? '1px solid rgba(79,70,229,0.5)' : '1px solid rgba(255,255,255,0.08)',
+                              background: postType === type ? 'rgba(79,70,229,0.15)' : 'rgba(255,255,255,0.04)',
+                              color: postType === type ? '#818CF8' : '#71717A',
                               cursor: isReadOnly ? 'not-allowed' : 'pointer',
                               fontSize: '11px', fontWeight: '800', textTransform: 'uppercase'
                             }}
@@ -392,7 +393,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                         value={scheduledDate}
                         onChange={e => setScheduledDate(e.target.value)}
                         disabled={isReadOnly}
-                        style={{ width: '100%', background: '#FFF', border: '1px solid var(--border-main)', borderRadius: '12px', padding: '14px 20px', color: 'var(--text-main)', fontSize: '14px', marginBottom: '24px', outline: 'none' }}
+                        style={{ width: '100%', background: '#1C1C1F', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px 20px', color: '#FAFAFA', fontSize: '14px', marginBottom: '24px', outline: 'none', colorScheme: 'dark' }}
                      />
 
                      <div style={{ display: 'flex', gap: '12px' }}>
