@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Eye, Heart, Share2, Calendar, Copy, ChevronDown, ChevronUp, Loader, CheckCircle, TrendingUp, Rocket, BrainCircuit, Sparkles, X, Clock, Smartphone, History } from 'lucide-react';
+import { Eye, Heart, Share2, Calendar, Copy, ChevronDown, ChevronUp, Loader, CheckCircle, AlertCircle, TrendingUp, Rocket, BrainCircuit, Sparkles, X, Clock, Smartphone, History } from 'lucide-react';
 
 const PLATFORM_CONFIG = {
   tiktok: { label: 'TikTok', color: '#000', bg: '#F3F4F6' },
@@ -127,6 +127,18 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
     return () => { if (pollIntervalRef.current) clearInterval(pollIntervalRef.current); };
   }, [data?.status]);
 
+  // Contenedor del portal — se agrega/quita del DOM de forma controlada para evitar el error
+  // "removeChild: The node to be removed is not a child of this node" al navegar
+  const portalContainer = useMemo(() => document.createElement('div'), []);
+  useEffect(() => {
+    document.body.appendChild(portalContainer);
+    return () => {
+      if (document.body.contains(portalContainer)) {
+        document.body.removeChild(portalContainer);
+      }
+    };
+  }, [portalContainer]);
+
   const handleSaveSettings = async () => {
     setSaveLoading(true);
     try {
@@ -162,15 +174,19 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
         body: JSON.stringify({ platforms: selectedPlatforms, postType })
       });
       const result = await res.json();
-      if (res.ok) { 
-        setData(result); 
-        setNotification({ 
-          type: 'success', 
-          message: '🚀 ¡Despliegue iniciado! Demora de 5 a 10 minutos en la publicación de cada red social.' 
-        }); 
+      if (res.ok) {
+        setData(result);
+        setNotification({
+          type: 'success',
+          message: '¡Publicación en camino! Puede demorar hasta 10 minutos en aparecer en cada red social.'
+        });
+      } else {
+        const errorMsg = result.error || result.message || 'Ocurrió un error inesperado. Intentá de nuevo.';
+        setNotification({ type: 'error', message: errorMsg });
       }
-      else { setNotification({ type: 'error', message: `Fallo: ${result.error}` }); }
-    } catch (err) { setNotification({ type: 'error', message: 'Error de red.' }); }
+    } catch (err) {
+      setNotification({ type: 'error', message: 'No se pudo conectar con el servidor. Revisá tu conexión e intentá de nuevo.' });
+    }
     finally { setPublishLoading(false); }
   };
 
@@ -204,8 +220,8 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
         <Sparkles size={16} /> REVISAR RESULTADOS IA
       </button>
 
-      {isOpen && createPortal(
-        <div style={{
+      {createPortal(
+        !isOpen ? null : <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           zIndex: 99999, display: 'flex', justifyContent: 'flex-end',
           pointerEvents: 'none'
@@ -233,6 +249,23 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
             pointerEvents: 'auto',
             animation: 'slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
           }}>
+            {/* Overlay publicando */}
+            {publishLoading && (
+              <div style={{
+                position: 'absolute', inset: 0, zIndex: 10,
+                background: 'rgba(10,10,12,0.85)', backdropFilter: 'blur(6px)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px'
+              }}>
+                <div style={{ width: '52px', height: '52px', border: '4px solid rgba(139,92,246,0.2)', borderTop: '4px solid #8B5CF6', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '18px', fontWeight: '800', color: '#FAFAFA', letterSpacing: '0.05em' }}>PUBLICANDO</div>
+                  <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginTop: '6px' }}>
+                    Enviando a {selectedPlatforms.join(', ')}...
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Drawer Header */}
             <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1C1C1F' }}>
               <div>
@@ -254,14 +287,20 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
               ) : (
                 <div className="animate-fade-in">
                   {notification && (
-                    <div style={{ 
+                    <div style={{
                       marginBottom: '24px', padding: '16px', borderRadius: '12px',
-                      background: notification.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                      border: `1px solid ${notification.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                      background: notification.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)',
+                      border: `1px solid ${notification.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.4)'}`,
                       color: notification.type === 'success' ? '#34D399' : '#F87171',
-                      fontSize: '13px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px'
+                      fontSize: '13px', fontWeight: '600', display: 'flex', alignItems: 'flex-start', gap: '10px',
+                      lineHeight: '1.5'
                     }}>
-                      <CheckCircle size={18} /> {notification.message}
+                      <span style={{ flexShrink: 0, marginTop: '1px' }}>
+                        {notification.type === 'success'
+                          ? <CheckCircle size={18} />
+                          : <AlertCircle size={18} />}
+                      </span>
+                      {notification.message}
                     </div>
                   )}
 
@@ -296,9 +335,9 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                         value={hashtags}
                         onChange={e => setHashtags(e.target.value)}
                         disabled={isReadOnly}
-                        style={{ 
-                          width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)', 
-                          borderRadius: '12px', color: 'var(--text-main)', padding: '16px', fontSize: '14px', 
+                        style={{
+                          width: '100%', background: '#1C1C1F', border: '1px solid rgba(255,255,255,0.08)',
+                          borderRadius: '12px', color: '#FAFAFA', padding: '16px', fontSize: '14px',
                           height: '80px', resize: 'none', fontWeight: '700', outline: 'none'
                         }}
                      />
@@ -380,7 +419,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                   </div>
 
                   {/* 4. Programación */}
-                  <div className="card-pro" style={{ padding: '24px', marginBottom: '32px', background: '#F9FAFB' }}>
+                  <div className="card-pro" style={{ padding: '24px', marginBottom: '32px', background: '#1C1C1F' }}>
                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                            <Calendar size={18} color="var(--primary)" />
@@ -397,13 +436,18 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                      />
 
                      <div style={{ display: 'flex', gap: '12px' }}>
-                        <button 
+                        <button
                           onClick={handlePublishNow}
                           disabled={publishLoading || isAnalyzing || selectedPlatforms.length === 0}
                           className="btn-primary"
-                          style={{ flex: 1, height: '56px', fontSize: '12px' }}
+                          style={{ flex: 1, height: '56px', fontSize: '12px', position: 'relative', overflow: 'hidden', opacity: (publishLoading || isAnalyzing || selectedPlatforms.length === 0) ? 0.7 : 1 }}
                         >
-                           {isPublished ? 'RE-PUBLICAR' : isAnalyzing ? 'ANALIZANDO' : `LANZAR AHORA`}
+                          {publishLoading ? (
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                              <span style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+                              PUBLICANDO...
+                            </span>
+                          ) : isPublished ? 'RE-PUBLICAR' : isAnalyzing ? 'ANALIZANDO...' : 'LANZAR AHORA'}
                         </button>
                         <button 
                           onClick={handleSaveSettings}
@@ -441,7 +485,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
             `}</style>
           </div>
         </div>,
-        document.body
+        portalContainer
       )}
     </>
   );

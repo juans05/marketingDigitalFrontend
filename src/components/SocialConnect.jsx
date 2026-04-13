@@ -1,27 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Link2, CheckCircle, Loader2, ExternalLink, RefreshCw, Instagram, Sparkles, Facebook, Youtube, CheckCircle2, Building2 } from 'lucide-react';
+import { RefreshCw, Instagram, Facebook, Youtube, Sparkles, Building2, CheckCircle2, Link2, Loader2 } from 'lucide-react';
 
-const PLATFORMS = [
-  { key: 'tiktok',    label: 'TikTok',    color: '#666' },
-  { key: 'instagram', label: 'Instagram', color: '#666' },
-  { key: 'youtube',   label: 'YouTube',   color: '#666' },
-  { key: 'facebook',  label: 'Facebook',  color: '#666' },
-];
+const PLATFORM_ICONS = {
+  instagram:      { icon: <Instagram size={16} />,  label: 'Instagram',  color: '#E1306C' },
+  facebook:       { icon: <Facebook size={16} />,   label: 'Facebook',   color: '#1877F2' },
+  youtube:        { icon: <Youtube size={16} />,    label: 'YouTube',    color: '#FF0000' },
+  tiktok:         { icon: <Sparkles size={16} />,   label: 'TikTok',     color: '#2DD4BF' },
+  tiktok_business:{ icon: <Building2 size={16} />,  label: 'TikTok Biz', color: '#2DD4BF' },
+};
 
-const SocialConnect = ({ artistId, artistName }) => {
-  const [loading, setLoading] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState('');
-  const [popupOpened, setPopupOpened] = useState(false);
+const SocialConnect = ({ artistId }) => {
+  const [loading, setLoading]           = useState(false);
+  const [verifying, setVerifying]       = useState(false);
+  const [error, setError]               = useState('');
+  const [popupOpened, setPopupOpened]   = useState(false);
   const [connectedPlatforms, setConnectedPlatforms] = useState([]);
-
-  const platforms = [
-    { id: 'instagram', label: 'Instagram', color: '#E1306C', bg: '#E1306C', icon: <Instagram size={20} />, description: 'Conectar cuenta profesional' },
-    { id: 'tiktok', label: 'Tiktok', color: '#000000', bg: '#111827', icon: <Sparkles size={20} />, description: 'Conectar cuenta personal' },
-    { id: 'facebook', label: 'Facebook', color: '#1877F2', bg: '#1877F2', icon: <Facebook size={20} />, description: 'Conectar cuenta de Facebook' },
-    { id: 'tiktok_business', label: 'Tiktok Business', color: '#000000', bg: '#111827', icon: <Building2 size={20} />, description: 'Conectar cuenta de empresa' },
-    { id: 'youtube', label: 'Youtube', color: '#FF0000', bg: '#FF0000', icon: <Youtube size={20} />, description: 'Conectar canal de YouTube' },
-  ];
 
   useEffect(() => {
     if (artistId) fetchStatus();
@@ -41,10 +34,10 @@ const SocialConnect = ({ artistId, artistName }) => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`);
+      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al generar link');
-      window.open(data.url, '_blank', 'width=600,height=700');
+      window.open(data.url, '_blank', 'width=700,height=750');
       setPopupOpened(true);
     } catch (err) {
       setError(err.message);
@@ -57,7 +50,7 @@ const SocialConnect = ({ artistId, artistName }) => {
     setVerifying(true);
     setError('');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/social-status/${artistId}?refresh=true`);
+      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/social-status/${artistId}?refresh=true`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al verificar');
       setConnectedPlatforms(data.platforms || []);
@@ -69,197 +62,119 @@ const SocialConnect = ({ artistId, artistName }) => {
     }
   };
 
+  const hasConnections = connectedPlatforms.length > 0;
+
   return (
-    <div className="social-connect-container animate-fade-in">
-      <div className="header-flex">
-        <div>
-          <h2 className="main-title">Conecta tus redes sociales</h2>
-          <p className="main-subtitle">Vincula tu cuenta de Vidalis con tus redes sociales. Puedes modificarlo más adelante.</p>
+    <div style={{
+      background: '#121214',
+      padding: '40px',
+      borderRadius: '16px',
+      border: '1px solid rgba(255,255,255,0.08)',
+      color: '#FAFAFA',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+      marginBottom: '40px',
+    }}>
+      <h2 style={{ fontWeight: 800, fontSize: '20px', marginBottom: '8px' }}>Conecta tus redes sociales</h2>
+      <p style={{ color: '#71717A', fontSize: '14px', marginBottom: '32px' }}>
+        Vincula tu cuenta de Vidalis con tus redes sociales. Podés modificarlo más adelante.
+      </p>
+
+      {/* Plataformas conectadas */}
+      {hasConnections && (
+        <div style={{ marginBottom: '28px' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, color: '#52525B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>
+            Redes conectadas
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+            {connectedPlatforms.map(pid => {
+              const cfg = PLATFORM_ICONS[pid] || { icon: <Link2 size={16} />, label: pid, color: '#888' };
+              return (
+                <div key={pid} style={{
+                  display: 'flex', alignItems: 'center', gap: '7px',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${cfg.color}33`,
+                  borderRadius: '999px',
+                  padding: '6px 14px',
+                  fontSize: '13px', fontWeight: 600,
+                  color: cfg.color,
+                }}>
+                  {cfg.icon} {cfg.label}
+                  <CheckCircle2 size={14} color="#22c55e" style={{ marginLeft: '2px' }} />
+                </div>
+              );
+            })}
+          </div>
         </div>
-        {popupOpened && (
-          <button onClick={handleVerify} disabled={verifying} className="btn-verify-top">
-            <RefreshCw size={16} className={verifying ? "animate-spin" : ""} />
-            {verifying ? 'VERIFICANDO...' : 'CONFIRMAR CONEXIÓN'}
-          </button>
-        )}
+      )}
+
+      {/* Botón principal */}
+      <button
+        onClick={handleConnect}
+        disabled={loading}
+        style={{
+          width: '100%',
+          height: '56px',
+          borderRadius: '14px',
+          background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+          color: '#fff',
+          fontWeight: 800,
+          fontSize: '14px',
+          letterSpacing: '0.05em',
+          border: 'none',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+          opacity: loading ? 0.7 : 1,
+          transition: 'all 0.2s',
+          boxShadow: '0 4px 20px rgba(99,102,241,0.35)',
+        }}
+        onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+      >
+        {loading
+          ? <><Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> Abriendo portal...</>
+          : <><Link2 size={18} /> {hasConnections ? 'GESTIONAR REDES CONECTADAS' : 'CONECTAR REDES SOCIALES'}</>
+        }
+      </button>
+
+      {/* Botón de verificar (aparece tras abrir el portal) */}
+      {popupOpened && (
+        <button
+          onClick={handleVerify}
+          disabled={verifying}
+          style={{
+            width: '100%',
+            marginTop: '12px',
+            height: '48px',
+            borderRadius: '12px',
+            background: 'rgba(79,70,229,0.1)',
+            color: '#818CF8',
+            border: '1px solid rgba(79,70,229,0.3)',
+            fontWeight: 700,
+            fontSize: '13px',
+            cursor: verifying ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            transition: 'all 0.2s',
+          }}
+        >
+          <RefreshCw size={15} style={verifying ? { animation: 'spin 0.8s linear infinite' } : {}} />
+          {verifying ? 'VERIFICANDO...' : 'YA CONECTÉ MIS REDES — CONFIRMAR'}
+        </button>
+      )}
+
+      {/* Error */}
+      {error && (
+        <p style={{ marginTop: '14px', color: '#F87171', fontSize: '13px', fontWeight: 600 }}>
+          {error}
+        </p>
+      )}
+
+      {/* Footer */}
+      <div style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <span style={{ fontSize: '11px', color: '#3F3F46', fontWeight: 600 }}>COMPATIBLE CON</span>
+        {[Instagram, Facebook, Youtube, Sparkles, Building2].map((Icon, i) => (
+          <Icon key={i} size={14} color="#3F3F46" />
+        ))}
       </div>
-
-      <div className="platforms-grid">
-        {platforms.map(p => {
-          const isConnected = connectedPlatforms.includes(p.id);
-          return (
-            <div key={p.id} className="platform-item">
-              <div className="platform-header">
-                <span className="platform-name" style={{ color: p.textColor || p.color }}>
-                  {p.icon} {p.label}
-                </span>
-                {isConnected && <CheckCircle2 size={16} color="#22c55e" />}
-              </div>
-              <button 
-                className={`platform-btn ${isConnected ? 'connected' : ''}`}
-                style={{ 
-                  backgroundColor: isConnected 
-                    ? 'rgba(255,255,255,0.04)' 
-                    : p.bg,
-                  color: isConnected ? '#52525B' : '#FFF',
-                  border: isConnected 
-                    ? '1px solid rgba(255,255,255,0.08)'
-                    : p.isPremium && !isConnected ? '1px solid rgba(253,230,138,0.3)' : '1px solid rgba(255,255,255,0.06)'
-                }}
-                disabled={isConnected || loading}
-                onClick={handleConnect}
-              >
-                <span className="btn-text">{isConnected ? 'CUENTA VINCULADA' : p.description}</span>
-                {p.isPremium && !isConnected && <Sparkles size={14} className="premium-icon" />}
-                {!isConnected && <span className="platform-icon-hover">{p.icon}</span>}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="footer-vidalis">
-        <p>Vidalis.AI es partner de Google y Meta y está autorizado por:</p>
-        <div className="partner-icons">
-          <Instagram size={14} />
-          <Facebook size={14} />
-          <Youtube size={14} />
-          <Sparkles size={14} />
-          <Building2 size={14} />
-        </div>
-      </div>
-
-      <style>{`
-        .social-connect-container {
-          background: #121214;
-          padding: 40px;
-          border-radius: 16px;
-          border: 1px solid rgba(255,255,255,0.08);
-          color: #FAFAFA;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-          margin-bottom: 40px;
-        }
-        .header-flex {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 32px;
-        }
-        .main-title { font-family: var(--font-heading); font-size: 20px; font-weight: 800; margin-bottom: 8px; color: #FAFAFA; }
-        .main-subtitle { color: #71717A; font-size: 14px; }
-        
-        .platforms-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 32px;
-        }
-
-        .platform-item {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .platform-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .platform-name {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-weight: 700;
-          font-size: 15px;
-        }
-
-        .platform-btn {
-          width: 100%;
-          min-height: 56px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 20px;
-          font-weight: 700;
-          font-size: 13px;
-          cursor: pointer;
-          transition: all 0.25s ease;
-          position: relative;
-          overflow: hidden;
-          letter-spacing: 0.02em;
-          border: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .platform-btn::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: rgba(255,255,255,0.04);
-          opacity: 0;
-          transition: opacity 0.2s;
-        }
-
-        .platform-btn:hover:not(:disabled)::before { opacity: 1; }
-        .platform-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-          border-color: rgba(255,255,255,0.15);
-        }
-
-        .platform-btn.connected {
-          cursor: default;
-          background: rgba(255,255,255,0.04) !important;
-          border: 1px solid rgba(255,255,255,0.08) !important;
-          color: #52525B !important;
-        }
-
-        .btn-text { flex-grow: 1; text-align: left; }
-        
-        .premium-icon { color: #F59E0B; margin-left: 8px; }
-        
-        .platform-icon-hover { opacity: 0.8; }
-
-        .btn-verify-top {
-          background: rgba(79,70,229,0.15);
-          color: #818CF8;
-          border: 1px solid rgba(79,70,229,0.3);
-          padding: 10px 20px;
-          border-radius: 10px;
-          font-weight: 700;
-          font-size: 12px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .btn-verify-top:hover { background: rgba(79,70,229,0.25); }
-
-        .footer-vidalis {
-          margin-top: 40px;
-          padding-top: 24px;
-          border-top: 1px solid rgba(255,255,255,0.06);
-          text-align: center;
-        }
-
-        .footer-vidalis p { font-size: 11px; color: #52525B; margin-bottom: 12px; font-weight: 600; }
-        
-        .partner-icons {
-          display: flex;
-          justify-content: center;
-          gap: 20px;
-          color: #52525B;
-          opacity: 0.6;
-        }
-
-        @media (max-width: 768px) {
-          .platforms-grid { grid-template-columns: 1fr; }
-          .social-connect-container { padding: 24px; }
-          .header-flex { flex-direction: column; gap: 20px; }
-        }
-      `}</style>
     </div>
   );
 };

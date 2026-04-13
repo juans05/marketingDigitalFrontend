@@ -69,29 +69,12 @@ const AIStatusIndicator = ({ artistId }) => {
   }
 
   return (
-    <div className="ai-status-indicator" style={{
-      display: 'flex', alignItems: 'center', gap: '8px',
-      background: '#f5f3ff', border: '1px solid #c4b5fd',
-      padding: '6px 16px', borderRadius: '100px',
-      color: '#7c3aed', fontSize: '12px', fontWeight: '800',
-      boxShadow: '0 2px 8px rgba(124, 58, 237, 0.15)',
-      animation: 'pulse 2s infinite ease-in-out'
-    }}>
+    <div className="ai-status-indicator">
       <Loader2 size={16} className="animate-spin" />
       <Sparkles size={16} />
       <span style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         IA en curso: {cleanText}
       </span>
-      <style>{`
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
-          70% { box-shadow: 0 0 0 4px rgba(124, 58, 237, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
-        }
-        @media (max-width: 768px) {
-          .ai-status-indicator span { display: none; }
-        }
-      `}</style>
     </div>
   );
 };

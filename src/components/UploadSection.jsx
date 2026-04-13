@@ -204,7 +204,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <div style={{ color: 'var(--primary)', background: '#F5F7FF', padding: '12px', borderRadius: '12px' }}>
+              <div style={{ color: 'var(--primary)', background: 'rgba(79,70,229,0.12)', padding: '12px', borderRadius: '12px' }}>
                 <FileVideo size={36} />
               </div>
               <div>
@@ -216,7 +216,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
             </div>
             <button
               onClick={() => { setFile(null); setStatus('idle'); }}
-              style={{ background: '#F3F4F6', border: 'none', color: '#9CA3AF', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#71717A', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}
             >
               <X size={18} />
             </button>
@@ -274,7 +274,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
                 <div style={{
                   width: '100%',
                   height: '10px',
-                  background: '#F3F4F6',
+                  background: 'rgba(255,255,255,0.06)',
                   borderRadius: '10px',
                   overflow: 'hidden',
                   border: '1px solid var(--border-main)'
@@ -301,9 +301,9 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
                 <div style={{
                   padding: '24px',
                   borderRadius: '12px',
-                  background: '#fffbeb',
-                  border: '1px solid #fef3c7',
-                  color: '#92400e'
+                  background: 'rgba(245,158,11,0.08)',
+                  border: '1px solid rgba(245,158,11,0.25)',
+                  color: '#FCD34D'
                 }}>
                   <div style={{ fontWeight: '900', fontSize: '1.1rem', marginBottom: '8px', textTransform: 'uppercase' }}>Autorización Pendiente</div>
                   <p style={{ fontSize: '0.9rem', lineHeight: '1.5', opacity: 0.9 }}>{platformWarning}</p>
@@ -312,8 +312,8 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
                 <div style={{
                   padding: '32px',
                   borderRadius: '16px',
-                  background: '#f0fdf4',
-                  border: '1px solid #dcfce7',
+                  background: 'rgba(34,197,94,0.08)',
+                  border: '1px solid rgba(34,197,94,0.2)',
                   textAlign: 'center'
                 }}>
                   <div style={{
@@ -325,7 +325,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
                     justifyContent: 'center',
                     marginBottom: '16px',
                     color: '#FFF',
-                    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.2)'
+                    boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
                   }}>
                     <CheckCircle size={32} />
                   </div>

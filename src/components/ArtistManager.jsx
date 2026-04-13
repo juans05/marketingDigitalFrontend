@@ -119,8 +119,8 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
               required
               autoFocus
               style={{
-                width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)',
-                borderRadius: '8px', padding: '12px 16px', color: 'var(--text-main)', fontSize: '14px', outline: 'none'
+                width: '100%', background: '#1C1C1F', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px', padding: '12px 16px', color: '#FAFAFA', fontSize: '14px', outline: 'none'
               }}
             />
           </div>
@@ -133,8 +133,8 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                 value={newGenero}
                 onChange={e => setNewGenero(e.target.value)}
                 style={{
-                  width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)',
-                  borderRadius: '8px', padding: '12px 14px', color: newGenero ? 'var(--text-main)' : '#9CA3AF', fontSize: '13px', outline: 'none',
+                  width: '100%', background: '#1C1C1F', border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px', padding: '12px 14px', color: newGenero ? '#FAFAFA' : '#71717A', fontSize: '13px', outline: 'none',
                   cursor: 'pointer'
                 }}
               >
@@ -151,8 +151,8 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                 value={newAudiencia}
                 onChange={e => setNewAudiencia(e.target.value)}
                 style={{
-                  width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)',
-                  borderRadius: '8px', padding: '12px 14px', color: 'var(--text-main)', fontSize: '13px', outline: 'none'
+                  width: '100%', background: '#1C1C1F', border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px', padding: '12px 14px', color: '#FAFAFA', fontSize: '13px', outline: 'none'
                 }}
               />
             </div>
@@ -163,8 +163,8 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                 value={newTono}
                 onChange={e => setNewTono(e.target.value)}
                 style={{
-                  width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)',
-                  borderRadius: '8px', padding: '12px 14px', color: newTono ? 'var(--text-main)' : '#9CA3AF', fontSize: '13px', outline: 'none',
+                  width: '100%', background: '#1C1C1F', border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px', padding: '12px 14px', color: newTono ? '#FAFAFA' : '#71717A', fontSize: '13px', outline: 'none',
                   cursor: 'pointer'
                 }}
               >
@@ -196,7 +196,7 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
           <Loader2 size={24} className="animate-spin" color="var(--primary)" /> Cargando perfiles...
         </div>
       ) : artists.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '14px', background: '#F9FAFB', borderRadius: '12px', border: '1px dashed var(--border-main)' }}>
+        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '14px', background: '#1C1C1F', borderRadius: '12px', border: '1px dashed var(--border-main)' }}>
           No hay marcas activas. Registra la primera para comenzar.
         </div>
       ) : (
@@ -212,15 +212,15 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '16px 20px', borderRadius: '12px',
                   border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-main)',
-                  background: isSelected ? '#F5F7FF' : '#FFFFFF',
+                  background: isSelected ? 'rgba(79, 70, 229, 0.12)' : '#1C1C1F',
                   cursor: 'pointer', transition: 'all 0.2s ease',
-                  boxShadow: isSelected ? '0 4px 12px rgba(44, 51, 216, 0.1)' : 'none'
+                  boxShadow: isSelected ? '0 4px 16px rgba(79, 70, 229, 0.2)' : 'none'
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{
                     width: '40px', height: '40px', borderRadius: '10px',
-                    background: isSelected ? 'var(--primary)' : '#F3F4F6',
+                    background: isSelected ? 'var(--primary)' : '#27272A',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '16px', fontWeight: '800', color: isSelected ? '#FFF' : 'var(--text-muted)'
                   }}>
@@ -257,6 +257,18 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
       )}
 
       <style>{`
+        .artist-manager-card select option {
+          background: #1C1C1F;
+          color: #FAFAFA;
+        }
+        .artist-manager-card input::placeholder {
+          color: #52525B;
+        }
+        .artist-manager-card input:focus,
+        .artist-manager-card select:focus {
+          border-color: rgba(79, 70, 229, 0.5) !important;
+          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+        }
         @media (max-width: 768px) {
           .artist-manager-card { padding: 20px 16px !important; }
           .artist-header { flex-direction: column; align-items: flex-start !important; gap: 16px; }

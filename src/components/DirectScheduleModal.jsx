@@ -136,88 +136,61 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
   if (!isOpen) return null;
 
   return createPortal(
-    <div style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
-      
-      <div className="card-pro direct-schedule-modal animate-fade-in" style={{ 
-        position: 'relative', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', 
-        background: '#FFF', borderRadius: '24px', padding: '0', display: 'flex', flexDirection: 'column' 
-      }}>
+    <div className="modal-portal">
+      <div className="modal-backdrop" onClick={onClose} />
+
+      <div className="card-pro direct-schedule-modal animate-fade-in">
         {/* Header */}
-        <div style={{ padding: '24px', borderBottom: '1px solid var(--border-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F9FAFB', position: 'sticky', top: 0, zIndex: 10 }}>
+        <div className="modal-header">
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Calendar size={20} color="var(--primary)" /> Programar Publicación
-            </h3>
+            <h3 className="modal-title"><Calendar className="icon-primary" size={20} /> Programar Publicación</h3>
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>
               Para el {initialDate?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </div>
-          <button onClick={onClose} style={{ background: '#FFF', border: '1px solid var(--border-main)', borderRadius: '8px', padding: '8px', cursor: 'pointer' }}>
-            <X size={20} color="var(--text-main)" />
+          <button onClick={onClose} className="btn-close">
+            <X size={20} />
           </button>
         </div>
 
         <div style={{ padding: '24px', flex: 1 }}>
           {error && (
-            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', padding: '12px', borderRadius: '12px', fontSize: '13px', fontWeight: '700', marginBottom: '20px' }}>
-              {error}
-            </div>
+            <div className="alert-error">{error}</div>
           )}
 
           {/* 1. Modo IA vs Manual */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', background: '#F3F4F6', padding: '6px', borderRadius: '100px' }}>
-            <button
-              onClick={() => setIsManual(true)}
-              style={{ flex: 1, padding: '10px', borderRadius: '100px', border: 'none', background: isManual ? '#FFF' : 'transparent', color: isManual ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: '800', fontSize: '12px', transition: 'all 0.3s', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', boxShadow: isManual ? '0 2px 8px rgba(0,0,0,0.05)' : 'none' }}
-            >
-              <PenTool size={14} /> MODO MANUAL
-            </button>
-            <button
-              onClick={() => setIsManual(false)}
-              style={{ flex: 1, padding: '10px', borderRadius: '100px', border: 'none', background: !isManual ? 'var(--primary)' : 'transparent', color: !isManual ? '#FFF' : 'var(--text-muted)', fontWeight: '800', fontSize: '12px', transition: 'all 0.3s', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', boxShadow: !isManual ? '0 2px 8px rgba(0,0,0,0.1)' : 'none' }}
-            >
-              <Sparkles size={14} /> DELEGAR A LA IA
-            </button>
+          <div className="seg-toggle">
+            <button onClick={() => setIsManual(true)} className={`seg-btn ${isManual ? 'active' : ''}`}><PenTool size={14} /> MODO MANUAL</button>
+            <button onClick={() => setIsManual(false)} className={`seg-btn ${!isManual ? 'primary active' : ''}`}><Sparkles size={14} /> DELEGAR A LA IA</button>
           </div>
 
           {!isManual && (
-            <div style={{ background: '#F5F3FF', border: '1px dashed #C4B5FD', padding: '16px', borderRadius: '12px', marginBottom: '24px', color: '#6D28D9', fontSize: '13px', fontWeight: '600', display: 'flex', gap: '12px' }}>
-              <div style={{ background: '#DDD6FE', padding: '8px', borderRadius: '50%', height: 'max-content' }}><Sparkles size={16} /></div>
+            <div className="alert-info">
+              <div className="alert-icon"><Sparkles size={16} /></div>
               El archivo subido se enviará primero al motor de Inteligencia Artificial para generar ganchos, copys y extraer hashtags. Podrás revisarlo en el calendario antes de que se publique.
             </div>
           )}
 
           {/* 2. Carga de Archivo */}
-          <div 
-            onDragOver={handleDragOver} onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            style={{ 
-              border: '2px dashed var(--border-main)', borderRadius: '16px', padding: preview ? '16px' : '40px 20px', 
-              textAlign: 'center', background: '#F9FAFB', cursor: 'pointer', marginBottom: '24px', 
-              transition: 'border-color 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center'
-            }}
-          >
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*,video/*" style={{ display: 'none' }} />
-            
+          <div className="file-drop" onDragOver={handleDragOver} onDrop={handleDrop} onClick={() => fileInputRef.current?.click()}>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*,video/*" className="hidden-file-input" />
+
             {preview ? (
-              <div style={{ width: '100%', position: 'relative', borderRadius: '12px', overflow: 'hidden', maxHeight: '200px' }}>
+              <div className="preview-wrap">
                 {file?.type.startsWith('video/') ? (
-                  <video src={preview} style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} muted controls />
+                  <video src={preview} className="preview-media" muted controls />
                 ) : (
-                  <img src={preview} style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }} alt="Preview" />
+                  <img src={preview} className="preview-media img" alt="Preview" />
                 )}
-                <div style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.7)', color: 'white', padding: '4px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: '800' }}>
-                  CAMBIAR
-                </div>
+                <div className="preview-badge">CAMBIAR</div>
               </div>
             ) : (
               <>
                 <div style={{ background: '#FFF', padding: '16px', borderRadius: '50%', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', marginBottom: '16px' }}>
-                  <UploadCloud size={32} color="var(--primary)" />
+                  <UploadCloud size={32} />
                 </div>
-                <h4 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--text-main)', marginBottom: '8px' }}>Sube tu Contenido</h4>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Arrastra tu imagen o video aquí, o haz clic para explorar.</p>
+                <h4 className="modal-subtitle">Sube tu Contenido</h4>
+                <p className="modal-note">Arrastra tu imagen o video aquí, o haz clic para explorar.</p>
               </>
             )}
           </div>
@@ -230,7 +203,7 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
                 value={text}
                 onChange={e => setText(e.target.value)}
                 placeholder="Escribe el mensaje que acompañará a la foto o video..."
-                style={{ width: '100%', minHeight: '120px', background: '#F9FAFB', border: '1px solid var(--border-main)', borderRadius: '12px', padding: '16px', resize: 'vertical', fontFamily: 'var(--font-body)', fontSize: '14px', outline: 'none' }}
+                className="textarea-plain"
               />
             </div>
           )}
@@ -243,7 +216,7 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
                 type="time" 
                 value={scheduledTime}
                 onChange={e => setScheduledTime(e.target.value)}
-                style={{ width: '100%', background: '#F9FAFB', border: '1px solid var(--border-main)', borderRadius: '12px', padding: '12px', fontSize: '14px', outline: 'none' }}
+                className="time-input"
               />
             </div>
             <div style={{ flex: 2, minWidth: '200px' }}>
@@ -253,13 +226,7 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
                     <button
                       key={type}
                       onClick={() => setPostType(type)}
-                      style={{
-                        flex: 1, padding: '10px', borderRadius: '12px',
-                        border: postType === type ? '2px solid var(--primary)' : '1px solid var(--border-main)',
-                        background: postType === type ? '#EEF2FF' : '#FFF',
-                        color: postType === type ? 'var(--primary)' : 'var(--text-muted)',
-                        cursor: 'pointer', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase'
-                      }}
+                      className={`format-btn ${postType === type ? 'selected' : ''}`}
                     >
                       {type === 'reel' ? '🎬 REEL' : type === 'story' ? '📱 STORY' : '📰 FEED'}
                     </button>
@@ -284,14 +251,7 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
                   <button
                     key={platform}
                     onClick={() => togglePlatform(platform)}
-                    style={{
-                      padding: '10px 16px', borderRadius: '100px', cursor: 'pointer',
-                      border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-main)',
-                      background: isSelected ? '#EEF2FF' : '#FFF',
-                      color: isSelected ? 'var(--primary)' : 'var(--text-muted)',
-                      fontSize: '12px', fontWeight: '800', transition: 'all 0.2s',
-                      display: 'flex', alignItems: 'center', gap: '6px'
-                    }}
+                    className={`platform-btn ${isSelected ? 'selected' : ''}`}
                   >
                     {isSelected && <CheckCircle size={14} />}
                     {PLATFORM_CONFIG[platform]?.label || platform}
@@ -304,22 +264,16 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
             </div>
           </div>
 
-          <button 
+            <button 
             onClick={handleUploadAndSchedule}
             disabled={loading || !file}
-            className="btn-primary"
-            style={{ width: '100%', height: '56px', fontSize: '14px' }}
+            className="btn-primary btn-block"
           >
             {loading ? <Loader2 className="animate-spin" size={20} /> : isManual ? 'CONFIRMAR PROGRAMACIÓN' : 'SUBIR PARA ANÁLISIS IA'}
           </button>
         </div>
       </div>
       
-      <style>{`
-        @media (max-width: 600px) {
-          .direct-schedule-modal { min-width: 100% !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0 !important; }
-        }
-      `}</style>
     </div>,
     document.body
   );

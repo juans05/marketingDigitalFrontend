@@ -219,16 +219,16 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
               ].map(platform => (
                 <div key={platform.id} className="social-card">
                   <div className="platform-info">
-                    <span style={{ color: platform.color, display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
-                      {platform.icon} {platform.label}
-                    </span>
-                  </div>
-                  <button 
-                    className="btn-connect" 
-                    style={{ backgroundColor: platform.color }}
-                    onClick={() => handleSocialConnect(platform.id)}
-                    disabled={isSubmitting}
-                  >
+                      <span className="platform-info-text" style={{ color: platform.color }}>
+                        {platform.icon} {platform.label}
+                      </span>
+                    </div>
+                    <button 
+                      className="btn-connect" 
+                      style={{ backgroundColor: platform.color }}
+                      onClick={() => handleSocialConnect(platform.id)}
+                      disabled={isSubmitting}
+                    >
                     {isSubmitting ? 'Procesando...' : `Conectar cuenta de ${platform.label}`}
                   </button>
 
@@ -249,20 +249,12 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
         <div className="progress-bar-container">
           <div className="progress-bar" style={{ width: `${(step / 4) * 100}%` }}></div>
         </div>
-        <div className="modal-inner" style={{ position: 'relative' }}>
+        <div className="modal-inner">
           <button
             onClick={handleSkip}
             title="Omitir Onboarding"
             disabled={isSubmitting}
-            style={{
-              position: 'absolute', top: '20px', right: '20px',
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '50%', width: '36px', height: '36px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', color: '#71717A', transition: 'all 0.2s ease', zIndex: 10
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#FAFAFA'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#71717A'; }}
+            className="btn-skip"
           >
             <X size={20} />
           </button>
@@ -355,7 +347,7 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; font-size: 13px; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; color: #71717A; letter-spacing: 0.05em; }
         .input-group input, .input-group select { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); font-family: inherit; font-size: 15px; background: #1C1C1F; color: #FAFAFA; outline: none; transition: all 0.2s; }
-        .input-group input::placeholder { color: #52525B; }
+        .input-group input::placeholder { color: var(--text-muted); opacity: 1; }
         .input-group select option { background: #1C1C1F; color: #FAFAFA; }
         .input-group input:focus, .input-group select:focus { border-color: #4F46E5; background: #27272A; box-shadow: 0 0 0 4px rgba(79,70,229,0.12); }
         .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
