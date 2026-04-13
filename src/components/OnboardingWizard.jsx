@@ -12,9 +12,61 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
     goals: ['Programación y publicación', 'Análisis y reportes'],
     firstArtist: { name: '', genre: '', tone: '' }
   });
+  const [artistId, setArtistId] = useState(null);
+  const [connectedPlatforms, setConnectedPlatforms] = useState([]);
 
-  const nextStep = () => setStep(s => s + 1);
+
+  const nextStep = async () => {
+    const isIndividual = data.persona === 'individual';
+    // Para individuales, el paso social es el 3 (que visualmente es el 4)
+    // Para agencias, el paso social es el 4.
+    // Gatillamos la creación del artista justo antes de entrar al paso donde se conectan redes.
+    const movingToSocialStep = (step === 2 && isIndividual) || (step === 3 && !isIndividual);
+
+    if (movingToSocialStep) {
+      setIsSubmitting(true);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/onboarding`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, persona: data.persona, teamSize: data.teamSize, goals: data.goals, firstArtist: data.firstArtist })
+        });
+        const result = await response.json();
+        if (response.ok && result.artist) {
+          setArtistId(result.artist.id);
+        }
+      } catch (err) {
+        console.error('Error pre-guardando marca:', err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+    setStep(s => s + 1);
+  };
+
   const prevStep = () => setStep(s => s - 1);
+
+  const handleSocialConnect = async (platformId) => {
+    if (!artistId) {
+      alert('Debes configurar tu marca primero.');
+      return;
+    }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al generar link');
+      
+      // Abrir popup de conexión
+      window.open(data.url, '_blank', 'width=600,height=700');
+      
+      // Marcar como "intentado" o simplemente dejar que el usuario vea el popup
+      // Para saber si se conectó realmente, habría que consultar el status periódicamente.
+    } catch (err) {
+      console.error('Error al conectar red social:', err);
+      alert('Error al conectar: ' + err.message);
+    }
+  };
+
 
   const handleFinish = async () => {
     setIsSubmitting(true);
@@ -171,9 +223,15 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
                       {platform.icon} {platform.label}
                     </span>
                   </div>
-                  <button className="btn-connect" style={{ backgroundColor: platform.color }}>
-                    Conectar cuenta de {platform.label}
+                  <button 
+                    className="btn-connect" 
+                    style={{ backgroundColor: platform.color }}
+                    onClick={() => handleSocialConnect(platform.id)}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Procesando...' : `Conectar cuenta de ${platform.label}`}
                   </button>
+
                 </div>
               ))}
             </div>
