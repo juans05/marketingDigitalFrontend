@@ -45,10 +45,11 @@ const Dashboard = () => {
         console.log("🎨 Auto-selecting artist profile:", parsedUser.name);
         setActiveArtist({ id: parsedUser.artist_id, name: parsedUser.name });
         needsOnboarding = false;
-      } else if (parsedUser.onboarding_completed) {
-        // Onboarding was done but artist_id not in localStorage — fetch from backend
+      } else {
+        // Fetch artist from backend regardless of onboarding flag
+        // (artist may exist in DB even if localStorage is out of sync)
         fetchIndividualArtist(parsedUser.id);
-        needsOnboarding = false;
+        if (parsedUser.onboarding_completed) needsOnboarding = false;
       }
 
       setShowOnboarding(needsOnboarding);
@@ -72,6 +73,7 @@ const Dashboard = () => {
         if (data.length > 0) {
           console.log("🎨 Individual artist found:", data[0].name);
           setActiveArtist(data[0]);
+          setShowOnboarding(false); // Artist exists — no need for onboarding
         }
       }
     } catch (err) {
