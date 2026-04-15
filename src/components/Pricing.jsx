@@ -30,25 +30,25 @@ const Pricing = () => {
   ];
 
   return (
-    <section id="pricing" style={{ 
-      padding: '100px 20px', 
-      textAlign: 'center', 
+    <section id="pricing" style={{
+      padding: '100px 20px',
+      textAlign: 'center',
       position: 'relative',
-      background: '#FFFFFF',
-      borderTop: '1px solid var(--border-main)'
+      background: '#09090B',
+      borderTop: '1px solid rgba(255,255,255,0.08)'
     }}>
       <div style={{ marginBottom: '60px' }}>
-        <h2 style={{ 
-          fontSize: 'clamp(28px, 4vw, 42px)', 
+        <h2 style={{
+          fontSize: 'clamp(28px, 4vw, 42px)',
           fontFamily: 'var(--font-heading)',
           fontWeight: '800',
           marginBottom: '16px',
           letterSpacing: '-0.02em',
-          color: 'var(--text-main)'
+          color: '#FAFAFA'
         }}>
           Inversión en <span style={{ color: 'var(--primary)' }}>Resultados</span>
         </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto', fontWeight: '500' }}>
+        <p style={{ color: '#71717A', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto', fontWeight: '500' }}>
           Planes diseñados para proyectar autoridad y maximizar tu impacto digital.
         </p>
       </div>
@@ -61,15 +61,15 @@ const Pricing = () => {
         margin: '0 auto' 
       }}>
         {plans.map((plan, i) => (
-          <div key={i} className="card-pro" style={{ 
-            padding: '48px 40px', 
-            textAlign: 'left', 
+          <div key={i} className="card-pro" style={{
+            padding: '48px 40px',
+            textAlign: 'left',
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
-            border: plan.popular ? '2px solid var(--primary)' : '1px solid var(--border-main)',
-            boxShadow: plan.popular ? 'var(--shadow-lg)' : 'var(--shadow-md)',
-            background: '#FFFFFF',
+            border: plan.popular ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.08)',
+            boxShadow: plan.popular ? '0 8px 40px rgba(99,102,241,0.25)' : '0 4px 24px rgba(0,0,0,0.4)',
+            background: plan.popular ? '#18181B' : '#121214',
             borderRadius: '16px',
             transform: plan.popular ? 'scale(1.02)' : 'scale(1)',
             zIndex: plan.popular ? 2 : 1
@@ -93,10 +93,10 @@ const Pricing = () => {
             )}
             
             <div style={{ marginBottom: '32px' }}>
-              <div style={{ 
-                width: '48px', 
-                height: '48px', 
-                background: plan.popular ? '#EEF2FF' : '#F9FAFB',
+              <div style={{
+                width: '48px',
+                height: '48px',
+                background: plan.popular ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.06)',
                 borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
@@ -105,32 +105,32 @@ const Pricing = () => {
               }}>
                 {plan.icon}
               </div>
-              <h3 style={{ 
-                fontSize: '22px', 
+              <h3 style={{
+                fontSize: '22px',
                 fontFamily: 'var(--font-heading)',
                 fontWeight: '800',
                 marginBottom: '8px',
-                color: 'var(--text-main)'
+                color: '#FAFAFA'
               }}>{plan.name}</h3>
-              <div style={{ 
-                fontSize: '48px', 
-                fontWeight: '800', 
+              <div style={{
+                fontSize: '48px',
+                fontWeight: '800',
                 fontFamily: 'var(--font-heading)',
-                color: 'var(--text-main)',
+                color: '#FAFAFA',
                 letterSpacing: '-0.02em'
               }}>
-                {plan.price}<span style={{ fontSize: '16px', color: 'var(--text-muted)', fontWeight: '600', marginLeft: '4px' }}>/mes</span>
+                {plan.price}<span style={{ fontSize: '16px', color: '#71717A', fontWeight: '600', marginLeft: '4px' }}>/mes</span>
               </div>
             </div>
             
             <ul style={{ listStyle: 'none', marginBottom: '40px', flexGrow: 1 }}>
               {plan.features.map((f, j) => (
-                <li key={j} style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '12px', 
-                  marginBottom: '14px', 
-                  color: 'var(--text-muted)',
+                <li key={j} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '14px',
+                  color: '#A1A1AA',
                   fontSize: '15px',
                   fontWeight: '500'
                 }}>
