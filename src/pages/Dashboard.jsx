@@ -40,14 +40,13 @@ const Dashboard = () => {
       // Logic for Agency vs Artist
       if (parsedUser.account_type === 'agency') {
         fetchAvailableArtists(parsedUser.id);
-      } else if (parsedUser.artist_id) {
-        // Individual artist: auto-select their own profile from localStorage
-        console.log("🎨 Auto-selecting artist profile:", parsedUser.name);
-        setActiveArtist({ id: parsedUser.artist_id, name: parsedUser.name });
-        needsOnboarding = false;
       } else {
-        // Fetch artist from backend regardless of onboarding flag
-        // (artist may exist in DB even if localStorage is out of sync)
+        // Set partial data immediately so VideoGallery renders without waiting
+        if (parsedUser.artist_id) {
+          setActiveArtist({ id: parsedUser.artist_id, name: parsedUser.name });
+          needsOnboarding = false;
+        }
+        // Always fetch full artist from backend to get active_platforms and latest data
         fetchIndividualArtist(parsedUser.id);
         if (parsedUser.onboarding_completed) needsOnboarding = false;
       }
