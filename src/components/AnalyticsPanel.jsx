@@ -418,46 +418,29 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                     </div>
                   </div>
 
-                  {/* 4. Programación */}
-                  <div className="card-pro" style={{ padding: '24px', marginBottom: '32px', background: '#1C1C1F' }}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                           <Calendar size={18} color="var(--primary)" />
-                           <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-main)' }}>AGENDA EL LANZAMIENTO</span>
-                        </div>
-                     </div>
-
-                     <input
-                        type="datetime-local"
-                        value={scheduledDate}
-                        onChange={e => setScheduledDate(e.target.value)}
-                        disabled={isReadOnly}
-                        style={{ width: '100%', background: '#1C1C1F', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px 20px', color: '#FAFAFA', fontSize: '14px', marginBottom: '24px', outline: 'none', colorScheme: 'dark' }}
-                     />
-
-                     <div style={{ display: 'flex', gap: '12px' }}>
-                        <button
-                          onClick={handlePublishNow}
-                          disabled={publishLoading || isAnalyzing || selectedPlatforms.length === 0}
-                          className="btn-primary"
-                          style={{ flex: 1, height: '56px', fontSize: '12px', position: 'relative', overflow: 'hidden', opacity: (publishLoading || isAnalyzing || selectedPlatforms.length === 0) ? 0.7 : 1 }}
-                        >
-                          {publishLoading ? (
-                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                              <span style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
-                              PUBLICANDO...
-                            </span>
-                          ) : isPublished ? 'RE-PUBLICAR' : isAnalyzing ? 'ANALIZANDO...' : 'LANZAR AHORA'}
-                        </button>
-                        <button 
-                          onClick={handleSaveSettings}
-                          disabled={saveLoading || isReadOnly}
-                          className="btn-secondary"
-                          style={{ flex: 1, height: '56px', fontSize: '12px', opacity: isReadOnly ? 0.5 : 1 }}
-                        >
-                           {saveLoading ? '...' : isReadOnly ? 'BLOQUEADO' : 'GUARDAR AJUSTES'}
-                        </button>
-                     </div>
+                  {/* 4. Acciones */}
+                  <div style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
+                    <button
+                      onClick={handlePublishNow}
+                      disabled={publishLoading || isAnalyzing || selectedPlatforms.length === 0}
+                      className="btn-primary"
+                      style={{ flex: 1, height: '56px', fontSize: '12px', position: 'relative', overflow: 'hidden', opacity: (publishLoading || isAnalyzing || selectedPlatforms.length === 0) ? 0.7 : 1 }}
+                    >
+                      {publishLoading ? (
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                          <span style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+                          PUBLICANDO...
+                        </span>
+                      ) : isPublished ? 'RE-PUBLICAR' : isAnalyzing ? 'ANALIZANDO...' : 'LANZAR AHORA'}
+                    </button>
+                    <button
+                      onClick={handleSaveSettings}
+                      disabled={saveLoading || isReadOnly}
+                      className="btn-secondary"
+                      style={{ flex: 1, height: '56px', fontSize: '12px', opacity: isReadOnly ? 0.5 : 1 }}
+                    >
+                      {saveLoading ? '...' : isReadOnly ? 'BLOQUEADO' : 'GUARDAR AJUSTES'}
+                    </button>
                   </div>
 
                   {/* Analytics Summary */}

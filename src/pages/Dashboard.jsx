@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2, Calendar, Users, Loader2 } from 'lucide-react';
+import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2, Calendar, Users, Loader2, Share2 } from 'lucide-react';
 import AnalyticsView from '../components/AnalyticsView';
 import OnboardingWizard from '../components/OnboardingWizard';
 import UploadSection from '../components/UploadSection';
@@ -40,11 +40,15 @@ const Dashboard = () => {
       // Logic for Agency vs Artist
       if (parsedUser.account_type === 'agency') {
         fetchAvailableArtists(parsedUser.id);
-      } else if (parsedUser.account_type === 'artist' && parsedUser.artist_id) {
-        // Individual artist: auto-select their own profile
+      } else if (parsedUser.artist_id) {
+        // Individual artist: auto-select their own profile from localStorage
         console.log("🎨 Auto-selecting artist profile:", parsedUser.name);
         setActiveArtist({ id: parsedUser.artist_id, name: parsedUser.name });
-        needsOnboarding = false; // ¡El artista ya está creado! Bypasear onboarding forzosamente
+        needsOnboarding = false;
+      } else if (parsedUser.onboarding_completed) {
+        // Onboarding was done but artist_id not in localStorage — fetch from backend
+        fetchIndividualArtist(parsedUser.id);
+        needsOnboarding = false;
       }
 
       setShowOnboarding(needsOnboarding);
@@ -58,6 +62,22 @@ const Dashboard = () => {
       setLoading(false);
     }
   }, [navigate]);
+
+  const fetchIndividualArtist = async (uid) => {
+    console.log("🔍 Fetching individual artist for user:", uid);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${uid}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.length > 0) {
+          console.log("🎨 Individual artist found:", data[0].name);
+          setActiveArtist(data[0]);
+        }
+      }
+    } catch (err) {
+      console.error('❌ Error fetching individual artist:', err);
+    }
+  };
 
   const fetchAvailableArtists = async (uid) => {
     console.log("🔍 Fetching artists for agency:", uid);
@@ -86,12 +106,15 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  const handleOnboardingComplete = () => {
+  const handleOnboardingComplete = (artist) => {
     setShowOnboarding(false);
     if (user) {
       const updatedUser = { ...user, onboarding_completed: true };
       setUser(updatedUser);
       localStorage.setItem('vidalis_user', JSON.stringify(updatedUser));
+    }
+    if (artist?.id && user?.account_type !== 'agency') {
+      setActiveArtist(artist);
     }
   };
 
@@ -174,9 +197,11 @@ const Dashboard = () => {
               <Calendar size={20} /> Calendario
             </button>
           )}
-          <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}>
-            <Film size={20} /> Contenido
-          </button>
+          {!isAgency && (
+            <button className={activeView === 'connect' ? 'active' : ''} onClick={() => setActiveView('connect')}>
+              <Share2 size={20} /> <span style={{ fontWeight: '600' }}>Redes Sociales</span>
+            </button>
+          )}
 
           {isAgency && (
             <>
@@ -195,6 +220,7 @@ const Dashboard = () => {
               {activeView === 'analytics' && 'Dashboard de Analítica'}
               {activeView === 'planning' && 'Planificación de Contenido'}
               {activeView === 'content' && 'Producción y Medios'}
+              {activeView === 'connect' && 'Redes Sociales'}
               {activeView === 'artists' && 'Gestión de Marcas'}
             </h1>
             {activeArtist && <div className="active-artist-tag">Editando: {activeArtist.name}</div>}
@@ -222,6 +248,52 @@ const Dashboard = () => {
                 </section>
               )}
             </div>
+          )}
+
+          {activeView === 'connect' && !isAgency && (
+            currentArtistId ? (
+              <div className="card-pro">
+                <h2 className="section-title">Canales Conectados</h2>
+                <SocialConnect artistId={currentArtistId} artistName={activeArtist?.name} />
+              </div>
+            ) : (
+              <div style={{
+                background: '#121214',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '16px',
+                padding: '48px',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '16px',
+              }}>
+                <div style={{ background: 'rgba(79,70,229,0.15)', borderRadius: '50%', padding: '20px', display: 'flex' }}>
+                  <Share2 size={32} color="#818CF8" />
+                </div>
+                <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#FAFAFA', margin: 0 }}>Configura tu perfil primero</h3>
+                <p style={{ color: '#71717A', fontSize: '14px', maxWidth: '400px', margin: 0 }}>
+                  Para conectar tus redes sociales necesitas crear tu perfil de marca. Solo toma un minuto.
+                </p>
+                <button
+                  onClick={() => setShowOnboarding(true)}
+                  style={{
+                    marginTop: '8px',
+                    padding: '14px 32px',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 20px rgba(99,102,241,0.35)',
+                  }}
+                >
+                  Crear mi perfil
+                </button>
+              </div>
+            )
           )}
 
           {activeView === 'artists' && (
@@ -285,6 +357,7 @@ const Dashboard = () => {
         .sidebar-pro button.active { background: #4F46E5; color: white; box-shadow: 0 0 20px rgba(79, 70, 229, 0.15); }
 
         .main-content-pro { flex-grow: 1; padding: 32px 40px; overflow-y: auto; max-width: 1400px; margin: 0 auto; width: 100%; min-width: 0; }
+        .mobile-nav { display: none; }
         .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
         .view-title { font-size: 24px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; }
         .active-artist-tag { font-size: 12px; font-weight: 600; color: var(--primary); background: rgba(79, 70, 229, 0.12); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(79, 70, 229, 0.3); }

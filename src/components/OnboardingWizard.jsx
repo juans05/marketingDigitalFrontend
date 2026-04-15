@@ -80,10 +80,13 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Fallo el registro del onboarding');
       }
-      onComplete();
+      const result = await response.json();
+      const finalArtistId = artistId || result?.artist?.id || null;
+      const finalArtistName = data.firstArtist?.name || data.agencyName || data.brandName || null;
+      onComplete(finalArtistId ? { id: finalArtistId, name: finalArtistName } : null);
     } catch (error) {
       console.error('Error al guardar onboarding:', error);
-      onComplete();
+      onComplete(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -101,7 +104,7 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
       console.error('Error al omitir onboarding:', error);
     } finally {
       setIsSubmitting(false);
-      onComplete();
+      onComplete(null);
     }
   };
 

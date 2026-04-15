@@ -36,7 +36,12 @@ const SocialConnect = ({ artistId }) => {
     try {
       const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al generar link');
+      if (!res.ok) {
+        if (data.code === 'PROFILE_LIMIT_REACHED') {
+          throw new Error('Tu plan actual ha alcanzado el límite de perfiles. Contacta a soporte en servidorinjoyplan@gmail.com para ampliar tu plan.');
+        }
+        throw new Error(data.error || 'Error al generar link');
+      }
       window.open(data.url, '_blank', 'width=700,height=750');
       setPopupOpened(true);
     } catch (err) {
