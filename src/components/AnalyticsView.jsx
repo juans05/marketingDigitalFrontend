@@ -213,7 +213,23 @@ const AnalyticsView = ({ userId, activeArtist }) => {
     return String(n);
   };
 
-  const handleSync = () => {
+  const handleSync = async () => {
+    const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+    
+    // Si hay un artista activo, primero forzar sincronización profunda con las redes
+    if (activeArtist?.id) {
+      setLoadingStats(true); // Usamos el loader para feedback
+      try {
+        const syncRes = await fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync`, {
+          method: 'POST'
+        });
+        if (!syncRes.ok) console.warn('Sync point response not OK:', syncRes.status);
+      } catch (err) {
+        console.error('Deep sync error:', err);
+      }
+    }
+
+    // Refrescar los datos del dashboard
     fetchStats();
     if (activeArtist?.id) fetchPostMetrics(activeArtist.id);
   };

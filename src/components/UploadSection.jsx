@@ -73,7 +73,16 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       const agencyFolder = user?.name ? user.name.replace(/\s+/g, '_').toLowerCase() : 'general';
       const resourceType = isVideo ? 'video' : 'image';
 
-      const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}&resourceType=${resourceType}`);
+      // Sanitizar URL para evitar dobles slashes
+      const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+
+      const sigResponse = await fetch(`${apiBase}/api/vidalis/cloudinary-signature?folder=${agencyFolder}&resourceType=${resourceType}`);
+      
+      if (!sigResponse.ok) {
+        const errorText = await sigResponse.text();
+        throw new Error(`Fallo en firma (${sigResponse.status}): ${errorText || 'Servidor inaccesible'}`);
+      }
+
       const sigData = await sigResponse.json();
 
       setUploadPhase('uploading');
@@ -86,7 +95,9 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       formData.append('folder', sigData.folder);
       formData.append('access_mode', 'public');
       formData.append('resource_type', isVideo ? 'video' : 'image');
-      if (isVideo && sigData.eager) {
+      
+      // IMPORTANTE: Enviar 'eager' siempre si viene en la firma (especialmente para imágenes)
+      if (sigData.eager) {
         formData.append('eager', sigData.eager);
       }
 
@@ -101,7 +112,8 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
 
       setUploadPhase('registering');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/upload`, {
+      const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+      const response = await fetch(`${apiBase}/api/vidalis/upload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
