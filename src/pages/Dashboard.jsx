@@ -1,14 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2, Calendar, Users, Loader2, Share2 } from 'lucide-react';
-import AnalyticsView from '../components/AnalyticsView';
-import OnboardingWizard from '../components/OnboardingWizard';
-import UploadSection from '../components/UploadSection';
-import VideoGallery from '../components/VideoGallery';
-import SocialConnect from '../components/SocialConnect';
-import ArtistManager from '../components/ArtistManager';
 import AIStatusIndicator from '../components/AIStatusIndicator';
 import PlanningView from '../components/PlanningView';
+import SparksMarket from '../components/SparksMarket';
+import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2, Calendar, Users, Loader2, Share2, Zap } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -167,14 +162,17 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className="user-profile-box hide-mobile" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+          <div onClick={() => setActiveView('sparks')} className="user-profile-box hide-mobile" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px', cursor: 'pointer' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <User size={12} color="var(--primary)" />
+              <Zap size={10} color="var(--primary)" fill="var(--primary)" />
               <span className="user-email" style={{ fontWeight: '700' }}>{user.email}</span>
             </div>
-            <span style={{ fontSize: '9px', fontWeight: '900', color: 'var(--primary)', background: 'rgba(79, 70, 229, 0.15)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
-              PLAN {user.plan || 'FREE'}
-            </span>
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              <span style={{ fontSize: '9px', fontWeight: '900', color: 'var(--primary)', background: 'rgba(79, 70, 229, 0.15)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                PLAN {user.plan || 'PRO'}
+              </span>
+              <span style={{ fontSize: '9px', fontWeight: '700', color: '#A1A1AA' }}>Recargar ⚡</span>
+            </div>
           </div>
 
           <button onClick={handleLogout} className="btn-exit-pro glass-morph" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#EF4444', height: '40px' }}>
@@ -212,6 +210,11 @@ const Dashboard = () => {
               </button>
             </>
           )}
+
+          <div className="sidebar-section-label" style={{ marginTop: 'auto', padding: '32px 24px 12px' }}>SOPORTE</div>
+          <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}>
+            <Zap size={20} /> <span style={{ fontWeight: '600' }}>Recargar Energía</span>
+          </button>
         </aside>
 
         {/* Main Content */}
@@ -223,6 +226,7 @@ const Dashboard = () => {
               {activeView === 'content' && 'Producción y Medios'}
               {activeView === 'connect' && 'Redes Sociales'}
               {activeView === 'artists' && 'Gestión de Marcas'}
+              {activeView === 'sparks' && 'Mercado de Energía'}
             </h1>
             {activeArtist && <div className="active-artist-tag">Editando: {activeArtist.name}</div>}
           </div>
@@ -297,6 +301,8 @@ const Dashboard = () => {
             )
           )}
 
+          {activeView === 'sparks' && <SparksMarket user={user} />}
+
           {activeView === 'artists' && (
             <div className="view-artists">
               <ArtistManager
@@ -321,6 +327,7 @@ const Dashboard = () => {
         <nav className="mobile-nav glass-morph">
           <button className={activeView === 'analytics' ? 'active' : ''} onClick={() => setActiveView('analytics')}><BarChart3 size={22} /></button>
           <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}><Film size={22} /></button>
+          <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}><Zap size={22} /></button>
           <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}><Calendar size={22} /></button>
           {isAgency && <button className={activeView === 'artists' ? 'active' : ''} onClick={() => setActiveView('artists')}><Users size={22} /></button>}
         </nav>
