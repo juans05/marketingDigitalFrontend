@@ -12,7 +12,13 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
     agencyName: '',
     brandName: '',
     goals: ['Programación y publicación', 'Análisis y reportes'],
-    firstArtist: { name: '', genre: '', tone: '' }
+    firstArtist: { 
+      name: '', 
+      style_notes: '', 
+      preferred_hooks: '', 
+      style_keywords: '', 
+      prohibited_topics: '' 
+    }
   });
   const [artistId, setArtistId] = useState(null);
   const [connectedPlatforms, setConnectedPlatforms] = useState([]);
@@ -144,12 +150,15 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
             <p className="subtitle">Entender quién usa Vidalis nos ayuda a optimizar tu experiencia.</p>
             <div className="grid-selection">
               {[
-                { id: 'individual', label: 'Creador de contenido, marca personal o influencer', icon: <User size={32} /> },
-                { id: 'agency', label: 'Agencia de marketing / Gestión de múltiples clientes', icon: <Building2 size={32} /> },
+                { id: 'individual', label: 'Creador | Influencer | Marca Personal', sub: 'Para perfiles que buscan potenciar su imagen y alcance.', icon: <User size={32} /> },
+                { id: 'agency', label: 'Agencia de Marketing | Enterprise', sub: 'Gestión profesional de múltiples marcas y clientes.', icon: <Building2 size={32} /> },
               ].map(item => (
                 <button key={item.id} className={`card-option ${data.persona === item.id ? 'active' : ''}`} onClick={() => setData({...data, persona: item.id})}>
                   <div className="card-icon">{item.icon}</div>
-                  <span className="card-label">{item.label}</span>
+                  <div style={{ textAlign: 'center' }}>
+                    <span className="card-label">{item.label}</span>
+                    <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#71717A' }}>{item.sub}</p>
+                  </div>
                 </button>
               ))}
             </div>
@@ -180,10 +189,10 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
             <p className="subtitle">Esto nos ayuda a orientar y agilizar tu experiencia.</p>
             <div className="grid-selection small">
               {[
-                { id: 'publish', label: 'Programación y publicación de contenidos', icon: <Calendar size={28} /> },
-                { id: 'analytics', label: 'Análisis y reportes', icon: <BarChart3 size={28} /> },
-                { id: 'bio', label: 'Crear una página para tu enlace de biografía', icon: <Link size={28} /> },
-                { id: 'inbox', label: 'Gestión de conversaciones', icon: <MessageSquare size={28} /> },
+                { id: 'publish', label: 'Publicación Inteligente (IA)', sub: 'Programar posts de alto impacto', icon: <Calendar size={28} /> },
+                { id: 'analytics', label: 'Reportes de Crecimiento', sub: 'Métricas reales y proyecciones', icon: <BarChart3 size={28} /> },
+                { id: 'bio', label: 'Bio-Link Premium', sub: 'Tu propia mini-web personalizada', icon: <Link size={28} /> },
+                { id: 'inbox', label: 'IA Engagement', sub: 'Gestión inteligente de audiencia', icon: <MessageSquare size={28} /> },
               ].map(item => (
                 <button key={item.id} className={`card-option small ${data.goals.includes(item.label) ? 'active' : ''}`}
                   onClick={() => {
@@ -191,7 +200,10 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
                     setData({ ...data, goals: exists ? data.goals.filter(g => g !== item.label) : [...data.goals, item.label] });
                   }}>
                   <div className="card-icon small">{item.icon}</div>
-                  <span className="card-label small">{item.label}</span>
+                  <div style={{ textAlign: 'left' }}>
+                    <span className="card-label small">{item.label}</span>
+                    <p style={{ margin: 0, fontSize: '10px', color: '#71717A' }}>{item.sub}</p>
+                  </div>
                 </button>
               ))}
             </div>
@@ -202,33 +214,38 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
       case 3:
         return (
           <div className="step-content animate-fade-in">
-            <h2 className="title">Configura tu Perfil</h2>
-            <p className="subtitle">Cuéntanos un poco sobre tu marca o proyecto personal para personalizar tu estrategia.</p>
+            <h2 className="title">Tu ADN Creativo</h2>
+            <p className="subtitle">Cuéntanos sobre tu marca. Esto sirve para que la IA genere copys y estrategias que encajen 100% con tu estilo.</p>
+            
             <div className="input-group">
-              <label>Nombre del Artista o Marca</label>
-              <input type="text" placeholder="Ej: David Guetta, Nike Latino..." value={data.firstArtist.name}
+              <label>Nombre de tu Marca o Perfil</label>
+              <input type="text" placeholder="Ej: Juan Pérez o El rincón musical" value={data.firstArtist.name}
                 onChange={e => setData({...data, firstArtist: {...data.firstArtist, name: e.target.value}})} />
             </div>
+
+            <div className="input-group">
+              <label>Notas de Estilo (Tono de la IA)</label>
+              <input type="text" placeholder="Ej: Tono sarcástico, mucha energía, enfocado en el lujo..." value={data.firstArtist.style_notes}
+                onChange={e => setData({...data, firstArtist: {...data.firstArtist, style_notes: e.target.value}})} />
+            </div>
+
             <div className="input-row">
               <div className="input-group">
-                <label>Género / Nicho</label>
-                <select value={data.firstArtist.genre} onChange={e => setData({...data, firstArtist: {...data.firstArtist, genre: e.target.value}})}>
-                  <option value="">Selecciona...</option>
-                  <option value="music">Música / Entretenimiento</option>
-                  <option value="tech">Tecnología</option>
-                  <option value="fashion">Moda / Estilo de Vida</option>
-                  <option value="other">Otro</option>
-                </select>
+                <label>Ganchos / Hooks favoritos</label>
+                <input type="text" placeholder="Ej: No vas a creer lo que pasó..." value={data.firstArtist.preferred_hooks}
+                  onChange={e => setData({...data, firstArtist: {...data.firstArtist, preferred_hooks: e.target.value}})} />
               </div>
               <div className="input-group">
-                <label>Tono de Marca</label>
-                <select value={data.firstArtist.tone} onChange={e => setData({...data, firstArtist: {...data.firstArtist, tone: e.target.value}})}>
-                  <option value="">Selecciona...</option>
-                  <option value="energetic">Enérgico</option>
-                  <option value="professional">Profesional</option>
-                  <option value="funny">Divertido</option>
-                </select>
+                <label>Palabras Clave</label>
+                <input type="text" placeholder="Ej: Viral, Música, Estilo de vida" value={data.firstArtist.style_keywords}
+                  onChange={e => setData({...data, firstArtist: {...data.firstArtist, style_keywords: e.target.value}})} />
               </div>
+            </div>
+
+            <div className="input-group">
+              <label>Temas Prohibidos (IA los ignorará)</label>
+              <input type="text" placeholder="Ej: Competencia X, temas políticos..." value={data.firstArtist.prohibited_topics}
+                onChange={e => setData({...data, firstArtist: {...data.firstArtist, prohibited_topics: e.target.value}})} />
             </div>
           </div>
         );
