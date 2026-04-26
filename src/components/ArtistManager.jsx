@@ -10,25 +10,24 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
   const [newGenero, setNewGenero] = useState('');
   const [newAudiencia, setNewAudiencia] = useState('');
   const [newTono, setNewTono] = useState('');
-  
-  const GENRE_OPTIONS = [
-    "Reggaeton / Urbano", "Pop / Comercial", "Hip-Hop / Trap", 
-    "Electronic / EDM", "Rock / Alternative", "Indie / Singer-Songwriter", 
-    "R&B / Soul", "Jazz / Blues", "Classical / Cinematic", 
-    "Folk / Country", "Podcast / Talk Show", "Gaming / Tutorial", 
-    "Lifestyle / Vlogging"
-  ];
-
-  const TONE_OPTIONS = [
-    "Energético / High-Energy", "Inspiracional / Motivating", 
-    "Profesional / Authoritative", "Divertido / Humorístico", 
-    "Lujoso / Premium", "Auténtico / Raw", "Educativo / Informative", 
-    "Provocativo / Edgy", "Minimalista / Clean", "Emocional / Deep"
-  ];
+  const [genreOptions, setGenreOptions] = useState([]);
+  const [toneOptions, setToneOptions] = useState([]);
 
   useEffect(() => {
     fetchArtists();
+    fetchConfig('genre_options').then(v => v && setGenreOptions(v));
+    fetchConfig('tone_options').then(v => v && setToneOptions(v));
   }, [agencyId]);
+
+  const fetchConfig = async (key) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/config/${key}`);
+      const data = await res.json();
+      return Array.isArray(data.value) ? data.value : null;
+    } catch {
+      return null;
+    }
+  };
 
   const fetchArtists = async () => {
     setLoading(true);
@@ -139,7 +138,7 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                 }}
               >
                 <option value="" disabled>Selecciona género</option>
-                {GENRE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                {genreOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
               </select>
             </div>
 
@@ -169,7 +168,7 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
                 }}
               >
                 <option value="" disabled>Selecciona tono</option>
-                {TONE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                {toneOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
               </select>
             </div>
           </div>
