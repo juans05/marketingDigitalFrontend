@@ -161,9 +161,13 @@ const AnalyticsView = ({ userId, activeArtist }) => {
   const fetchStats = async () => {
     setLoadingStats(true);
     try {
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
       const url = new URL(`${import.meta.env.VITE_API_URL}/api/vidalis/stats/${userId}`);
       if (activeArtist?.id) url.searchParams.append('artistId', activeArtist.id);
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) setData(await res.json());
     } catch (err) {
       console.error('Analytics Fetch Error:', err);
@@ -175,7 +179,11 @@ const AnalyticsView = ({ userId, activeArtist }) => {
   const fetchPostMetrics = async (artistId) => {
     setLoadingPosts(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics-posts/${artistId}`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics-posts/${artistId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) {
         const json = await res.json();
         setPosts(json.posts || []);
@@ -192,7 +200,11 @@ const AnalyticsView = ({ userId, activeArtist }) => {
     setLoadingInsights(true);
     setInsights(null);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics-insights/${activeArtist.id}`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics-insights/${activeArtist.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) {
         const json = await res.json();
         setInsights(json);
@@ -215,13 +227,16 @@ const AnalyticsView = ({ userId, activeArtist }) => {
 
   const handleSync = async () => {
     const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+    const userStr = localStorage.getItem('vidalis_user');
+    const token = userStr ? JSON.parse(userStr).token : '';
     
     // Si hay un artista activo, primero forzar sincronización profunda con las redes
     if (activeArtist?.id) {
       setLoadingStats(true); // Usamos el loader para feedback
       try {
         const syncRes = await fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync`, {
-          method: 'POST'
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!syncRes.ok) console.warn('Sync point response not OK:', syncRes.status);
       } catch (err) {

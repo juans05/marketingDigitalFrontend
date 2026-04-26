@@ -9,7 +9,11 @@ const AIStatusIndicator = ({ artistId }) => {
 
     const checkStatus = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/gallery/${artistId}`);
+        const userStr = localStorage.getItem('vidalis_user');
+        const token = userStr ? JSON.parse(userStr).token : '';
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/gallery/${artistId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         if (res.ok) {
           const videos = await res.json();
           // Buscar si hay algún video procesándose

@@ -21,7 +21,11 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
 
   const fetchConfig = async (key) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/config/${key}`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/config/${key}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       return Array.isArray(data.value) ? data.value : null;
     } catch {
@@ -32,7 +36,11 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
   const fetchArtists = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${agencyId}`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${agencyId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       setArtists(Array.isArray(data) ? data : []);
     } catch {
@@ -47,9 +55,14 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
     if (!newName.trim()) return;
     setCreating(true);
     try {
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           agency_id: agencyId,
           name: newName.trim(),
@@ -76,8 +89,11 @@ const ArtistManager = ({ agencyId, onSelectArtist, selectedArtistId }) => {
     if (!window.confirm('¿Estás seguro de que quieres eliminar este artista y TODOS sus videos? Esta acción no se puede deshacer.')) return;
     
     try {
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${artistId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Error al eliminar');
       

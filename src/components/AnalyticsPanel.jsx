@@ -84,7 +84,11 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const fetchAnalytics = async (silent = false, isOpening = false) => {
     if (!silent) setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics/${videoId}`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics/${videoId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) {
         const newData = await res.json();
         const justFinished = data?.status === 'analyzing' && newData.status !== 'analyzing';
@@ -142,9 +146,14 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const handleSaveSettings = async () => {
     setSaveLoading(true);
     try {
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/video/${videoId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           scheduled_at: scheduledDate || null,
           hashtags,
@@ -168,9 +177,14 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const handlePublishNow = async () => {
     setPublishLoading(true);
     try {
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/publish-now/${videoId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ platforms: selectedPlatforms, postType })
       });
       const result = await res.json();

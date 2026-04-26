@@ -22,7 +22,11 @@ const SocialConnect = ({ artistId }) => {
 
   const fetchStatus = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/social-status/${artistId}`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/social-status/${artistId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) {
         const data = await res.json();
         setConnectedPlatforms(data.platforms || []);
@@ -34,7 +38,11 @@ const SocialConnect = ({ artistId }) => {
     setLoading(true);
     setError('');
     try {
-      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (!res.ok) {
         if (data.code === 'PROFILE_LIMIT_REACHED') {
@@ -55,7 +63,11 @@ const SocialConnect = ({ artistId }) => {
     setVerifying(true);
     setError('');
     try {
-      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/social-status/${artistId}?refresh=true`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/social-status/${artistId}?refresh=true`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al verificar');
       setConnectedPlatforms(data.platforms || []);
