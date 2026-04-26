@@ -3,6 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import AIStatusIndicator from '../components/AIStatusIndicator';
 import PlanningView from '../components/PlanningView';
 import SparksMarket from '../components/SparksMarket';
+import OnboardingWizard from '../components/OnboardingWizard';
+import AnalyticsView from '../components/AnalyticsView';
+import UploadSection from '../components/UploadSection';
+import VideoGallery from '../components/VideoGallery';
+import SocialConnect from '../components/SocialConnect';
+import ArtistManager from '../components/ArtistManager';
 import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2, Calendar, Users, Loader2, Share2, Zap } from 'lucide-react';
 
 const Dashboard = () => {
@@ -61,7 +67,12 @@ const Dashboard = () => {
   const fetchIndividualArtist = async (uid) => {
     console.log("🔍 Fetching individual artist for user:", uid);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${uid}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${uid}`, {
+        headers: { 
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.length > 0) {
@@ -78,7 +89,12 @@ const Dashboard = () => {
   const fetchAvailableArtists = async (uid) => {
     console.log("🔍 Fetching artists for agency:", uid);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${uid}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${uid}`, {
+        headers: { 
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         console.log("✅ Artists loaded:", data.length);
