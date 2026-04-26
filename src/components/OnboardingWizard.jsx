@@ -4,10 +4,10 @@ import { User, Building2, Users, ChevronRight, ChevronLeft, Instagram, Youtube, 
 console.log("⚡ OnboardingWizard Module Loaded");
 
 const OnboardingWizard = ({ userId, userType, onComplete }) => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(2);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [data, setData] = useState({
-    persona: '',
+    persona: 'individual',
     teamSize: 'Solo yo',
     agencyName: '',
     brandName: '',
@@ -179,8 +179,8 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
       case 3:
         return (
           <div className="step-content animate-fade-in">
-            <h2 className="title">Configura tu Primera Marca</h2>
-            <p className="subtitle">Como agencia, el primer paso es añadir un cliente o artista para gestionar.</p>
+            <h2 className="title">Configura tu Perfil</h2>
+            <p className="subtitle">Cuéntanos un poco sobre tu marca o proyecto personal para personalizar tu estrategia.</p>
             <div className="input-group">
               <label>Nombre del Artista o Marca</label>
               <input type="text" placeholder="Ej: David Guetta, Nike Latino..." value={data.firstArtist.name}
@@ -221,7 +221,21 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
                 { id: 'tiktok', label: 'TikTok', color: '#555', icon: <Sparkles size={18} /> },
                 { id: 'facebook', label: 'Facebook', color: '#1877F2', icon: <Facebook size={18} /> },
                 { id: 'youtube', label: 'YouTube', color: '#FF0000', icon: <Youtube size={18} /> },
-              ].map(platform => (
+                { id: 'linkedin', label: 'LinkedIn', color: '#0077B5', icon: <Link size={18} /> },
+              ].filter(platform => {
+                const user = JSON.parse(localStorage.getItem('vidalis_user') || '{}');
+                const planType = user.plan || 'Mini';
+                
+                const PLAN_LIMITS = {
+                  'Mini': ['instagram', 'tiktok'],
+                  'Artista': ['instagram', 'tiktok', 'facebook'],
+                  'Estrella': ['instagram', 'tiktok', 'facebook', 'youtube', 'linkedin'],
+                  'Agencia Pro': ['instagram', 'tiktok', 'facebook', 'youtube', 'linkedin']
+                };
+                
+                const allowed = PLAN_LIMITS[planType] || PLAN_LIMITS['Mini'];
+                return allowed.includes(platform.id);
+              }).map(platform => (
                 <div key={platform.id} className="social-card">
                   <div className="platform-info">
                       <span className="platform-info-text" style={{ color: platform.color }}>

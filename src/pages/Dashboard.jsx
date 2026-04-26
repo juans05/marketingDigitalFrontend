@@ -164,19 +164,7 @@ const Dashboard = () => {
 
         <div className="header-actions">
           {currentArtistId && <AIStatusIndicator artistId={currentArtistId} />}
-          {isAgency && availableArtists.length > 0 && (
-            <div className="brand-selector-wrapper">
-              <select
-                className="brand-dropdown-pro glass-morph"
-                value={activeArtist?.id || ''}
-                onChange={(e) => setActiveArtist(availableArtists.find(a => a.id === e.target.value))}
-                style={{ border: '1px solid var(--border-main)', color: 'var(--text-main)', padding: '10px 16px', borderRadius: '12px' }}
-              >
-                <option value="">Resumen Global</option>
-                {availableArtists.map(a => <option key={a.id} value={a.id} style={{ background: 'var(--bg-secondary)', color: 'var(--text-main)' }}>{a.name}</option>)}
-              </select>
-            </div>
-          )}
+          {/* Brand selector hidden for personal use */}
 
           <div onClick={() => setActiveView('sparks')} className="user-profile-box hide-mobile" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px', cursor: 'pointer' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -218,14 +206,7 @@ const Dashboard = () => {
             </button>
           )}
 
-          {isAgency && (
-            <>
-              <div className="sidebar-section-label" style={{ marginTop: '32px', padding: '0 24px 12px' }}>AGENCIA</div>
-              <button className={activeView === 'artists' ? 'active' : ''} onClick={() => setActiveView('artists')}>
-                <Users size={20} /> <span style={{ fontWeight: '600' }}>Mis Marcas</span>
-              </button>
-            </>
-          )}
+          {/* Agency section hidden */}
 
           <div className="sidebar-section-label" style={{ marginTop: 'auto', padding: '32px 24px 12px' }}>SOPORTE</div>
           <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}>
@@ -345,7 +326,7 @@ const Dashboard = () => {
           <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}><Film size={22} /></button>
           <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}><Zap size={22} /></button>
           <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}><Calendar size={22} /></button>
-          {isAgency && <button className={activeView === 'artists' ? 'active' : ''} onClick={() => setActiveView('artists')}><Users size={22} /></button>}
+          {/* Artists view hidden map */}
         </nav>
       </div>
 

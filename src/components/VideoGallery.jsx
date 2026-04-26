@@ -149,7 +149,15 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
   const fetchGallery = (showLoader = false) => {
     if (!artistId) { setLoading(false); return; }
     if (showLoader) setLoading(true);
-    fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/gallery/${artistId}`)
+    
+    const user = JSON.parse(localStorage.getItem('vidalis_user'));
+    
+    fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/gallery/${artistId}`, {
+      headers: {
+        'Authorization': `Bearer ${user?.token}`,
+        'Content-Type': 'application/json'
+      }
+    })
       .then(r => r.ok ? r.json() : [])
       .then(data => setVideos(data))
       .catch(e => console.error('Gallery error:', e))
@@ -158,10 +166,14 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
 
   const handleCancelVideo = async (videoId) => {
     if (!window.confirm("¿Estás seguro de que deseas cancelar de inmediato el procesamiento de este análisis?")) return;
+    const user = JSON.parse(localStorage.getItem('vidalis_user'));
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/video/${videoId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({ status: 'canceled', error_log: '{"message":"Cancelado manualmente por el usuario"}' })
       });
       if (res.ok) fetchGallery(false);
@@ -172,10 +184,15 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
 
   const handleRetryVideo = async (videoId) => {
     // Si la lista tiene videos en progreso, no reintentes si quieres hacer UI state, pero es opcional.
+    const user = JSON.parse(localStorage.getItem('vidalis_user'));
     try {
       setLoading(true);
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/video/${videoId}/retry`, {
-        method: 'POST'
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json' 
+        }
       });
       if (res.ok) fetchGallery(false);
     } catch (e) {

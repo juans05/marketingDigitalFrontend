@@ -11,8 +11,10 @@ const PLATFORM_CONFIG = {
 };
 
 const PLAN_RESTRICTIONS = {
-  'Free': ['instagram'],
-  'Creator': ['instagram', 'facebook'],
+  'Mini': ['instagram', 'tiktok'],
+  'Artista': ['instagram', 'tiktok', 'facebook'],
+  'Estrella': ['instagram', 'tiktok', 'facebook', 'youtube', 'linkedin'],
+  'Agencia Pro': ['instagram', 'tiktok', 'facebook', 'youtube', 'linkedin', 'twitter', 'pinterest'],
 };
 
 const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePlatforms = [], onSuccess }) => {

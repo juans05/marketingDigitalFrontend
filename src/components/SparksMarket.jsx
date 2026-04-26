@@ -34,9 +34,9 @@ const SparksMarket = ({ user }) => {
       id: 'elite',
       name: 'Elite Pro',
       sparks: 1500,
-      price: 'Agencia',
+      price: 'Alto Impacto',
       icon: <Diamond className="text-amber-400" size={32} />,
-      features: ['150 Posts de Alto Valor', 'IA Predictiva', 'Gestión de 5 Marcas', 'Manager Dedicado'],
+      features: ['150 Posts de Alto Valor', 'Análisis de Competencia IA', 'IA Predictiva', 'Manager Dedicado'],
       color: '#F59E0B',
       popular: false
     }
@@ -62,9 +62,24 @@ const SparksMarket = ({ user }) => {
           marginBottom: '12px'
         }}>Centro de Energía Vidalis</span>
         <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#FFFFFF', marginBottom: '16px' }}>Potencia tu Contenido con <span style={{ color: 'var(--primary)' }}>Sparks</span></h2>
-        <p style={{ color: '#A1A1AA', maxWidth: '600px', margin: '0 auto', fontSize: '15px' }}>
+        <p style={{ color: '#A1A1AA', maxWidth: '600px', margin: '0 auto', fontSize: '15px', marginBottom: '32px' }}>
           Los Sparks son la unidad de energía que utiliza nuestra IA para procesar, programar y viralizar tus contenidos en todas las redes sociales.
         </p>
+
+        <div style={{ 
+          display: 'inline-flex', 
+          background: 'rgba(79, 70, 229, 0.15)', 
+          border: '1px solid rgba(79, 70, 229, 0.3)',
+          padding: '12px 24px', 
+          borderRadius: '100px',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <Zap size={16} color="var(--primary)" fill="var(--primary)" />
+          <span style={{ fontSize: '13px', fontWeight: '700', color: '#FFF' }}>
+            RECARGAS ÚNICAS: <span style={{ color: '#D1D5DB', fontWeight: '500' }}>No caducan, se acumulan y se suman a los Sparks base de tu plan.</span>
+          </span>
+        </div>
       </div>
 
       <div style={{ 
@@ -151,12 +166,15 @@ const SparksMarket = ({ user }) => {
       }}>
         <div style={{ flex: 1, minWidth: '300px' }}>
           <h4 style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <HelpCircle size={20} color="var(--primary)" /> ¿Necesitas una recarga personalizada?
+            <HelpCircle size={20} color="var(--primary)" /> ¿Diferencia entre Planes y Recargas?
           </h4>
-          <p style={{ color: '#71717A', fontSize: '14px' }}>Contáctanos para planes de agencia superiores a 5000 Sparks con descuentos exclusivos.</p>
+          <p style={{ color: '#71717A', fontSize: '14px', lineHeight: '1.6' }}>
+            Tu <strong>Plan</strong> (Pro, Elite) te da las herramientas y una carga mensual base. <br/>
+            Las <strong>Recargas</strong> son combustible extra que compras cuando lo necesitas; nunca vencen y te permiten seguir produciendo sin subir de plan.
+          </p>
         </div>
         <button 
-          onClick={() => window.open(`https://wa.me/${whatsappNumber}?text=Hola! Necesito un plan corporativo de Sparks`, '_blank')}
+          onClick={() => window.open(`https://wa.me/${whatsappNumber}?text=Hola! Necesito un paquete personalizado de Sparks`, '_blank')}
           style={{ 
             background: 'transparent', 
             color: 'var(--primary)', 
