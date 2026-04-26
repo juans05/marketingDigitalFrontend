@@ -76,7 +76,12 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       // Sanitizar URL para evitar dobles slashes
       const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
-      const sigResponse = await fetch(`${apiBase}/api/vidalis/cloudinary-signature?folder=${agencyFolder}&resourceType=${resourceType}`);
+      const sigResponse = await fetch(`${apiBase}/api/vidalis/cloudinary-signature?folder=${agencyFolder}&resourceType=${resourceType}`, {
+        headers: { 
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (!sigResponse.ok) {
         const errorText = await sigResponse.text();
@@ -112,10 +117,12 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
 
       setUploadPhase('registering');
 
-      const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
       const response = await fetch(`${apiBase}/api/vidalis/upload`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({
           videoData: {
             title: file.name,
