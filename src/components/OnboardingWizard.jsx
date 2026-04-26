@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Building2, Users, ChevronRight, ChevronLeft, Instagram, Youtube, Facebook, CheckCircle2, LayoutDashboard, Calendar, BarChart3, MessageSquare, Link, Sparkles, X } from 'lucide-react';
+
+console.log("⚡ OnboardingWizard Module Loaded");
 
 const OnboardingWizard = ({ userId, userType, onComplete }) => {
   const [step, setStep] = useState(1);
@@ -384,3 +386,4 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
 };
 
 export default OnboardingWizard;
+

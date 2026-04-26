@@ -55,6 +55,7 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
 
     const validationErrors = await validateFile(selectedFile);
 
+    const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setStatus('error');
@@ -73,8 +74,6 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       const agencyFolder = user?.name ? user.name.replace(/\s+/g, '_').toLowerCase() : 'general';
       const resourceType = isVideo ? 'video' : 'image';
 
-      // Sanitizar URL para evitar dobles slashes
-      const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
       const sigResponse = await fetch(`${apiBase}/api/vidalis/cloudinary-signature?folder=${agencyFolder}&resourceType=${resourceType}`, {
         headers: { 
