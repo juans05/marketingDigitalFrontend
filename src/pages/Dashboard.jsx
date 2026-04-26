@@ -40,7 +40,7 @@ const Dashboard = () => {
 
       // Logic for Agency vs Artist
       if (parsedUser.account_type === 'agency') {
-        fetchAvailableArtists(parsedUser.id);
+        fetchAvailableArtists(parsedUser.id, parsedUser.token);
       } else {
         // Set partial data immediately so VideoGallery renders without waiting
         if (parsedUser.artist_id) {
@@ -48,7 +48,7 @@ const Dashboard = () => {
           needsOnboarding = false;
         }
         // Always fetch full artist from backend to get active_platforms and latest data
-        fetchIndividualArtist(parsedUser.id);
+        fetchIndividualArtist(parsedUser.id, parsedUser.token);
         if (parsedUser.onboarding_completed) needsOnboarding = false;
       }
 
@@ -64,12 +64,12 @@ const Dashboard = () => {
     }
   }, [navigate]);
 
-  const fetchIndividualArtist = async (uid) => {
+  const fetchIndividualArtist = async (uid, token) => {
     console.log("🔍 Fetching individual artist for user:", uid);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${uid}`, {
         headers: { 
-          'Authorization': `Bearer ${user?.token}`,
+          'Authorization': `Bearer ${token || user?.token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -86,12 +86,12 @@ const Dashboard = () => {
     }
   };
 
-  const fetchAvailableArtists = async (uid) => {
+  const fetchAvailableArtists = async (uid, token) => {
     console.log("🔍 Fetching artists for agency:", uid);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/artists/${uid}`, {
         headers: { 
-          'Authorization': `Bearer ${user?.token}`,
+          'Authorization': `Bearer ${token || user?.token}`,
           'Content-Type': 'application/json'
         }
       });

@@ -28,9 +28,15 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
     if (movingToSocialStep) {
       setIsSubmitting(true);
       try {
+        const userStr = localStorage.getItem('vidalis_user');
+        const token = userStr ? JSON.parse(userStr).token : '';
+
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/onboarding`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({ userId, persona: data.persona, teamSize: data.teamSize, goals: data.goals, firstArtist: data.firstArtist })
         });
         const result = await response.json();
@@ -54,7 +60,12 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
       return;
     }
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`);
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al generar link');
       
@@ -73,9 +84,15 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
   const handleFinish = async () => {
     setIsSubmitting(true);
     try {
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/onboarding`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ userId, persona: data.persona, teamSize: data.teamSize, goals: data.goals, firstArtist: data.firstArtist })
       });
       if (!response.ok) {
@@ -97,9 +114,15 @@ const OnboardingWizard = ({ userId, userType, onComplete }) => {
   const handleSkip = async () => {
     setIsSubmitting(true);
     try {
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
+
       await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/onboarding`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ userId, persona: 'skipped', teamSize: 'solo', goals: [], firstArtist: {} })
       });
     } catch (error) {

@@ -55,7 +55,6 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
 
     const validationErrors = await validateFile(selectedFile);
 
-    const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       setStatus('error');
@@ -63,6 +62,8 @@ const UploadSection = ({ artistId, onUploadSuccess }) => {
       setStatus('ready');
     }
   };
+
+  const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
   const handleUpload = async () => {
     setStatus('uploading');
