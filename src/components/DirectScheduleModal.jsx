@@ -74,11 +74,14 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
 
     try {
       const isVideo = file.type.startsWith('video/');
-      const user = JSON.parse(localStorage.getItem('vidalis_user'));
+      const userStr = localStorage.getItem('vidalis_user');
+      const token = userStr ? JSON.parse(userStr).token : '';
       const agencyFolder = user?.name ? user.name.replace(/\s+/g, '_').toLowerCase() : 'general';
 
       // 1. Signature
-      const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}`);
+      const sigResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/cloudinary-signature?folder=${agencyFolder}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       const sigData = await sigResponse.json();
 
       // 2. Cloudinary Upload
@@ -116,7 +119,10 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/upload`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ videoData })
       });
 
@@ -282,3 +288,204 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
 };
 
 export default DirectScheduleModal;
+
+const styles = `
+  .direct-schedule-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(580px, 95vw);
+    max-height: 90vh;
+    background: #FFFFFF !important;
+    color: #111111 !important;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    border: none !important;
+  }
+  
+  .modal-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid #EEEEEE;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F9FAFB;
+  }
+  
+  .modal-title {
+    color: #111111 !important;
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+  }
+  
+  .modal-header p {
+    color: #6B7280 !important;
+    margin-top: 4px;
+  }
+  
+  .seg-toggle {
+    display: flex;
+    background: #F3F4F6;
+    padding: 6px;
+    border-radius: 14px;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+  
+  .seg-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: #6B7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .seg-btn.active {
+    background: white;
+    color: #111111;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .seg-btn.primary.active {
+    background: #4F46E5;
+    color: white;
+  }
+  
+  label {
+    color: #374151 !important;
+    font-weight: 800 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.05em;
+  }
+  
+  .textarea-plain {
+    width: 100%;
+    background: #F9FAFB !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 12px;
+    padding: 16px;
+    color: #111111 !important;
+    font-size: 14px;
+    min-height: 120px;
+    outline: none;
+  }
+  
+  .textarea-plain::placeholder {
+    color: #9CA3AF;
+  }
+  
+  .time-input {
+    width: 100%;
+    background: #F9FAFB !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #111111 !important;
+    font-weight: 700;
+  }
+  
+  .format-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1.5px solid #E5E7EB;
+    background: white;
+    color: #6B7280;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  
+  .format-btn.selected {
+    border-color: #4F46E5;
+    color: #4F46E5;
+    background: #EEF2FF;
+  }
+  
+  .platform-btn {
+    padding: 8px 16px;
+    border-radius: 100px;
+    border: 1px solid #E5E7EB;
+    background: white;
+    color: #4B5563;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .platform-btn.selected {
+    background: #4F46E5;
+    color: white;
+    border-color: #4F46E5;
+  }
+  
+  .file-drop {
+    background: #F9FAFB;
+    border: 2px dashed #E5E7EB;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 24px;
+  }
+  
+  .modal-subtitle { color: #111111 !important; margin-bottom: 8px; font-weight: 800; }
+  .modal-note { color: #6B7280 !important; font-size: 13px; }
+  
+  .alert-info {
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+    color: #1E40AF;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+  }
+  
+  .btn-close {
+    background: #F3F4F6;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    color: #6B7280;
+    cursor: pointer;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    z-index: 99999;
+  }
+`;
+
+// Inyectar estilos
+if (typeof document !== 'undefined') {
+  const styleTag = document.createElement('style');
+  styleTag.innerHTML = styles;
+  document.head.appendChild(styleTag);
+}
+
