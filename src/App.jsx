@@ -6,6 +6,7 @@ import Pricing from './components/Pricing';
 import Footer from './components/Footer';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import SocialCallback from './pages/SocialCallback';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function LandingPage() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/social-callback" element={<SocialCallback />} />
         </Routes>
       </ErrorBoundary>
     </BrowserRouter>
