@@ -9,7 +9,8 @@ import UploadSection from '../components/UploadSection';
 import VideoGallery from '../components/VideoGallery';
 import SocialConnect from '../components/SocialConnect';
 import ArtistManager from '../components/ArtistManager';
-import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2, Calendar, Users, Loader2, Share2, Zap } from 'lucide-react';
+import Settings from '../components/Settings';
+import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2, Calendar, Users, Loader2, Share2, Zap, Settings as SettingsIcon } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -212,6 +213,9 @@ const Dashboard = () => {
           <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}>
             <Zap size={20} /> <span style={{ fontWeight: '600' }}>Recargar Energía</span>
           </button>
+          <button className={activeView === 'settings' ? 'active' : ''} onClick={() => setActiveView('settings')}>
+            <SettingsIcon size={20} /> <span style={{ fontWeight: '600' }}>Configuración</span>
+          </button>
         </aside>
 
         {/* Main Content */}
@@ -224,8 +228,9 @@ const Dashboard = () => {
               {activeView === 'connect' && 'Redes Sociales'}
               {activeView === 'artists' && 'Gestión de Marcas'}
               {activeView === 'sparks' && 'Mercado de Energía'}
+              {activeView === 'settings' && 'Configuración'}
             </h1>
-            {activeArtist && <div className="active-artist-tag">Editando: {activeArtist.name}</div>}
+            {activeArtist && activeView !== 'settings' && <div className="active-artist-tag">Editando: {activeArtist.name}</div>}
           </div>
 
           {activeView === 'analytics' && <AnalyticsView userId={user.id} activeArtist={activeArtist} />}
@@ -300,6 +305,13 @@ const Dashboard = () => {
 
           {activeView === 'sparks' && <SparksMarket user={user} />}
 
+          {activeView === 'settings' && <Settings user={user} onUpdate={async (data) => {
+            console.log('Updated user data:', data);
+            const updated = { ...user, name: `${data.firstName} ${data.lastName}`, bio: data.bio };
+            localStorage.setItem('vidalis_user', JSON.stringify(updated));
+            setUser(updated);
+          }} />}
+
           {activeView === 'artists' && (
             <div className="view-artists">
               <ArtistManager
@@ -352,7 +364,11 @@ const Dashboard = () => {
         .btn-exit-pro { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-exit-pro:hover { background: #FEE2E2; }
 
-        .sidebar-pro { width: 260px; background: #121214; border-right: 1px solid rgba(255,255,255,0.08); padding: 32px 16px; display: flex; flex-direction: column; gap: 4px; }
+        .sidebar-pro { width: 260px; background: #121214; border-right: 1px solid rgba(255,255,255,0.08); padding: 32px 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: calc(100vh - 70px); }
+        .sidebar-pro::-webkit-scrollbar { width: 6px; }
+        .sidebar-pro::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-pro::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+        .sidebar-pro::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
         .sidebar-section-label { font-size: 11px; font-weight: 700; color: #A1A1AA; padding: 0 16px 8px; letter-spacing: 0.05em; }
         .sidebar-pro button {
           display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-radius: 12px;

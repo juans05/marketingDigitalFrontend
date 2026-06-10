@@ -276,10 +276,6 @@ const AnalyticsView = ({ userId, activeArtist }) => {
   return (
     <div className="analytics-container animate-fade-in">
       <div className="analytics-header">
-        <div>
-          <h2 className="section-title">Dashboard de Analítica</h2>
-          <p className="section-subtitle">Métricas reales de tus canales + decisiones IA.</p>
-        </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn-secondary" onClick={handleSync} disabled={loadingStats || loadingPosts} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <RefreshCw size={13} className={loadingStats ? 'animate-spin' : ''} />
