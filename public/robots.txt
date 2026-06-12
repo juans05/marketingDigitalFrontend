@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api
+Disallow: /admin
+
+Sitemap: https://vidalis.up.railway.app/sitemap.xml

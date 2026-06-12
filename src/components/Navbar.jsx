@@ -45,8 +45,8 @@ const Navbar = () => {
       </div>
 
       <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
-        <a href="#features" className="nav-link">Funciones</a>
-        <a href="#about" className="nav-link">Nosotros</a>
+        <a href="#features" className="nav-link" aria-label="Ver funciones">Funciones</a>
+        <a href="#about" className="nav-link" aria-label="Sobre Vidalis">Nosotros</a>
 
         <button
           onClick={() => navigate('/login')}

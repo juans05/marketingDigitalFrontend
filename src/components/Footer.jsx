@@ -10,10 +10,10 @@ const Footer = () => {
       textAlign: 'center'
     }}>
       <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '30px' }}>
-        <a href="#" style={{ color: 'var(--text-muted)' }}><Twitter size={20} /></a>
-        <a href="#" style={{ color: 'var(--text-muted)' }}><Instagram size={20} /></a>
-        <a href="#" style={{ color: 'var(--text-muted)' }}><Github size={20} /></a>
-        <a href="#" style={{ color: 'var(--text-muted)' }}><Mail size={20} /></a>
+        <a href="#" aria-label="Síguenos en Twitter" style={{ color: 'var(--text-muted)' }}><Twitter size={20} /></a>
+        <a href="#" aria-label="Síguenos en Instagram" style={{ color: 'var(--text-muted)' }}><Instagram size={20} /></a>
+        <a href="#" aria-label="Nuestro repositorio en GitHub" style={{ color: 'var(--text-muted)' }}><Github size={20} /></a>
+        <a href="#" aria-label="Envíanos un email" style={{ color: 'var(--text-muted)' }}><Mail size={20} /></a>
       </div>
       <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
         © 2026 VIDALIS.AI - Automatización Viral para Músicos de Élite.
