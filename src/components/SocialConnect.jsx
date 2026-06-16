@@ -154,12 +154,11 @@ const SocialConnect = ({ artistId }) => {
         </div>
       )}
 
-      {/* Selección de plataforma (Zernio: una URL de conexión por red) */}
+      {/* Selección de plataforma (Zernio: una URL de conexión por red) — solo las que faltan conectar */}
       {selectablePlatforms ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {sortByDisplayOrder(selectablePlatforms).map(pid => {
+          {sortByDisplayOrder(selectablePlatforms.filter(pid => !connectedPlatforms.includes(pid))).map(pid => {
             const cfg = PLATFORM_ICONS[pid] || { icon: <Link2 size={16} />, label: pid, color: '#888' };
-            const alreadyConnected = connectedPlatforms.includes(pid);
             return (
               <button
                 key={pid}
@@ -181,7 +180,6 @@ const SocialConnect = ({ artistId }) => {
                 }}
               >
                 {cfg.icon} CONECTAR {cfg.label.toUpperCase()}
-                {alreadyConnected && <CheckCircle2 size={14} color="#22c55e" />}
               </button>
             );
           })}
