@@ -9,12 +9,18 @@ const PLATFORM_ICONS = {
   tiktok_business:{ icon: <Building2 size={16} />,  label: 'TikTok Biz', color: '#2DD4BF' },
 };
 
+const PLATFORM_DISPLAY_ORDER = ['instagram', 'tiktok', 'facebook', 'youtube', 'tiktok_business', 'linkedin'];
+const sortByDisplayOrder = (platforms) => [...platforms].sort(
+  (a, b) => PLATFORM_DISPLAY_ORDER.indexOf(a) - PLATFORM_DISPLAY_ORDER.indexOf(b)
+);
+
 const SocialConnect = ({ artistId }) => {
   const [loading, setLoading]           = useState(false);
   const [verifying, setVerifying]       = useState(false);
   const [error, setError]               = useState('');
   const [popupOpened, setPopupOpened]   = useState(false);
   const [connectedPlatforms, setConnectedPlatforms] = useState([]);
+  const [selectablePlatforms, setSelectablePlatforms] = useState(null);
 
   useEffect(() => {
     if (artistId) fetchStatus();
@@ -34,22 +40,46 @@ const SocialConnect = ({ artistId }) => {
     } catch {}
   };
 
+  const requestConnectUrl = async (platform) => {
+    const userStr = localStorage.getItem('vidalis_user');
+    const token = userStr ? JSON.parse(userStr).token : '';
+    const qs = platform ? `?platform=${platform}` : '';
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}${qs}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      if (data.code === 'PROFILE_LIMIT_REACHED') {
+        throw new Error('Tu plan actual ha alcanzado el límite de perfiles. Contacta a soporte en servidorinjoyplan@gmail.com para ampliar tu plan.');
+      }
+      throw new Error(data.error || 'Error al generar link');
+    }
+    return data;
+  };
+
   const handleConnect = async () => {
     setLoading(true);
     setError('');
     try {
-      const userStr = localStorage.getItem('vidalis_user');
-      const token = userStr ? JSON.parse(userStr).token : '';
-      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/connect-social/${artistId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        if (data.code === 'PROFILE_LIMIT_REACHED') {
-          throw new Error('Tu plan actual ha alcanzado el límite de perfiles. Contacta a soporte en servidorinjoyplan@gmail.com para ampliar tu plan.');
-        }
-        throw new Error(data.error || 'Error al generar link');
+      const data = await requestConnectUrl();
+      if (data.needsPlatformSelection) {
+        setSelectablePlatforms(data.allowedPlatforms || []);
+        return;
       }
+      window.open(data.url, '_blank', 'width=700,height=750');
+      setPopupOpened(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConnectPlatform = async (platform) => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await requestConnectUrl(platform);
       window.open(data.url, '_blank', 'width=700,height=750');
       setPopupOpened(true);
     } catch (err) {
@@ -124,34 +154,67 @@ const SocialConnect = ({ artistId }) => {
         </div>
       )}
 
-      {/* Botón principal */}
-      <button
-        onClick={handleConnect}
-        disabled={loading}
-        style={{
-          width: '100%',
-          height: '56px',
-          borderRadius: '14px',
-          background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-          color: '#fff',
-          fontWeight: 800,
-          fontSize: '14px',
-          letterSpacing: '0.05em',
-          border: 'none',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-          opacity: loading ? 0.7 : 1,
-          transition: 'all 0.2s',
-          boxShadow: '0 4px 20px rgba(99,102,241,0.35)',
-        }}
-        onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)'; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-      >
-        {loading
-          ? <><Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> Abriendo portal...</>
-          : <><Link2 size={18} /> {hasConnections ? 'GESTIONAR REDES CONECTADAS' : 'CONECTAR REDES SOCIALES'}</>
-        }
-      </button>
+      {/* Selección de plataforma (Zernio: una URL de conexión por red) */}
+      {selectablePlatforms ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {sortByDisplayOrder(selectablePlatforms).map(pid => {
+            const cfg = PLATFORM_ICONS[pid] || { icon: <Link2 size={16} />, label: pid, color: '#888' };
+            const alreadyConnected = connectedPlatforms.includes(pid);
+            return (
+              <button
+                key={pid}
+                onClick={() => handleConnectPlatform(pid)}
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  height: '52px',
+                  borderRadius: '14px',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${cfg.color}55`,
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  opacity: loading ? 0.7 : 1,
+                  transition: 'all 0.2s',
+                }}
+              >
+                {cfg.icon} CONECTAR {cfg.label.toUpperCase()}
+                {alreadyConnected && <CheckCircle2 size={14} color="#22c55e" />}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <button
+          onClick={handleConnect}
+          disabled={loading}
+          style={{
+            width: '100%',
+            height: '56px',
+            borderRadius: '14px',
+            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            color: '#fff',
+            fontWeight: 800,
+            fontSize: '14px',
+            letterSpacing: '0.05em',
+            border: 'none',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+            opacity: loading ? 0.7 : 1,
+            transition: 'all 0.2s',
+            boxShadow: '0 4px 20px rgba(99,102,241,0.35)',
+          }}
+          onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+        >
+          {loading
+            ? <><Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> Abriendo portal...</>
+            : <><Link2 size={18} /> {hasConnections ? 'GESTIONAR REDES CONECTADAS' : 'CONECTAR REDES SOCIALES'}</>
+          }
+        </button>
+      )}
 
       {/* Botón de verificar (aparece tras abrir el portal) */}
       {popupOpened && (
