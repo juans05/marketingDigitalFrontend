@@ -3,11 +3,11 @@ import { createPortal } from 'react-dom';
 import { X, UploadCloud, Calendar, Image as ImageIcon, Sparkles, CheckCircle, Loader2, PenTool } from 'lucide-react';
 
 const PLATFORM_CONFIG = {
-  tiktok: { label: 'TikTok' },
-  instagram: { label: 'Instagram' },
-  youtube: { label: 'YouTube' },
-  facebook: { label: 'Facebook' },
-  linkedin: { label: 'LinkedIn' },
+  tiktok:    { label: 'TikTok',    acceptsImage: false, acceptsVideo: true  },
+  instagram: { label: 'Instagram', acceptsImage: true,  acceptsVideo: true  },
+  youtube:   { label: 'YouTube',   acceptsImage: false, acceptsVideo: true  },
+  facebook:  { label: 'Facebook',  acceptsImage: true,  acceptsVideo: true  },
+  linkedin:  { label: 'LinkedIn',  acceptsImage: true,  acceptsVideo: true  },
 };
 
 const PLAN_RESTRICTIONS = {
@@ -59,12 +59,15 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
     if (selected) {
       setFile(selected);
       setPreview(URL.createObjectURL(selected));
-      // Auto-set post-type heuristic
-      if (selected.type.startsWith('video/')) {
-        setPostType('reel');
-      } else {
-        setPostType('feed');
-      }
+      const isVideo = selected.type.startsWith('video/');
+      setPostType(isVideo ? 'reel' : 'feed');
+      // Deseleccionar plataformas que no aceptan este tipo de contenido
+      setSelectedPlatforms(prev =>
+        prev.filter(p => {
+          const cfg = PLATFORM_CONFIG[p.toLowerCase()];
+          return cfg ? (isVideo ? cfg.acceptsVideo : cfg.acceptsImage) : true;
+        })
+      );
     }
   };
 
@@ -80,6 +83,7 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
     if (!file) return setError('Selecciona una imagen o video.');
     if (isManual && !text.trim()) return setError('Escribe el texto de la publicación.');
     if (selectedPlatforms.length === 0) return setError('Selecciona al menos una red social.');
+
 
     setLoading(true);
     setError('');
@@ -267,14 +271,23 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
                 })
                 .map(platform => {
                 const isSelected = selectedPlatforms.includes(platform);
+                const cfg = PLATFORM_CONFIG[platform?.toLowerCase()];
+                const isVideo = file?.type?.startsWith('video/');
+                const isImage = file?.type?.startsWith('image/');
+                const incompatible = file && cfg && (
+                  (isVideo && !cfg.acceptsVideo) || (isImage && !cfg.acceptsImage)
+                );
                 return (
                   <button
                     key={platform}
-                    onClick={() => togglePlatform(platform)}
-                    className={`platform-btn ${isSelected ? 'selected' : ''}`}
+                    onClick={() => !incompatible && togglePlatform(platform)}
+                    disabled={incompatible}
+                    title={incompatible ? `${cfg?.label} no acepta ${isImage ? 'imágenes' : 'videos'}` : undefined}
+                    className={`platform-btn ${isSelected ? 'selected' : ''} ${incompatible ? 'disabled' : ''}`}
                   >
-                    {isSelected && <CheckCircle size={14} />}
-                    {PLATFORM_CONFIG[platform]?.label || platform}
+                    {isSelected && !incompatible && <CheckCircle size={14} />}
+                    {cfg?.label || platform}
+                    {incompatible && <span style={{ fontSize: '10px', marginLeft: '4px', opacity: 0.7 }}>{isImage ? '(solo video)' : '(solo imagen)'}</span>}
                   </button>
                 );
               })}
@@ -449,6 +462,14 @@ const styles = `
     background: #4F46E5;
     color: white;
     border-color: #4F46E5;
+  }
+
+  .platform-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #F3F4F6;
+    color: #9CA3AF;
+    border-color: #E5E7EB;
   }
   
   .file-drop {
