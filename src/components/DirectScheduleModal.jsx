@@ -33,6 +33,18 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isOpen]);
+
   // Combinar fecha inicial con la hora
   const getISOString = () => {
     const d = new Date(initialDate);
@@ -161,7 +173,7 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
           </button>
         </div>
 
-        <div style={{ padding: '24px', flex: 1 }}>
+        <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
           {error && (
             <div className="alert-error">{error}</div>
           )}
@@ -304,6 +316,7 @@ const styles = `
     flex-direction: column;
     box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     border: none !important;
+    overflow: hidden;
   }
   
   .modal-header {
