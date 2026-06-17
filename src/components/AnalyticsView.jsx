@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Sparkles, BarChart3, Upload, Loader2, TrendingUp, Users, Film,
   Heart, MessageCircle, Eye, Share2, Lightbulb, Target, AlertCircle,
@@ -23,62 +24,69 @@ const METRIC_EXPLANATIONS = {
   rendimiento_publicacion: 'Tabla con cada publicación y sus métricas reales de las redes sociales. Te permite identificar qué contenido funcionó mejor y repetir ese formato en el futuro.',
 };
 
-const InfoTooltip = ({ metricKey, position = 'top' }) => {
+const InfoTooltip = ({ metricKey }) => {
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const iconRef = useRef(null);
   const text = METRIC_EXPLANATIONS[metricKey];
   if (!text) return null;
 
-  const show = () => {
+  const show = (e) => {
+    e.stopPropagation();
     if (iconRef.current) {
       const rect = iconRef.current.getBoundingClientRect();
-      setCoords({ top: rect.top, left: rect.left + rect.width / 2 });
+      setCoords({ top: rect.top - 8, left: rect.left + rect.width / 2 });
     }
     setVisible(true);
   };
 
+  const hide = () => setVisible(false);
+  const toggle = (e) => { e.stopPropagation(); setVisible(v => !v); };
+
+  const tooltip = visible ? createPortal(
+    <span
+      style={{
+        position: 'fixed',
+        top: coords.top,
+        left: coords.left,
+        transform: 'translate(-50%, -100%)',
+        zIndex: 99999,
+        background: 'rgba(15,15,20,0.97)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        borderRadius: '10px',
+        padding: '10px 14px',
+        fontSize: '12px',
+        lineHeight: '1.6',
+        color: '#E2E8F0',
+        maxWidth: '240px',
+        width: 'max-content',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        pointerEvents: 'none',
+      }}
+    >
+      {text}
+      <span style={{
+        position: 'absolute', bottom: '-6px', left: '50%', transform: 'translateX(-50%)',
+        width: 0, height: 0,
+        borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
+        borderTop: '6px solid rgba(15,15,20,0.97)',
+      }} />
+    </span>,
+    document.body
+  ) : null;
+
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
       <span
         ref={iconRef}
         onMouseEnter={show}
-        onMouseLeave={() => setVisible(false)}
-        onClick={() => setVisible(v => !v)}
+        onMouseLeave={hide}
+        onClick={toggle}
         style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', color: 'var(--text-dim)', marginLeft: '4px', opacity: 0.6 }}
       >
         <Info size={11} />
       </span>
-      {visible && (
-        <span
-          style={{
-            position: 'fixed',
-            top: coords.top - 8,
-            left: coords.left,
-            transform: 'translate(-50%, -100%)',
-            zIndex: 9999,
-            background: 'rgba(15,15,20,0.97)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            fontSize: '12px',
-            lineHeight: '1.6',
-            color: '#E2E8F0',
-            maxWidth: '240px',
-            width: 'max-content',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-            pointerEvents: 'none',
-          }}
-        >
-          {text}
-          <span style={{
-            position: 'absolute', bottom: '-6px', left: '50%', transform: 'translateX(-50%)',
-            width: 0, height: 0,
-            borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
-            borderTop: '6px solid rgba(255,255,255,0.12)',
-          }} />
-        </span>
-      )}
+      {tooltip}
     </span>
   );
 };
