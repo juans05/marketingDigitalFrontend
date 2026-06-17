@@ -3,12 +3,14 @@ import { createPortal } from 'react-dom';
 import { Eye, Heart, Share2, Calendar, Copy, ChevronDown, ChevronUp, Loader, CheckCircle, AlertCircle, TrendingUp, Rocket, BrainCircuit, Sparkles, X, Clock, Smartphone, History } from 'lucide-react';
 
 const PLATFORM_CONFIG = {
-  tiktok: { label: 'TikTok', color: '#000', bg: '#F3F4F6' },
-  instagram: { label: 'Instagram', color: '#000', bg: '#F3F4F6' },
-  youtube: { label: 'YouTube', color: '#000', bg: '#F3F4F6' },
-  facebook: { label: 'Facebook', color: '#000', bg: '#F3F4F6' },
-  linkedin: { label: 'LinkedIn', color: '#000', bg: '#F3F4F6' },
+  tiktok:    { label: 'TikTok',    color: '#000', bg: '#F3F4F6', acceptsImage: false, acceptsVideo: true  },
+  instagram: { label: 'Instagram', color: '#000', bg: '#F3F4F6', acceptsImage: true,  acceptsVideo: true  },
+  youtube:   { label: 'YouTube',   color: '#000', bg: '#F3F4F6', acceptsImage: false, acceptsVideo: true  },
+  facebook:  { label: 'Facebook',  color: '#000', bg: '#F3F4F6', acceptsImage: true,  acceptsVideo: true  },
+  linkedin:  { label: 'LinkedIn',  color: '#000', bg: '#F3F4F6', acceptsImage: true,  acceptsVideo: true  },
 };
+
+const isVideoUrl = (url) => url && (url.includes('/video/') || /\.(mp4|mov|webm|ogv)(\?|$)/i.test(url));
 
 const PLAN_RESTRICTIONS = {
   'Free': ['instagram'],
@@ -80,6 +82,18 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const [showBestTimes, setShowBestTimes] = useState(false);
   const [notification, setNotification] = useState(null);
   const pollIntervalRef = useRef(null);
+
+  // Deseleccionar plataformas incompatibles con el tipo de media cuando llegan los datos
+  useEffect(() => {
+    if (!data?.source_url) return;
+    const mediaIsVideo = isVideoUrl(data.source_url || data.processed_url);
+    setSelectedPlatforms(prev =>
+      prev.filter(p => {
+        const cfg = PLATFORM_CONFIG[p];
+        return cfg ? (mediaIsVideo ? cfg.acceptsVideo : cfg.acceptsImage) : true;
+      })
+    );
+  }, [data?.source_url]);
 
   const fetchAnalytics = async (silent = false, isOpening = false) => {
     if (!silent) setLoading(true);
@@ -376,8 +390,13 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                         .map(([key, cfg]) => {
                         const isConnected = activePlatforms.includes(key);
                         const isSelected = selectedPlatforms.includes(key);
+                        const mediaIsVideo = isVideoUrl(data?.source_url || data?.processed_url);
+                        const incompatible = data?.source_url && (
+                          (mediaIsVideo && !cfg.acceptsVideo) || (!mediaIsVideo && !cfg.acceptsImage)
+                        );
+                        const isDisabled = !isConnected || isReadOnly || incompatible;
                         const togglePlatformBtn = () => {
-                          if (!isConnected || isReadOnly) return;
+                          if (isDisabled) return;
                           setSelectedPlatforms(prev =>
                             prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key]
                           );
@@ -386,14 +405,16 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                           <button
                             key={key}
                             onClick={togglePlatformBtn}
-                            disabled={!isConnected || isReadOnly}
+                            disabled={isDisabled}
+                            title={incompatible ? `${cfg.label} no acepta ${mediaIsVideo ? 'videos' : 'imágenes'}` : undefined}
                             style={{
                               padding: '10px 18px',
                               borderRadius: '100px',
-                              border: isSelected && isConnected ? '1px solid rgba(79,70,229,0.6)' : '1px solid rgba(255,255,255,0.08)',
-                              background: isSelected && isConnected ? 'rgba(79,70,229,0.15)' : 'rgba(255,255,255,0.04)',
-                              color: isSelected && isConnected ? '#818CF8' : isConnected ? '#71717A' : '#3F3F46',
-                              cursor: isConnected && !isReadOnly ? 'pointer' : 'not-allowed',
+                              border: isSelected && isConnected && !incompatible ? '1px solid rgba(79,70,229,0.6)' : '1px solid rgba(255,255,255,0.08)',
+                              background: isSelected && isConnected && !incompatible ? 'rgba(79,70,229,0.15)' : 'rgba(255,255,255,0.04)',
+                              color: incompatible ? '#3F3F46' : isSelected && isConnected ? '#818CF8' : isConnected ? '#71717A' : '#3F3F46',
+                              cursor: isDisabled ? 'not-allowed' : 'pointer',
+                              opacity: incompatible ? 0.4 : 1,
                               fontSize: '11px',
                               fontWeight: '800',
                               transition: 'all 0.2s ease',
@@ -403,6 +424,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                             }}
                           >
                             {cfg.label}
+                            {incompatible && <span style={{ fontSize: '9px', opacity: 0.8 }}>{mediaIsVideo ? '(imagen)' : '(video)'}</span>}
                           </button>
                         );
                       })}
