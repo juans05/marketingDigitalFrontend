@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   Sparkles, BarChart3, Upload, Loader2, TrendingUp, Users, Film,
-  Heart, MessageCircle, Eye, Share2, Lightbulb, Target, AlertCircle, RefreshCw
+  Heart, MessageCircle, Eye, Share2, Lightbulb, Target, AlertCircle,
+  RefreshCw, Bookmark, Clock, Zap
 } from 'lucide-react';
 
 const TrendChart = ({ data }) => {
@@ -60,9 +61,30 @@ const MetricPill = ({ icon, value, label, color = '#6366F1' }) => (
   <div className="metric-pill" style={{ borderColor: `${color}22`, background: `${color}08` }}>
     <span style={{ color }}>{icon}</span>
     <span className="metric-pill-value">{value}</span>
-    <span className="metric-pill-label">{label}</span>
+    {label && <span className="metric-pill-label">{label}</span>}
   </div>
 );
+
+const BestTimesChart = ({ times }) => {
+  if (!times || times.length === 0) return null;
+  const maxEng = Math.max(...times.map(t => t.avg_engagement)) || 1;
+  return (
+    <div className="best-times-chart">
+      {times.map((t, i) => (
+        <div key={i} className="best-time-bar">
+          <div className="best-time-label">{t.label}</div>
+          <div className="best-time-track">
+            <div
+              className="best-time-fill"
+              style={{ width: `${Math.round((t.avg_engagement / maxEng) * 100)}%`, opacity: 1 - i * 0.08 }}
+            />
+          </div>
+          <div className="best-time-value">{t.avg_engagement > 0 ? `~${t.avg_engagement}` : '—'}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const InsightCard = ({ insights, decisions, bestPlatform, bestPostTitle, engagementRate, loading }) => {
   if (loading) {
@@ -145,7 +167,7 @@ const InsightCard = ({ insights, decisions, bestPlatform, bestPostTitle, engagem
 
 const PLATFORM_META = {
   instagram: { label: 'Instagram', emoji: '📸', color: '#E1306C' },
-  tiktok:    { label: 'TikTok',    emoji: '🎵', color: '#010101' },
+  tiktok:    { label: 'TikTok',    emoji: '🎵', color: '#69C9D0' },
   youtube:   { label: 'YouTube',   emoji: '▶',  color: '#FF0000' },
   facebook:  { label: 'Facebook',  emoji: '👥', color: '#1877F2' },
   linkedin:  { label: 'LinkedIn',  emoji: '💼', color: '#0A66C2' },
@@ -175,9 +197,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
       const token = userStr ? JSON.parse(userStr).token : '';
       const url = new URL(`${import.meta.env.VITE_API_URL}/api/vidalis/stats/${userId}`);
       if (activeArtist?.id) url.searchParams.append('artistId', activeArtist.id);
-      const res = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) setData(await res.json());
     } catch (err) {
       console.error('Analytics Fetch Error:', err);
@@ -218,7 +238,6 @@ const AnalyticsView = ({ userId, activeArtist }) => {
       if (res.ok) {
         const json = await res.json();
         setInsights(json);
-        // Mergear métricas reales a los posts si vinieron del endpoint
         if (json.posts?.length) setPosts(json.posts);
       }
     } catch (err) {
@@ -229,7 +248,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
   };
 
   const formatNum = (n) => {
-    if (!n) return '0';
+    if (!n || n === 0) return '0';
     if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
     if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
     return String(n);
@@ -239,22 +258,17 @@ const AnalyticsView = ({ userId, activeArtist }) => {
     const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
     const userStr = localStorage.getItem('vidalis_user');
     const token = userStr ? JSON.parse(userStr).token : '';
-    
-    // Si hay un artista activo, primero forzar sincronización profunda con las redes
     if (activeArtist?.id) {
-      setLoadingStats(true); // Usamos el loader para feedback
+      setLoadingStats(true);
       try {
-        const syncRes = await fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync`, {
+        await fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!syncRes.ok) console.warn('Sync point response not OK:', syncRes.status);
       } catch (err) {
         console.error('Deep sync error:', err);
       }
     }
-
-    // Refrescar los datos del dashboard
     fetchStats();
     if (activeArtist?.id) fetchPostMetrics(activeArtist.id);
   };
@@ -273,19 +287,30 @@ const AnalyticsView = ({ userId, activeArtist }) => {
   const breakdown = data?.platform_breakdown || {};
   const connectedPlatforms = Object.keys(breakdown).filter(p => PLATFORM_META[p]);
   const totalReachAll = connectedPlatforms.reduce((sum, p) => sum + (breakdown[p]?.reach || 0), 0);
-  const bestPlatformKey = connectedPlatforms.reduce((best, p) =>
-    (breakdown[p]?.reach || 0) > (breakdown[best]?.reach || 0) ? p : best,
-    connectedPlatforms[0] || null
-  );
+  const bestPlatformKey = connectedPlatforms.reduce((best, p) => {
+    const engA = breakdown[p]?.engagement_rate || 0;
+    const engB = breakdown[best]?.engagement_rate || 0;
+    return engA > engB ? p : best;
+  }, connectedPlatforms[0] || null);
 
-  const allPosts = posts.length ? posts : data?.postList || [];
+  // Merge postList from stats (has analytics_4h) with real-time from fetchPostMetrics
+  const statsPostList = data?.postList || [];
+  const realtimePosts = posts.length ? posts : [];
+  const mergedPosts = statsPostList.map(sp => {
+    const rt = realtimePosts.find(p => p.id === sp.id);
+    if (rt && (rt.likes > 0 || rt.views > 0)) return { ...sp, ...rt };
+    return sp;
+  });
+  const allPosts = mergedPosts.length ? mergedPosts : realtimePosts;
   const filteredPosts = activePlatform === 'all'
     ? allPosts
     : allPosts.filter(p => Array.isArray(p.platforms) && p.platforms.includes(activePlatform));
 
+  const bestTimes = data?.best_posting_times || [];
+
   return (
     <div className="analytics-container animate-fade-in">
-      {/* Header buttons */}
+      {/* Header */}
       <div className="analytics-header">
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn-secondary" onClick={handleSync} disabled={loadingStats || loadingPosts} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -301,7 +326,19 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         </div>
       </div>
 
-      {/* Tabs de plataforma */}
+      {/* Insights IA */}
+      {(insights || loadingInsights) && (
+        <InsightCard
+          loading={loadingInsights}
+          insights={insights?.insights || []}
+          decisions={insights?.decisions || []}
+          bestPlatform={insights?.bestPlatform}
+          bestPostTitle={insights?.bestPostTitle}
+          engagementRate={insights?.engagementRate}
+        />
+      )}
+
+      {/* Platform Tabs */}
       <div className="platform-tabs">
         <button onClick={() => setActivePlatform('all')} className={`platform-tab ${activePlatform === 'all' ? 'active' : ''}`}>
           ★ Todo
@@ -309,11 +346,14 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         {connectedPlatforms.map(p => (
           <button key={p} onClick={() => setActivePlatform(p)} className={`platform-tab ${activePlatform === p ? 'active' : ''}`}>
             {PLATFORM_META[p].emoji} {PLATFORM_META[p].label}
+            {breakdown[p]?.engagement_rate > 0 && (
+              <span className="tab-er-badge">{breakdown[p].engagement_rate.toFixed(1)}%</span>
+            )}
           </button>
         ))}
       </div>
 
-      {/* ── VISTA TODO: comparativa entre plataformas ── */}
+      {/* ── VISTA TODO ── */}
       {activePlatform === 'all' && (
         <>
           <div className="stats-section-label">COMPARATIVA DE PLATAFORMAS</div>
@@ -330,7 +370,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                 const meta = PLATFORM_META[p];
                 const isBest = p === bestPlatformKey;
                 return (
-                  <div key={p} className="platform-compare-card card-pro" onClick={() => setActivePlatform(p)} style={{ cursor: 'pointer', borderColor: isBest ? `${meta.color}44` : undefined }}>
+                  <div key={p} className="platform-compare-card card-pro" onClick={() => setActivePlatform(p)} style={{ cursor: 'pointer', borderColor: isBest ? `${meta.color}55` : undefined }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '22px' }}>{meta.emoji}</span>
@@ -338,12 +378,13 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                       </div>
                       {isBest && <span style={{ fontSize: '10px', fontWeight: '800', background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '99px', padding: '2px 10px' }}>★ LÍDER</span>}
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                       {[
-                        { icon: <Users size={12} />, val: formatNum(m.followers), label: 'Seguidores' },
-                        { icon: <Eye size={12} />,   val: formatNum(m.reach),     label: 'Alcance'    },
-                        { icon: <Heart size={12} />, val: formatNum(m.likes),     label: 'Likes'      },
-                        { icon: <MessageCircle size={12} />, val: formatNum(m.comments), label: 'Comentarios' },
+                        { icon: <Users size={12} />,        val: formatNum(m.followers), label: 'Seguidores' },
+                        { icon: <Eye size={12} />,          val: formatNum(m.reach),     label: 'Alcance'    },
+                        { icon: <Heart size={12} />,        val: formatNum(m.likes),     label: 'Likes'      },
+                        { icon: <MessageCircle size={12} />,val: formatNum(m.comments),  label: 'Comentarios'},
                       ].map((item, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span style={{ color: 'var(--text-muted)' }}>{item.icon}</span>
@@ -354,6 +395,17 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                         </div>
                       ))}
                     </div>
+
+                    {/* Engagement rate badge */}
+                    {m.engagement_rate > 0 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
+                        <Zap size={11} color="#F59E0B" />
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#F59E0B' }}>
+                          {m.engagement_rate.toFixed(1)}% engagement rate
+                        </span>
+                      </div>
+                    )}
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>{m.posts || 0} posts</span>
                       <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>{pct}% del alcance</span>
@@ -367,13 +419,28 @@ const AnalyticsView = ({ userId, activeArtist }) => {
             </div>
           )}
 
-          {/* Tracción global */}
-          <div className="card-pro chart-card-pro">
-            <div className="chart-card-header">
-              <h3 className="chart-title">TRACCIÓN VIRAL (7 DÍAS)</h3>
-              <div className="chart-period">MÉTRICA LIVE</div>
+          {/* Tracción global + Mejor hora para publicar */}
+          <div style={{ display: 'grid', gridTemplateColumns: bestTimes.length ? '2fr 1fr' : '1fr', gap: '20px', marginBottom: '32px' }}>
+            <div className="card-pro chart-card-pro">
+              <div className="chart-card-header">
+                <h3 className="chart-title">TRACCIÓN VIRAL (7 DÍAS)</h3>
+                <div className="chart-period">MÉTRICA LIVE</div>
+              </div>
+              <TrendChart data={data?.history} />
             </div>
-            <TrendChart data={data?.history} />
+
+            {bestTimes.length > 0 && (
+              <div className="card-pro" style={{ padding: '28px' }}>
+                <div className="chart-card-header" style={{ marginBottom: '20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Clock size={14} color="var(--primary)" />
+                    <h3 className="chart-title">MEJOR HORA</h3>
+                  </div>
+                  <div className="chart-period">ENGAGEMENT</div>
+                </div>
+                <BestTimesChart times={bestTimes} />
+              </div>
+            )}
           </div>
         </>
       )}
@@ -382,20 +449,32 @@ const AnalyticsView = ({ userId, activeArtist }) => {
       {activePlatform !== 'all' && (() => {
         const m = breakdown[activePlatform] || {};
         const meta = PLATFORM_META[activePlatform] || {};
+        const isInstagram = activePlatform === 'instagram';
+        const isYouTube = activePlatform === 'youtube';
+
         const kpis = [
-          { label: 'Seguidores', value: formatNum(m.followers), icon: <Users size={18} />, color: '#818CF8' },
-          { label: 'Alcance',    value: formatNum(m.reach),     icon: <Eye size={18} />,   color: '#38BDF8' },
-          { label: 'Likes',      value: formatNum(m.likes),     icon: <Heart size={18} />, color: '#F472B6' },
-          { label: 'Comentarios',value: formatNum(m.comments),  icon: <MessageCircle size={18} />, color: '#34D399' },
+          { label: 'Seguidores',  value: formatNum(m.followers), icon: <Users size={18} />,         color: '#818CF8' },
+          { label: 'Alcance',     value: formatNum(m.reach),     icon: <Eye size={18} />,            color: '#38BDF8' },
+          { label: 'Likes',       value: formatNum(m.likes),     icon: <Heart size={18} />,          color: '#F472B6' },
+          { label: 'Comentarios', value: formatNum(m.comments),  icon: <MessageCircle size={18} />,  color: '#34D399' },
+          { label: 'Compartidos', value: formatNum(m.shares),    icon: <Share2 size={18} />,         color: '#FBBF24' },
+          ...(isInstagram ? [{ label: 'Guardados', value: formatNum(m.saves), icon: <Bookmark size={18} />, color: '#A78BFA' }] : []),
         ];
+
         return (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '24px 0 20px' }}>
               <span style={{ fontSize: '28px' }}>{meta.emoji}</span>
               <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{meta.label}</h2>
               <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>{m.posts || 0} publicaciones</span>
+              {m.engagement_rate > 0 && (
+                <span style={{ fontSize: '12px', fontWeight: '800', background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '99px', padding: '3px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Zap size={10} /> {m.engagement_rate.toFixed(1)}% ER
+                </span>
+              )}
             </div>
-            <div className="stats-grid" style={{ marginBottom: '32px' }}>
+
+            <div className="platform-kpi-grid" style={{ marginBottom: '32px' }}>
               {kpis.map((kpi, i) => (
                 <div key={i} className="card-pro stat-card-pro">
                   <div className="stat-card-header">
@@ -408,11 +487,17 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                 </div>
               ))}
             </div>
+
+            {isYouTube && (
+              <div className="card-pro" style={{ padding: '16px 20px', marginBottom: '24px', borderLeft: '3px solid #FF0000', fontSize: '12px', color: 'var(--text-muted)' }}>
+                ⚠️ Los datos de YouTube tienen un retraso de 2-3 días. El watch time y CTR solo están disponibles en YouTube Studio.
+              </div>
+            )}
           </>
         );
       })()}
 
-      {/* Tabla de posts (filtrada por plataforma activa) */}
+      {/* Tabla de posts */}
       <div className="card-pro content-list-card-pro">
         <div className="chart-card-header" style={{ marginBottom: '24px' }}>
           <h3 className="chart-title">
@@ -428,7 +513,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                 <th>FECHA</th>
                 <th>CANALES</th>
                 <th style={{ textAlign: 'center' }}>❤️ Likes</th>
-                <th style={{ textAlign: 'center' }}>💬 Comments</th>
+                <th style={{ textAlign: 'center' }}>💬 Coment.</th>
                 <th style={{ textAlign: 'center' }}>👁 Views</th>
                 <th style={{ textAlign: 'center' }}>🔁 Shares</th>
                 <th style={{ textAlign: 'center' }}>VIRAL</th>
@@ -438,24 +523,25 @@ const AnalyticsView = ({ userId, activeArtist }) => {
               {filteredPosts.map((post, idx) => {
                 const safePlatforms = Array.isArray(post.platforms) ? post.platforms : [];
                 const safeScore = typeof post.viral_score === 'number' ? post.viral_score : 0;
-                const likes = post.likes ?? post.metrics?.likes ?? post.metrics?.like_count ?? '—';
-                const comments = post.comments ?? post.metrics?.comments ?? post.metrics?.comment_count ?? '—';
-                const views = post.views ?? post.metrics?.views ?? post.metrics?.play_count ?? post.metrics?.impressions ?? '—';
-                const shares = post.shares ?? post.metrics?.shares ?? post.metrics?.share_count ?? '—';
+                const likes    = post.likes    ?? post.metrics?.likes    ?? post.metrics?.like_count    ?? 0;
+                const comments = post.comments ?? post.metrics?.comments ?? post.metrics?.comment_count ?? 0;
+                const views    = post.views    ?? post.metrics?.views    ?? post.metrics?.play_count    ?? post.metrics?.impressions ?? 0;
+                const shares   = post.shares   ?? post.metrics?.shares   ?? post.metrics?.share_count   ?? 0;
+                const hasData  = likes > 0 || views > 0 || comments > 0;
                 return (
                   <tr key={post.id || idx}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <div className="post-icon-box glass-morph"><Film size={14} color="var(--primary)" /></div>
-                        <span className="post-title-cell-pro">{post.title || 'Inyección de Contenido'}</span>
+                        <span className="post-title-cell-pro">{post.title || 'Publicación'}</span>
                       </div>
                     </td>
-                    <td className="text-muted" style={{ fontSize: '13px' }}>{post.date ? new Date(post.date).toLocaleDateString() : 'N/A'}</td>
-                    <td><div style={{ display: 'flex', gap: '8px' }}>{safePlatforms.map(p => <div key={p} className="platform-pill glass-morph">{p}</div>)}</div></td>
-                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Heart size={11} />} value={formatNum(likes)} label="" color="#EF4444" /></td>
-                    <td style={{ textAlign: 'center' }}><MetricPill icon={<MessageCircle size={11} />} value={formatNum(comments)} label="" color="#6366F1" /></td>
-                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Eye size={11} />} value={formatNum(views)} label="" color="#0EA5E9" /></td>
-                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Share2 size={11} />} value={formatNum(shares)} label="" color="#10B981" /></td>
+                    <td className="text-muted" style={{ fontSize: '13px' }}>{post.date ? new Date(post.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : 'N/A'}</td>
+                    <td><div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>{safePlatforms.map(p => <div key={p} className="platform-pill glass-morph" style={{ borderColor: PLATFORM_META[p]?.color + '44' }}>{PLATFORM_META[p]?.emoji || ''} {p}</div>)}</div></td>
+                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Heart size={11} />} value={hasData ? formatNum(likes) : '—'} color="#EF4444" /></td>
+                    <td style={{ textAlign: 'center' }}><MetricPill icon={<MessageCircle size={11} />} value={hasData ? formatNum(comments) : '—'} color="#6366F1" /></td>
+                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Eye size={11} />} value={hasData ? formatNum(views) : '—'} color="#0EA5E9" /></td>
+                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Share2 size={11} />} value={hasData ? formatNum(shares) : '—'} color="#10B981" /></td>
                     <td style={{ textAlign: 'center' }}>
                       <div className="score-pill glass-morph" style={{ color: safeScore > 7 ? '#10B981' : 'var(--primary)', borderColor: safeScore > 7 ? 'rgba(16,185,129,0.3)' : 'var(--border-main)' }}>
                         {safeScore.toFixed(1)} <span style={{ fontSize: '10px', opacity: 0.6 }}>/10</span>
@@ -484,50 +570,51 @@ const AnalyticsView = ({ userId, activeArtist }) => {
           padding: 10px 18px; background: none; border: none; border-bottom: 2px solid transparent;
           color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer;
           transition: all 0.2s; margin-bottom: -1px; border-radius: 0; white-space: nowrap;
+          display: flex; align-items: center; gap: 6px;
         }
         .platform-tab:hover { color: var(--text-main); }
         .platform-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-er-badge {
+          font-size: 9px; font-weight: 800; background: rgba(245,158,11,0.12);
+          color: #F59E0B; border: 1px solid rgba(245,158,11,0.25);
+          border-radius: 99px; padding: 1px 6px;
+        }
 
-        /* Comparativa grid */
+        /* Platform compare grid */
         .platform-compare-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
         .platform-compare-card { padding: 20px; transition: transform 0.15s, box-shadow 0.15s; }
         .platform-compare-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-        .section-subtitle { color: var(--text-muted); font-size: 14px; margin: 0; font-weight: 500; }
-        
-        .stats-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin: 32px 0 16px 0; letter-spacing: 0.05em; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
-        .community-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-        
+        /* Per-platform KPI grid */
+        .platform-kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+
+        .stats-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin: 32px 0 16px 0; letter-spacing: 0.05em; }
         .stat-card-pro { padding: 24px; }
         .stat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-        .stat-card-icon-box { background: rgba(79, 70, 229, 0.15); color: var(--primary); padding: 8px; border-radius: 8px; }
-        .stat-card-trend-box { 
-          display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 20px;
-        }
-        .stat-card-trend-box.up { background: rgba(22, 163, 74, 0.12); color: #4ADE80; }
-
-        .stat-card-value { font-size: 32px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; margin-bottom: 4px; }
+        .stat-card-value { font-size: 28px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; margin-bottom: 4px; }
         .stat-card-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
 
-        .mini-stat-card-pro { padding: 16px; text-align: left; }
-        .mini-val { font-size: 18px; font-weight: 700; color: var(--text-main); }
-        .mini-label { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 2px; }
+        /* Best times chart */
+        .best-times-chart { display: flex; flex-direction: column; gap: 10px; }
+        .best-time-bar { display: grid; grid-template-columns: 72px 1fr 40px; align-items: center; gap: 10px; }
+        .best-time-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-align: right; white-space: nowrap; }
+        .best-time-track { height: 8px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+        .best-time-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #8B5CF6); border-radius: 99px; transition: width 0.6s ease; }
+        .best-time-value { font-size: 11px; font-weight: 700; color: var(--text-main); text-align: left; }
 
         .chart-card-pro, .content-list-card-pro { padding: 40px; border: 1px solid var(--border-main); }
         .chart-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .chart-title { font-size: 14px; font-weight: 900; color: var(--text-main); margin: 0; letter-spacing: 0.1em; color: var(--primary); }
+        .chart-title { font-size: 14px; font-weight: 900; color: var(--primary); margin: 0; letter-spacing: 0.1em; }
         .chart-period { font-size: 10px; font-weight: 900; color: var(--text-dim); border: 1px solid var(--border-main); padding: 4px 12px; border-radius: 20px; }
 
         .table-wrapper { overflow-x: auto; }
-        .posts-table-pro { width: 100%; border-collapse: collapse; min-width: 800px; }
+        .posts-table-pro { width: 100%; border-collapse: collapse; min-width: 700px; }
         .posts-table-pro th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border-main); }
         .posts-table-pro td { padding: 12px; border-bottom: 1px solid var(--bg-primary); vertical-align: middle; }
-        .post-icon-box { width: 32px; height: 32px; background: var(--bg-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); flex-shrink: 0; }
+        .post-icon-box { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .post-title-cell-pro { font-weight: 600; color: var(--text-main); font-size: 13px; }
-        .platform-pill { padding: 2px 7px; background: var(--bg-tertiary); border: 1px solid var(--border-main); border-radius: 4px; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .platform-pill { padding: 2px 7px; border: 1px solid var(--border-main); border-radius: 4px; font-size: 10px; font-weight: 700; color: var(--text-muted); }
         .score-pill { display: inline-block; padding: 3px 10px; border: 1px solid var(--border-main); border-radius: 8px; font-size: 12px; font-weight: 700; }
-
         .metric-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; border: 1px solid; font-size: 12px; font-weight: 700; }
         .metric-pill-value { color: var(--text-main); }
         .metric-pill-label { color: var(--text-muted); font-size: 10px; }
@@ -546,35 +633,16 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         .insight-best-post { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-main); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
         @media (max-width: 1024px) {
-          .stats-grid { grid-template-columns: 1fr; }
-          .community-grid { grid-template-columns: 1fr 1fr; }
+          .platform-kpi-grid { grid-template-columns: repeat(3, 1fr); }
           .insight-body { grid-template-columns: 1fr; }
           .insight-divider { display: none; }
         }
         @media (max-width: 768px) {
           .analytics-header { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
-          .analytics-header > div:last-child { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-          .analytics-header > div:last-child button { width: 100%; justify-content: center; height: 44px; }
-          
-          .chart-wrapper { height: 220px; padding: 0; }
-          .chart-card-pro, .content-list-card-pro { 
-            padding: 20px 16px; 
-            margin: 0 0 24px 0; 
-            border-radius: 16px;
-            width: 100%; 
-            max-width: 100%;
-          }
+          .platform-kpi-grid { grid-template-columns: 1fr 1fr; }
+          .chart-card-pro, .content-list-card-pro { padding: 20px 16px; margin: 0 0 24px 0; border-radius: 16px; }
           .stat-card-pro { padding: 20px; }
-          
-          .community-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-          .mini-stat-card-pro { padding: 12px; }
-          .mini-val { font-size: 16px; }
-          
-          .insight-card { padding: 20px 16px; margin-left: -20px; margin-right: -20px; border-radius: 0; border-right: 0; width: calc(100% + 40px); max-width: 100vw; }
-          .insight-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-          .insight-badge { align-self: flex-start; }
-          
-          .posts-table-pro th, .posts-table-pro td { white-space: nowrap; padding: 12px 10px; }
+          .stat-card-value { font-size: 22px; }
         }
       `}</style>
     </div>
