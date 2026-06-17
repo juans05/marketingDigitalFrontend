@@ -1,9 +1,84 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Sparkles, BarChart3, Upload, Loader2, TrendingUp, Users, Film,
   Heart, MessageCircle, Eye, Share2, Lightbulb, Target, AlertCircle,
-  RefreshCw, Bookmark, Clock, Zap
+  RefreshCw, Bookmark, Clock, Zap, Info
 } from 'lucide-react';
+
+const METRIC_EXPLANATIONS = {
+  seguidores:    'Personas que eligieron seguir tu cuenta. Es tu audiencia base — las personas que verán tu contenido primero.',
+  alcance:       'Cuántas personas DISTINTAS vieron tu publicación. Si llega a 1.000 personas, el alcance es 1.000, sin importar cuántas veces la vio cada una.',
+  impresiones:   'Cuántas veces se mostró tu contenido en total. Una persona puede verlo 3 veces = 3 impresiones. Más impresiones que alcance significa que tu contenido "engancha" y la gente lo vuelve a ver.',
+  likes:         'Personas que tocaron el corazón ❤️ en tu publicación. Es la interacción más fácil y básica.',
+  comentarios:   'Personas que escribieron algo en tu publicación. Vale mucho más que un like — significa que tu contenido generó una reacción real.',
+  compartidos:   'Personas que mandaron tu contenido a sus amigos o lo publicaron en su perfil. Es la forma más poderosa de crecer — tu contenido llega a personas que aún no te siguen.',
+  guardados:     '📌 La métrica más valiosa de Instagram. Cuando alguien guarda tu publicación significa que el contenido fue tan útil o inspirador que quiere volver a verlo. El algoritmo lo premia mucho.',
+  engagement:    'De cada 100 personas que ven tu contenido, cuántas interactúan (dan like, comentan o comparten). Un 3% ya es bueno. Por encima del 6% es excelente. Un artista con 500 seguidores y 10% ER supera a uno con 50.000 y 0.5% ER.',
+  viral_score:   'Puntuación de nuestra IA (0–10) sobre el potencial viral de este video. Evalúa el gancho inicial, la duración, el ritmo y el mensaje. Más de 7 = tiene posibilidades reales de explotar.',
+  best_times:    'Los días y horas en que tu audiencia interactuó más con tu contenido en el pasado. Publicar en esos momentos aumenta las probabilidades de que más personas lo vean.',
+  views:         'Cuántas veces se reprodujo tu video (al menos unos segundos). Es el primer filtro del algoritmo — si pocas personas lo ven, deja de mostrarlo.',
+  watch_time:    'YouTube: tiempo total que las personas pasaron viendo tu video. El algoritmo de YouTube premia los videos que la gente termina de ver. Un video de 10 min con 8 min de watch time promedio es un hit.',
+};
+
+const InfoTooltip = ({ metricKey, position = 'top' }) => {
+  const [visible, setVisible] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const iconRef = useRef(null);
+  const text = METRIC_EXPLANATIONS[metricKey];
+  if (!text) return null;
+
+  const show = () => {
+    if (iconRef.current) {
+      const rect = iconRef.current.getBoundingClientRect();
+      setCoords({ top: rect.top, left: rect.left + rect.width / 2 });
+    }
+    setVisible(true);
+  };
+
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', position: 'relative' }}>
+      <span
+        ref={iconRef}
+        onMouseEnter={show}
+        onMouseLeave={() => setVisible(false)}
+        onClick={() => setVisible(v => !v)}
+        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', color: 'var(--text-dim)', marginLeft: '4px', opacity: 0.6 }}
+      >
+        <Info size={11} />
+      </span>
+      {visible && (
+        <span
+          style={{
+            position: 'fixed',
+            top: coords.top - 8,
+            left: coords.left,
+            transform: 'translate(-50%, -100%)',
+            zIndex: 9999,
+            background: 'rgba(15,15,20,0.97)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            fontSize: '12px',
+            lineHeight: '1.6',
+            color: '#E2E8F0',
+            maxWidth: '240px',
+            width: 'max-content',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            pointerEvents: 'none',
+          }}
+        >
+          {text}
+          <span style={{
+            position: 'absolute', bottom: '-6px', left: '50%', transform: 'translateX(-50%)',
+            width: 0, height: 0,
+            borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
+            borderTop: '6px solid rgba(255,255,255,0.12)',
+          }} />
+        </span>
+      )}
+    </span>
+  );
+};
 
 const TrendChart = ({ data }) => {
   if (!data || data.length < 2) return null;
@@ -261,12 +336,19 @@ const AnalyticsView = ({ userId, activeArtist }) => {
     if (activeArtist?.id) {
       setLoadingStats(true);
       try {
-        await fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        // Sincronizar estado de cuentas Y analytics Zernio en paralelo
+        await Promise.all([
+          fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+          fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync-analytics`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          }),
+        ]);
       } catch (err) {
-        console.error('Deep sync error:', err);
+        console.error('Sync error:', err);
       }
     }
     fetchStats();
@@ -381,16 +463,18 @@ const AnalyticsView = ({ userId, activeArtist }) => {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                       {[
-                        { icon: <Users size={12} />,        val: formatNum(m.followers), label: 'Seguidores' },
-                        { icon: <Eye size={12} />,          val: formatNum(m.reach),     label: 'Alcance'    },
-                        { icon: <Heart size={12} />,        val: formatNum(m.likes),     label: 'Likes'      },
-                        { icon: <MessageCircle size={12} />,val: formatNum(m.comments),  label: 'Comentarios'},
+                        { icon: <Users size={12} />,        val: formatNum(m.followers), label: 'Seguidores',  tip: 'seguidores' },
+                        { icon: <Eye size={12} />,          val: formatNum(m.reach),     label: 'Alcance',     tip: 'alcance'    },
+                        { icon: <Heart size={12} />,        val: formatNum(m.likes),     label: 'Likes',       tip: 'likes'      },
+                        { icon: <MessageCircle size={12} />,val: formatNum(m.comments),  label: 'Comentarios', tip: 'comentarios'},
                       ].map((item, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span style={{ color: 'var(--text-muted)' }}>{item.icon}</span>
                           <div>
                             <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', lineHeight: 1.2 }}>{item.val}</div>
-                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '600' }}>{item.label}</div>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '600', display: 'flex', alignItems: 'center' }}>
+                              {item.label}<InfoTooltip metricKey={item.tip} />
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -403,6 +487,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                         <span style={{ fontSize: '11px', fontWeight: '700', color: '#F59E0B' }}>
                           {m.engagement_rate.toFixed(1)}% engagement rate
                         </span>
+                        <InfoTooltip metricKey="engagement" />
                       </div>
                     )}
 
@@ -435,6 +520,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Clock size={14} color="var(--primary)" />
                     <h3 className="chart-title">MEJOR HORA</h3>
+                    <InfoTooltip metricKey="best_times" />
                   </div>
                   <div className="chart-period">ENGAGEMENT</div>
                 </div>
@@ -453,12 +539,12 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         const isYouTube = activePlatform === 'youtube';
 
         const kpis = [
-          { label: 'Seguidores',  value: formatNum(m.followers), icon: <Users size={18} />,         color: '#818CF8' },
-          { label: 'Alcance',     value: formatNum(m.reach),     icon: <Eye size={18} />,            color: '#38BDF8' },
-          { label: 'Likes',       value: formatNum(m.likes),     icon: <Heart size={18} />,          color: '#F472B6' },
-          { label: 'Comentarios', value: formatNum(m.comments),  icon: <MessageCircle size={18} />,  color: '#34D399' },
-          { label: 'Compartidos', value: formatNum(m.shares),    icon: <Share2 size={18} />,         color: '#FBBF24' },
-          ...(isInstagram ? [{ label: 'Guardados', value: formatNum(m.saves), icon: <Bookmark size={18} />, color: '#A78BFA' }] : []),
+          { label: 'Seguidores',  value: formatNum(m.followers), icon: <Users size={18} />,         color: '#818CF8', tip: 'seguidores'  },
+          { label: 'Alcance',     value: formatNum(m.reach),     icon: <Eye size={18} />,            color: '#38BDF8', tip: 'alcance'     },
+          { label: 'Likes',       value: formatNum(m.likes),     icon: <Heart size={18} />,          color: '#F472B6', tip: 'likes'       },
+          { label: 'Comentarios', value: formatNum(m.comments),  icon: <MessageCircle size={18} />,  color: '#34D399', tip: 'comentarios' },
+          { label: 'Compartidos', value: formatNum(m.shares),    icon: <Share2 size={18} />,         color: '#FBBF24', tip: 'compartidos' },
+          ...(isInstagram ? [{ label: 'Guardados', value: formatNum(m.saves), icon: <Bookmark size={18} />, color: '#A78BFA', tip: 'guardados' }] : []),
         ];
 
         return (
@@ -482,7 +568,9 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                   </div>
                   <div className="stat-card-body">
                     <div className="stat-card-value" style={{ color: kpi.color }}>{kpi.value}</div>
-                    <div className="stat-card-label">{kpi.label}</div>
+                    <div className="stat-card-label" style={{ display: 'flex', alignItems: 'center' }}>
+                      {kpi.label}<InfoTooltip metricKey={kpi.tip} />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -512,11 +600,11 @@ const AnalyticsView = ({ userId, activeArtist }) => {
                 <th>PRODUCCIÓN</th>
                 <th>FECHA</th>
                 <th>CANALES</th>
-                <th style={{ textAlign: 'center' }}>❤️ Likes</th>
-                <th style={{ textAlign: 'center' }}>💬 Coment.</th>
-                <th style={{ textAlign: 'center' }}>👁 Views</th>
-                <th style={{ textAlign: 'center' }}>🔁 Shares</th>
-                <th style={{ textAlign: 'center' }}>VIRAL</th>
+                <th style={{ textAlign: 'center' }}>❤️ Likes <InfoTooltip metricKey="likes" /></th>
+                <th style={{ textAlign: 'center' }}>💬 Coment. <InfoTooltip metricKey="comentarios" /></th>
+                <th style={{ textAlign: 'center' }}>👁 Views <InfoTooltip metricKey="views" /></th>
+                <th style={{ textAlign: 'center' }}>🔁 Shares <InfoTooltip metricKey="compartidos" /></th>
+                <th style={{ textAlign: 'center' }}>VIRAL <InfoTooltip metricKey="viral_score" /></th>
               </tr>
             </thead>
             <tbody>
