@@ -143,6 +143,14 @@ const InsightCard = ({ insights, decisions, bestPlatform, bestPostTitle, engagem
   );
 };
 
+const PLATFORM_META = {
+  instagram: { label: 'Instagram', emoji: '📸', color: '#E1306C' },
+  tiktok:    { label: 'TikTok',    emoji: '🎵', color: '#010101' },
+  youtube:   { label: 'YouTube',   emoji: '▶',  color: '#FF0000' },
+  facebook:  { label: 'Facebook',  emoji: '👥', color: '#1877F2' },
+  linkedin:  { label: 'LinkedIn',  emoji: '💼', color: '#0A66C2' },
+};
+
 const AnalyticsView = ({ userId, activeArtist }) => {
   const [data, setData] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -150,8 +158,10 @@ const AnalyticsView = ({ userId, activeArtist }) => {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [loadingInsights, setLoadingInsights] = useState(false);
+  const [activePlatform, setActivePlatform] = useState('all');
 
   useEffect(() => {
+    setActivePlatform('all');
     fetchStats();
     if (activeArtist?.id) {
       fetchPostMetrics(activeArtist.id);
@@ -260,21 +270,22 @@ const AnalyticsView = ({ userId, activeArtist }) => {
     );
   }
 
-  const kpis = [
-    { label: 'Impacto Viral', value: data?.avgScore ? data.avgScore.toFixed(1) : '0.0', trend: data?.trend || '—', icon: <Sparkles size={18} /> },
-    { label: 'Alcance Bruto', value: formatNum(data?.totalReach), trend: '+reach', icon: <BarChart3 size={18} /> },
-    { label: 'Publicaciones', value: data?.published || 0, trend: `total: ${data?.total || 0}`, icon: <Upload size={18} /> },
-  ];
+  const breakdown = data?.platform_breakdown || {};
+  const connectedPlatforms = Object.keys(breakdown).filter(p => PLATFORM_META[p]);
+  const totalReachAll = connectedPlatforms.reduce((sum, p) => sum + (breakdown[p]?.reach || 0), 0);
+  const bestPlatformKey = connectedPlatforms.reduce((best, p) =>
+    (breakdown[p]?.reach || 0) > (breakdown[best]?.reach || 0) ? p : best,
+    connectedPlatforms[0] || null
+  );
 
-  const communityKpis = [
-    { label: 'Seguidores', value: formatNum(data?.followersTotal), icon: <Users size={14} /> },
-    { label: 'Seg. Diarios', value: `+${data?.followersDaily || 0}`, icon: <TrendingUp size={14} /> },
-    { label: 'Seg./Publicación', value: data?.followersPerPost || 0, icon: <Sparkles size={14} /> },
-    { label: 'Posts/Día (prom)', value: data?.postsDaily || 0, icon: <Upload size={14} /> },
-  ];
+  const allPosts = posts.length ? posts : data?.postList || [];
+  const filteredPosts = activePlatform === 'all'
+    ? allPosts
+    : allPosts.filter(p => Array.isArray(p.platforms) && p.platforms.includes(activePlatform));
 
   return (
     <div className="analytics-container animate-fade-in">
+      {/* Header buttons */}
       <div className="analytics-header">
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn-secondary" onClick={handleSync} disabled={loadingStats || loadingPosts} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -282,12 +293,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
             Sincronizar
           </button>
           {activeArtist?.id && (
-            <button
-              className="btn-primary"
-              onClick={fetchInsights}
-              disabled={loadingInsights}
-              style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
-            >
+            <button className="btn-primary" onClick={fetchInsights} disabled={loadingInsights} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Sparkles size={13} />
               {loadingInsights ? 'Analizando...' : 'Analizar con IA'}
             </button>
@@ -295,61 +301,131 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         </div>
       </div>
 
-      <div className="stats-section-label">RESUMEN DE RENDIMIENTO</div>
-      <div className="stats-grid">
-        {kpis.map((kpi, i) => (
-          <div key={i} className="card-pro stat-card-pro">
-            <div className="stat-card-header">
-              <div className="stat-card-icon-box">{kpi.icon}</div>
-              <span className="stat-card-trend-box up">
-                <TrendingUp size={12} />
-                {kpi.trend}
-              </span>
-            </div>
-            <div className="stat-card-body">
-              <div className="stat-card-value accent-text">{kpi.value}</div>
-              <div className="stat-card-label">{kpi.label}</div>
-            </div>
-          </div>
+      {/* Tabs de plataforma */}
+      <div className="platform-tabs">
+        <button onClick={() => setActivePlatform('all')} className={`platform-tab ${activePlatform === 'all' ? 'active' : ''}`}>
+          ★ Todo
+        </button>
+        {connectedPlatforms.map(p => (
+          <button key={p} onClick={() => setActivePlatform(p)} className={`platform-tab ${activePlatform === p ? 'active' : ''}`}>
+            {PLATFORM_META[p].emoji} {PLATFORM_META[p].label}
+          </button>
         ))}
       </div>
 
-      {/* KPIs comunidad */}
-      <div className="stats-section-label">KPIs DE COMUNIDAD</div>
-      <div className="community-grid">
-        {communityKpis.map((kpi, i) => (
-          <div key={i} className="mini-stat-card-pro card-pro">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', color: 'var(--text-muted)' }}>
-              {kpi.icon}
-              <span className="mini-label">{kpi.label}</span>
+      {/* ── VISTA TODO: comparativa entre plataformas ── */}
+      {activePlatform === 'all' && (
+        <>
+          <div className="stats-section-label">COMPARATIVA DE PLATAFORMAS</div>
+          {connectedPlatforms.length === 0 ? (
+            <div className="card-pro" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', marginBottom: '32px' }}>
+              <BarChart3 size={32} style={{ marginBottom: '12px', opacity: 0.3 }} />
+              <p style={{ margin: 0 }}>Sincroniza tus redes sociales para ver métricas por plataforma.</p>
             </div>
-            <div className="mini-val">{kpi.value}</div>
+          ) : (
+            <div className="platform-compare-grid">
+              {connectedPlatforms.map(p => {
+                const m = breakdown[p] || {};
+                const pct = totalReachAll > 0 ? Math.round((m.reach || 0) / totalReachAll * 100) : 0;
+                const meta = PLATFORM_META[p];
+                const isBest = p === bestPlatformKey;
+                return (
+                  <div key={p} className="platform-compare-card card-pro" onClick={() => setActivePlatform(p)} style={{ cursor: 'pointer', borderColor: isBest ? `${meta.color}44` : undefined }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '22px' }}>{meta.emoji}</span>
+                        <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{meta.label}</span>
+                      </div>
+                      {isBest && <span style={{ fontSize: '10px', fontWeight: '800', background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '99px', padding: '2px 10px' }}>★ LÍDER</span>}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                      {[
+                        { icon: <Users size={12} />, val: formatNum(m.followers), label: 'Seguidores' },
+                        { icon: <Eye size={12} />,   val: formatNum(m.reach),     label: 'Alcance'    },
+                        { icon: <Heart size={12} />, val: formatNum(m.likes),     label: 'Likes'      },
+                        { icon: <MessageCircle size={12} />, val: formatNum(m.comments), label: 'Comentarios' },
+                      ].map((item, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ color: 'var(--text-muted)' }}>{item.icon}</span>
+                          <div>
+                            <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', lineHeight: 1.2 }}>{item.val}</div>
+                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '600' }}>{item.label}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>{m.posts || 0} posts</span>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>{pct}% del alcance</span>
+                    </div>
+                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
+                      <div style={{ width: `${pct}%`, height: '100%', background: meta.color, borderRadius: '99px', transition: 'width 0.6s ease' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Tracción global */}
+          <div className="card-pro chart-card-pro">
+            <div className="chart-card-header">
+              <h3 className="chart-title">TRACCIÓN VIRAL (7 DÍAS)</h3>
+              <div className="chart-period">MÉTRICA LIVE</div>
+            </div>
+            <TrendChart data={data?.history} />
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
-      {/* Curva de alcance */}
-      <div className="card-pro chart-card-pro">
-        <div className="chart-card-header">
-          <h3 className="chart-title">TRACCIÓN VIRAL (7 DÍAS)</h3>
-          <div className="chart-period">MÉTRICA LIVE</div>
-        </div>
-        <TrendChart data={data?.history} />
-      </div>
+      {/* ── VISTA POR PLATAFORMA ── */}
+      {activePlatform !== 'all' && (() => {
+        const m = breakdown[activePlatform] || {};
+        const meta = PLATFORM_META[activePlatform] || {};
+        const kpis = [
+          { label: 'Seguidores', value: formatNum(m.followers), icon: <Users size={18} />, color: '#818CF8' },
+          { label: 'Alcance',    value: formatNum(m.reach),     icon: <Eye size={18} />,   color: '#38BDF8' },
+          { label: 'Likes',      value: formatNum(m.likes),     icon: <Heart size={18} />, color: '#F472B6' },
+          { label: 'Comentarios',value: formatNum(m.comments),  icon: <MessageCircle size={18} />, color: '#34D399' },
+        ];
+        return (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '24px 0 20px' }}>
+              <span style={{ fontSize: '28px' }}>{meta.emoji}</span>
+              <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{meta.label}</h2>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>{m.posts || 0} publicaciones</span>
+            </div>
+            <div className="stats-grid" style={{ marginBottom: '32px' }}>
+              {kpis.map((kpi, i) => (
+                <div key={i} className="card-pro stat-card-pro">
+                  <div className="stat-card-header">
+                    <div style={{ background: `${kpi.color}22`, color: kpi.color, padding: '8px', borderRadius: '8px' }}>{kpi.icon}</div>
+                  </div>
+                  <div className="stat-card-body">
+                    <div className="stat-card-value" style={{ color: kpi.color }}>{kpi.value}</div>
+                    <div className="stat-card-label">{kpi.label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        );
+      })()}
 
-      {/* Tabla de posts con métricas reales */}
+      {/* Tabla de posts (filtrada por plataforma activa) */}
       <div className="card-pro content-list-card-pro">
         <div className="chart-card-header" style={{ marginBottom: '24px' }}>
-          <h3 className="chart-title">RENDIMIENTO POR PUBLICACIÓN</h3>
+          <h3 className="chart-title">
+            {activePlatform === 'all' ? 'RENDIMIENTO POR PUBLICACIÓN' : `PUBLICACIONES EN ${(PLATFORM_META[activePlatform]?.label || activePlatform).toUpperCase()}`}
+          </h3>
           {loadingPosts && <Loader2 size={14} className="animate-spin" color="var(--text-muted)" />}
         </div>
-
         <div className="table-wrapper">
           <table className="posts-table-pro">
             <thead>
               <tr>
                 <th>PRODUCCIÓN</th>
-                <th>LATENCIA / FECHA</th>
+                <th>FECHA</th>
                 <th>CANALES</th>
                 <th style={{ textAlign: 'center' }}>❤️ Likes</th>
                 <th style={{ textAlign: 'center' }}>💬 Comments</th>
@@ -359,62 +435,39 @@ const AnalyticsView = ({ userId, activeArtist }) => {
               </tr>
             </thead>
             <tbody>
-              {(posts.length ? posts : data?.postList || []).map((post, idx) => {
+              {filteredPosts.map((post, idx) => {
                 const safePlatforms = Array.isArray(post.platforms) ? post.platforms : [];
                 const safeScore = typeof post.viral_score === 'number' ? post.viral_score : 0;
-                const hasRealMetrics = post.metrics !== undefined || post.likes !== undefined;
                 const likes = post.likes ?? post.metrics?.likes ?? post.metrics?.like_count ?? '—';
                 const comments = post.comments ?? post.metrics?.comments ?? post.metrics?.comment_count ?? '—';
                 const views = post.views ?? post.metrics?.views ?? post.metrics?.play_count ?? post.metrics?.impressions ?? '—';
                 const shares = post.shares ?? post.metrics?.shares ?? post.metrics?.share_count ?? '—';
-
                 return (
                   <tr key={post.id || idx}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div className="post-icon-box glass-morph">
-                          <Film size={14} color="var(--primary)" />
-                        </div>
+                        <div className="post-icon-box glass-morph"><Film size={14} color="var(--primary)" /></div>
                         <span className="post-title-cell-pro">{post.title || 'Inyección de Contenido'}</span>
                       </div>
                     </td>
                     <td className="text-muted" style={{ fontSize: '13px' }}>{post.date ? new Date(post.date).toLocaleDateString() : 'N/A'}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        {safePlatforms.map(p => (
-                          <div key={p} className="platform-pill glass-morph">{p}</div>
-                        ))}
-                      </div>
-                    </td>
+                    <td><div style={{ display: 'flex', gap: '8px' }}>{safePlatforms.map(p => <div key={p} className="platform-pill glass-morph">{p}</div>)}</div></td>
+                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Heart size={11} />} value={formatNum(likes)} label="" color="#EF4444" /></td>
+                    <td style={{ textAlign: 'center' }}><MetricPill icon={<MessageCircle size={11} />} value={formatNum(comments)} label="" color="#6366F1" /></td>
+                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Eye size={11} />} value={formatNum(views)} label="" color="#0EA5E9" /></td>
+                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Share2 size={11} />} value={formatNum(shares)} label="" color="#10B981" /></td>
                     <td style={{ textAlign: 'center' }}>
-                      <MetricPill icon={<Heart size={11} />} value={formatNum(likes)} label="" color="#EF4444" />
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <MetricPill icon={<MessageCircle size={11} />} value={formatNum(comments)} label="" color="#6366F1" />
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <MetricPill icon={<Eye size={11} />} value={formatNum(views)} label="" color="#0EA5E9" />
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <MetricPill icon={<Share2 size={11} />} value={formatNum(shares)} label="" color="#10B981" />
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div className="score-pill glass-morph" style={{
-                        color: safeScore > 7 ? '#10B981' : 'var(--primary)',
-                        borderColor: safeScore > 7 ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-main)'
-                      }}>
+                      <div className="score-pill glass-morph" style={{ color: safeScore > 7 ? '#10B981' : 'var(--primary)', borderColor: safeScore > 7 ? 'rgba(16,185,129,0.3)' : 'var(--border-main)' }}>
                         {safeScore.toFixed(1)} <span style={{ fontSize: '10px', opacity: 0.6 }}>/10</span>
                       </div>
                     </td>
                   </tr>
                 );
               })}
-              {!posts.length && !data?.postList?.length && (
-                <tr>
-                  <td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '14px' }}>
-                    Aún no hay publicaciones con métricas disponibles.
-                  </td>
-                </tr>
+              {!filteredPosts.length && (
+                <tr><td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '14px' }}>
+                  {activePlatform === 'all' ? 'Aún no hay publicaciones con métricas.' : `No hay publicaciones en ${PLATFORM_META[activePlatform]?.label || activePlatform}.`}
+                </td></tr>
               )}
             </tbody>
           </table>
@@ -423,7 +476,22 @@ const AnalyticsView = ({ userId, activeArtist }) => {
 
       <style>{`
         .analytics-container { padding-bottom: 40px; }
-        .analytics-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
+        .analytics-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+
+        /* Tabs */
+        .platform-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 32px; border-bottom: 1px solid var(--border-main); padding-bottom: 0; }
+        .platform-tab {
+          padding: 10px 18px; background: none; border: none; border-bottom: 2px solid transparent;
+          color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer;
+          transition: all 0.2s; margin-bottom: -1px; border-radius: 0; white-space: nowrap;
+        }
+        .platform-tab:hover { color: var(--text-main); }
+        .platform-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        /* Comparativa grid */
+        .platform-compare-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
+        .platform-compare-card { padding: 20px; transition: transform 0.15s, box-shadow 0.15s; }
+        .platform-compare-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
         .section-subtitle { color: var(--text-muted); font-size: 14px; margin: 0; font-weight: 500; }
         
         .stats-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin: 32px 0 16px 0; letter-spacing: 0.05em; }

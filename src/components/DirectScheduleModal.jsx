@@ -10,6 +10,12 @@ const PLATFORM_CONFIG = {
   linkedin:  { label: 'LinkedIn',  acceptsImage: true,  acceptsVideo: true  },
 };
 
+const FORMAT_CONFIG = {
+  reel:  { label: '🎬 REEL',    requiresVideo: true,  platforms: ['instagram', 'tiktok', 'youtube', 'facebook'] },
+  story: { label: '📱 STORY',   requiresVideo: false, platforms: ['instagram', 'facebook'] },
+  feed:  { label: '📰 FEED',    requiresVideo: false, platforms: ['instagram', 'facebook', 'linkedin'] },
+};
+
 const PLAN_RESTRICTIONS = {
   'Mini': ['instagram', 'tiktok'],
   'Artista': ['instagram', 'tiktok', 'facebook'],
@@ -246,15 +252,27 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
             <div style={{ flex: 2, minWidth: '200px' }}>
                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-main)', marginBottom: '8px', textTransform: 'uppercase' }}>Formato</label>
                <div style={{ display: 'flex', gap: '8px' }}>
-                  {['reel', 'story', 'feed'].map(type => (
-                    <button
-                      key={type}
-                      onClick={() => setPostType(type)}
-                      className={`format-btn ${postType === type ? 'selected' : ''}`}
-                    >
-                      {type === 'reel' ? '🎬 REEL' : type === 'story' ? '📱 STORY' : '📰 FEED'}
-                    </button>
-                  ))}
+                  {Object.entries(FORMAT_CONFIG).map(([type, fmt]) => {
+                    const isVideo = file?.type?.startsWith('video/');
+                    const isImage = file?.type?.startsWith('image/');
+                    const needsVideoButIsImage = fmt.requiresVideo && isImage;
+                    const noSelectedPlatformSupports = selectedPlatforms.length > 0 && !selectedPlatforms.some(p => fmt.platforms.includes(p));
+                    const fmtDisabled = (file && needsVideoButIsImage) || noSelectedPlatformSupports;
+                    let hint = '';
+                    if (needsVideoButIsImage) hint = 'solo video';
+                    else if (noSelectedPlatformSupports) hint = 'no compatible';
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => !fmtDisabled && setPostType(type)}
+                        disabled={fmtDisabled}
+                        title={hint ? `${fmt.label}: ${hint}` : undefined}
+                        className={`format-btn ${postType === type && !fmtDisabled ? 'selected' : ''} ${fmtDisabled ? 'disabled' : ''}`}
+                      >
+                        {fmt.label}
+                      </button>
+                    );
+                  })}
                </div>
             </div>
           </div>
@@ -442,6 +460,14 @@ const styles = `
     border-color: #4F46E5;
     color: #4F46E5;
     background: #EEF2FF;
+  }
+
+  .format-btn.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    color: #9CA3AF;
+    border-color: #E5E7EB;
+    background: #F9FAFB;
   }
   
   .platform-btn {

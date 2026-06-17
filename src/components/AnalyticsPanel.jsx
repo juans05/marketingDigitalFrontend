@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Eye, Heart, Share2, Calendar, Copy, ChevronDown, ChevronUp, Loader, CheckCircle, AlertCircle, TrendingUp, Rocket, BrainCircuit, Sparkles, X, Clock, Smartphone, History } from 'lucide-react';
+import { Eye, Heart, Share2, Calendar, Copy, ChevronDown, ChevronUp, Loader, CheckCircle, AlertCircle, TrendingUp, Rocket, BrainCircuit, Sparkles, X, Clock, Smartphone, History, Info } from 'lucide-react';
 
 const PLATFORM_CONFIG = {
   tiktok:    { label: 'TikTok',    color: '#000', bg: '#F3F4F6', acceptsImage: false, acceptsVideo: true  },
@@ -11,6 +11,13 @@ const PLATFORM_CONFIG = {
 };
 
 const isVideoUrl = (url) => url && (url.includes('/video/') || /\.(mp4|mov|webm|ogv)(\?|$)/i.test(url));
+
+// Qué formatos acepta cada plataforma y si requieren video
+const FORMAT_CONFIG = {
+  reel:  { label: '🎬 REELS',   requiresVideo: true,  platforms: ['instagram', 'tiktok', 'youtube', 'facebook'] },
+  story: { label: '📱 STORIES', requiresVideo: false, platforms: ['instagram', 'facebook'] },
+  feed:  { label: '📰 FEED',    requiresVideo: false, platforms: ['instagram', 'facebook', 'linkedin'] },
+};
 
 const PLAN_RESTRICTIONS = {
   'Free': ['instagram'],
@@ -81,6 +88,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
   const [postType, setPostType] = useState(data?.post_type || 'reel');
   const [showBestTimes, setShowBestTimes] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
   const pollIntervalRef = useRef(null);
 
   // Deseleccionar plataformas incompatibles con el tipo de media cuando llegan los datos
@@ -94,6 +102,20 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
       })
     );
   }, [data?.source_url]);
+
+  // Auto-corregir postType si se vuelve incompatible con el media o las plataformas seleccionadas
+  useEffect(() => {
+    if (!data?.source_url) return;
+    const mediaIsVideo = isVideoUrl(data.source_url || data.processed_url);
+    const fmt = FORMAT_CONFIG[postType];
+    if (!fmt) return;
+    const fmtIncompatible =
+      (fmt.requiresVideo && !mediaIsVideo) ||
+      (selectedPlatforms.length > 0 && !selectedPlatforms.some(p => fmt.platforms.includes(p)));
+    if (fmtIncompatible) {
+      setPostType(mediaIsVideo ? 'reel' : 'feed');
+    }
+  }, [data?.source_url, selectedPlatforms, postType]);
 
   const fetchAnalytics = async (silent = false, isOpening = false) => {
     if (!silent) setLoading(true);
@@ -334,19 +356,64 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
 
                   {/* 1. Score de Viralidad Card */}
                   {viralScore && (
-                    <div className="card-pro" style={{ padding: '24px', marginBottom: '32px', border: '1px solid rgba(79,70,229,0.4)', background: 'rgba(79,70,229,0.08)' }}>
+                    <div className="card-pro" style={{ padding: '24px', marginBottom: '32px', border: '1px solid rgba(79,70,229,0.4)', background: 'rgba(79,70,229,0.08)', position: 'relative' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                          <p style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '8px' }}>Potencial de IMPACTO</p>
-                          <h5 style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>{viralScore}/10</h5>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <p style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '800', textTransform: 'uppercase', margin: 0 }}>Potencial de IMPACTO</p>
+                            <button
+                              onClick={() => setShowScoreInfo(v => !v)}
+                              title="¿Por qué este puntaje?"
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: showScoreInfo ? 'var(--primary)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', borderRadius: '4px' }}
+                            >
+                              <Info size={14} />
+                            </button>
+                          </div>
+                          <h5 style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--text-main)', letterSpacing: '-0.02em', margin: 0 }}>{viralScore}/10</h5>
                           <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600', marginTop: '4px' }}>
-                            {viralScore >= 8 ? 'Candidato a Tendencia Mundial' : 'Construcción de Autoridad Orgánica'}
+                            {viralScore >= 8 ? 'Candidato a Tendencia Mundial' : viralScore >= 6 ? 'Construcción de Autoridad Orgánica' : 'Contenido en Desarrollo'}
                           </p>
                         </div>
                         <div style={{ background: 'var(--primary)', padding: '12px', borderRadius: '12px' }}>
                           <TrendingUp size={24} color="white" />
                         </div>
                       </div>
+
+                      {/* Barra de progreso */}
+                      <div style={{ marginTop: '16px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', height: '6px', overflow: 'hidden' }}>
+                        <div style={{ width: `${viralScore * 10}%`, height: '100%', borderRadius: '99px', background: viralScore >= 8 ? '#10B981' : viralScore >= 6 ? '#818CF8' : '#F59E0B', transition: 'width 0.6s ease' }} />
+                      </div>
+
+                      {/* Popover de razones */}
+                      {showScoreInfo && (() => {
+                        const hashtagCount = (data?.hashtags || '').split(/\s+/).filter(h => h.startsWith('#')).length;
+                        const hasCopy = !!(data?.ai_copy_short || data?.ai_copy_long);
+                        const platformCount = (data?.platforms || []).length;
+                        const factors = [
+                          { ok: viralScore >= 7,    text: viralScore >= 7 ? 'Gancho visual detectado por IA' : 'Gancho visual débil o ausente' },
+                          { ok: hashtagCount >= 10, text: hashtagCount >= 10 ? `${hashtagCount} hashtags de autoridad` : `Solo ${hashtagCount} hashtags (recomendado: 10+)` },
+                          { ok: hasCopy,            text: hasCopy ? 'Copy generado con IA' : 'Sin copy de IA — genera análisis primero' },
+                          { ok: platformCount >= 2, text: platformCount >= 2 ? `Distribución en ${platformCount} plataformas` : 'Solo 1 plataforma seleccionada' },
+                          { ok: viralScore >= 6,    text: viralScore >= 6 ? 'Estructura narrativa identificada' : 'Estructura narrativa no detectada' },
+                        ];
+                        return (
+                          <div style={{ marginTop: '16px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '12px' }}>¿Por qué {viralScore}/10?</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              {factors.map((f, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ flexShrink: 0, width: '16px', height: '16px', borderRadius: '50%', background: f.ok ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {f.ok
+                                      ? <CheckCircle size={10} color="#10B981" />
+                                      : <AlertCircle size={10} color="#F87171" />}
+                                  </span>
+                                  <span style={{ fontSize: '12px', color: f.ok ? 'var(--text-main)' : 'var(--text-muted)', fontWeight: '600' }}>{f.text}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 
@@ -433,23 +500,36 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
                     <div style={{ marginTop: '24px' }}>
                       <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase' }}>Formato</label>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        {['reel', 'story', 'feed'].map(type => (
-                          <button
-                            key={type}
-                            onClick={() => !isReadOnly && setPostType(type)}
-                            disabled={isReadOnly}
-                            style={{
-                              flex: 1, padding: '14px', borderRadius: '12px',
-                              border: postType === type ? '1px solid rgba(79,70,229,0.5)' : '1px solid rgba(255,255,255,0.08)',
-                              background: postType === type ? 'rgba(79,70,229,0.15)' : 'rgba(255,255,255,0.04)',
-                              color: postType === type ? '#818CF8' : '#71717A',
-                              cursor: isReadOnly ? 'not-allowed' : 'pointer',
-                              fontSize: '11px', fontWeight: '800', textTransform: 'uppercase'
-                            }}
-                          >
-                            {type === 'reel' ? '🎬 REELS' : type === 'story' ? '📱 STORIES' : '📰 FEED'}
-                          </button>
-                        ))}
+                        {Object.entries(FORMAT_CONFIG).map(([type, fmt]) => {
+                          const mediaIsVideo = isVideoUrl(data?.source_url || data?.processed_url);
+                          const needsVideoButIsImage = fmt.requiresVideo && !mediaIsVideo && data?.source_url;
+                          const noSelectedPlatformSupports = selectedPlatforms.length > 0 && !selectedPlatforms.some(p => fmt.platforms.includes(p));
+                          const fmtDisabled = isReadOnly || needsVideoButIsImage || noSelectedPlatformSupports;
+                          const isActive = postType === type;
+                          let hint = '';
+                          if (needsVideoButIsImage) hint = 'solo video';
+                          else if (noSelectedPlatformSupports) hint = 'no compatible';
+                          return (
+                            <button
+                              key={type}
+                              onClick={() => !fmtDisabled && setPostType(type)}
+                              disabled={fmtDisabled}
+                              title={hint ? `${fmt.label}: ${hint}` : undefined}
+                              style={{
+                                flex: 1, padding: '14px', borderRadius: '12px',
+                                border: isActive && !fmtDisabled ? '1px solid rgba(79,70,229,0.5)' : '1px solid rgba(255,255,255,0.08)',
+                                background: isActive && !fmtDisabled ? 'rgba(79,70,229,0.15)' : 'rgba(255,255,255,0.04)',
+                                color: fmtDisabled ? '#3F3F46' : isActive ? '#818CF8' : '#71717A',
+                                cursor: fmtDisabled ? 'not-allowed' : 'pointer',
+                                opacity: fmtDisabled ? 0.35 : 1,
+                                fontSize: '11px', fontWeight: '800', textTransform: 'uppercase',
+                                transition: 'all 0.2s ease',
+                              }}
+                            >
+                              {fmt.label}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
