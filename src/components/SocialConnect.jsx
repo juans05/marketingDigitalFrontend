@@ -14,7 +14,7 @@ const sortByDisplayOrder = (platforms) => [...platforms].sort(
   (a, b) => PLATFORM_DISPLAY_ORDER.indexOf(a) - PLATFORM_DISPLAY_ORDER.indexOf(b)
 );
 
-const SocialConnect = ({ artistId }) => {
+const SocialConnect = ({ artistId, onPlatformsUpdated }) => {
   const [loading, setLoading]           = useState(false);
   const [verifying, setVerifying]       = useState(false);
   const [error, setError]               = useState('');
@@ -100,8 +100,10 @@ const SocialConnect = ({ artistId }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al verificar');
-      setConnectedPlatforms(data.platforms || []);
+      const platforms = data.platforms || [];
+      setConnectedPlatforms(platforms);
       setPopupOpened(false);
+      onPlatformsUpdated?.(platforms);
     } catch (err) {
       setError(err.message);
     } finally {

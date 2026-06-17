@@ -261,7 +261,7 @@ const Dashboard = () => {
             currentArtistId ? (
               <div className="card-pro">
                 <h2 className="section-title">Canales Conectados</h2>
-                <SocialConnect artistId={currentArtistId} artistName={activeArtist?.name} />
+                <SocialConnect artistId={currentArtistId} artistName={activeArtist?.name} onPlatformsUpdated={(platforms) => setActiveArtist(prev => ({ ...prev, active_platforms: platforms }))} />
               </div>
             ) : (
               <div style={{
@@ -325,7 +325,7 @@ const Dashboard = () => {
               {currentArtistId && (
                 <section className="card-pro" style={{ marginTop: '32px' }}>
                   <h2 className="section-title">Canales Conectados</h2>
-                  <SocialConnect artistId={currentArtistId} artistName={activeArtist?.name} />
+                  <SocialConnect artistId={currentArtistId} artistName={activeArtist?.name} onPlatformsUpdated={(platforms) => setActiveArtist(prev => ({ ...prev, active_platforms: platforms }))} />
                 </section>
               )}
             </div>
