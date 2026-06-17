@@ -305,9 +305,8 @@ const Dashboard = () => {
 
           {activeView === 'sparks' && <SparksMarket user={user} />}
 
-          {activeView === 'settings' && <Settings user={user} activeArtist={activeArtist} onUpdate={async (data) => {
-            const updated = { ...user, name: `${data.firstName} ${data.lastName}`, bio: data.bio };
-            localStorage.setItem('vidalis_user', JSON.stringify(updated));
+          {activeView === 'settings' && <Settings user={user} activeArtist={activeArtist} onUpdate={(data) => {
+            const updated = { ...user, name: data.firstName, bio: data.bio, avatar_url: data.avatar_url };
             setUser(updated);
           }} />}
 
@@ -343,7 +342,7 @@ const Dashboard = () => {
 
       <style>{`
         .dashboard-root { min-height: 100vh; background: var(--bg-primary); color: var(--text-main); }
-        .dashboard-container { display: flex; min-height: calc(100vh - 80px); }
+        .dashboard-container { display: flex; min-height: calc(100vh - 70px); align-items: flex-start; }
         
         .main-header-pro {
           height: 70px; padding: 0 32px; display: flex; justify-content: space-between; align-items: center;
@@ -363,7 +362,7 @@ const Dashboard = () => {
         .btn-exit-pro { background: #FEF2F2; color: #DC2626; border: 1px solid #FEE2E2; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-exit-pro:hover { background: #FEE2E2; }
 
-        .sidebar-pro { width: 260px; background: #121214; border-right: 1px solid rgba(255,255,255,0.08); padding: 32px 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: calc(100vh - 70px); }
+        .sidebar-pro { width: 260px; background: #121214; border-right: 1px solid rgba(255,255,255,0.08); padding: 32px 16px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; position: sticky; top: 70px; height: calc(100vh - 70px); align-self: flex-start; }
         .sidebar-pro::-webkit-scrollbar { width: 6px; }
         .sidebar-pro::-webkit-scrollbar-track { background: transparent; }
         .sidebar-pro::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
