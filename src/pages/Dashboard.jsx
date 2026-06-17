@@ -305,8 +305,7 @@ const Dashboard = () => {
 
           {activeView === 'sparks' && <SparksMarket user={user} />}
 
-          {activeView === 'settings' && <Settings user={user} onUpdate={async (data) => {
-            console.log('Updated user data:', data);
+          {activeView === 'settings' && <Settings user={user} activeArtist={activeArtist} onUpdate={async (data) => {
             const updated = { ...user, name: `${data.firstName} ${data.lastName}`, bio: data.bio };
             localStorage.setItem('vidalis_user', JSON.stringify(updated));
             setUser(updated);

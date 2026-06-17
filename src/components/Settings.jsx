@@ -1,364 +1,421 @@
-import { useState } from 'react';
-import { User, Lock, CreditCard, Key, AlertTriangle, Copy, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Camera, Info } from 'lucide-react';
 
-const Settings = ({ user, onUpdate }) => {
-  const [formData, setFormData] = useState({
-    firstName: user?.name?.split(' ')[0] || 'Felix',
-    lastName: user?.name?.split(' ').slice(1).join(' ') || 'Van Houtte',
-    email: user?.email || 'felix.vh@metalabs.ai',
-    bio: user?.bio || 'Passionate about the intersection of AI and visual arts. Leading creative teams at MetaLabs to build the future of generative media.'
+const PLATFORM_META = {
+  instagram: {
+    label: 'Instagram',
+    icon: '📸',
+    gradient: 'linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7)',
+    textColor: '#fff',
+  },
+  tiktok: {
+    label: 'TikTok',
+    icon: '🎵',
+    gradient: 'linear-gradient(135deg, #010101, #69C9D0)',
+    textColor: '#fff',
+  },
+  youtube: {
+    label: 'YouTube',
+    icon: '▶',
+    gradient: 'linear-gradient(135deg, #FF0000, #cc0000)',
+    textColor: '#fff',
+  },
+  facebook: {
+    label: 'Facebook',
+    icon: 'f',
+    gradient: 'linear-gradient(135deg, #1877F2, #0d5fd6)',
+    textColor: '#fff',
+  },
+  twitter: {
+    label: 'X (Twitter)',
+    icon: '✕',
+    gradient: 'linear-gradient(135deg, #14171A, #333)',
+    textColor: '#fff',
+  },
+  linkedin: {
+    label: 'LinkedIn',
+    icon: 'in',
+    gradient: 'linear-gradient(135deg, #0077B5, #005885)',
+    textColor: '#fff',
+  },
+};
+
+const ALL_PLATFORMS = ['instagram', 'tiktok', 'youtube', 'facebook'];
+
+const Toggle = ({ on, onChange }) => (
+  <button
+    onClick={() => onChange(!on)}
+    style={{
+      width: '48px', height: '26px', borderRadius: '999px',
+      background: on ? 'linear-gradient(135deg, #7c3aed, #aa0266)' : 'rgba(255,255,255,0.1)',
+      border: 'none', cursor: 'pointer', padding: '3px',
+      display: 'flex', alignItems: 'center',
+      justifyContent: on ? 'flex-end' : 'flex-start',
+      transition: 'all 0.3s ease', flexShrink: 0,
+    }}
+  >
+    <div style={{
+      width: '20px', height: '20px', borderRadius: '50%',
+      background: on ? '#fff' : 'rgba(255,255,255,0.4)',
+      transition: 'all 0.3s ease',
+      boxShadow: on ? '0 0 8px rgba(210,187,255,0.5)' : 'none',
+    }} />
+  </button>
+);
+
+const GlassCard = ({ children, style = {} }) => (
+  <div style={{
+    backdropFilter: 'blur(16px)',
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '16px',
+    ...style,
+  }}>
+    {children}
+  </div>
+);
+
+const GradientTitle = ({ children }) => (
+  <h2 style={{
+    fontFamily: 'Outfit, sans-serif', fontSize: '20px', fontWeight: '700', margin: '0 0 16px',
+    background: 'linear-gradient(135deg, #d2bbff 0%, #ffb0cd 100%)',
+    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+  }}>
+    {children}
+  </h2>
+);
+
+const inputStyle = {
+  width: '100%', padding: '12px 14px', boxSizing: 'border-box',
+  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: '12px', color: '#e7dff0', fontSize: '14px',
+  fontFamily: 'Inter, sans-serif', outline: 'none', transition: 'border-color 0.2s',
+};
+
+const labelStyle = {
+  display: 'block', fontSize: '11px', fontWeight: '600',
+  color: 'rgba(204,195,216,0.6)', textTransform: 'uppercase',
+  letterSpacing: '0.05em', marginBottom: '8px',
+};
+
+const Settings = ({ user, activeArtist, onUpdate }) => {
+  const [form, setForm] = useState({
+    name: user?.name || '',
+    handle: user?.handle || user?.email?.split('@')[0] || '',
+    bio: user?.bio || '',
   });
-
-  const [copied, setCopied] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [smartReply, setSmartReply] = useState(true);
+  const [autoDM, setAutoDM] = useState(false);
+  const [focusField, setFocusField] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const activePlatforms = activeArtist?.active_platforms || [];
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onUpdate?.(formData);
-      alert('✅ Cambios guardados');
-    } catch (err) {
-      alert('❌ Error al guardar cambios');
+      const [first, ...rest] = form.name.trim().split(' ');
+      await onUpdate?.({ firstName: first, lastName: rest.join(' '), bio: form.bio });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch {
+      alert('Error al guardar');
     } finally {
       setSaving(false);
     }
   };
 
-  const copyToClipboard = (text, id) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
+  const planLabels = {
+    'Mini': { name: 'Mini', price: 'Gratis', desc: 'Acceso básico a publicación y análisis de contenido.' },
+    'Artista': { name: 'Artista', price: '$29', desc: 'Calendario editorial, todas las plataformas principales y métricas avanzadas.' },
+    'Estrella': { name: 'Estrella', price: '$79', desc: 'Videos ilimitados, YouTube y LinkedIn, IA de contenido completa.' },
+    'Agencia Pro': { name: 'Agencia Pro', price: '$149', desc: 'Sin límites, todas las redes, soporte prioritario y analítica global.' },
   };
+  const plan = planLabels[user?.plan_type] || planLabels['Mini'];
 
   return (
-    <div className="settings-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', padding: '32px' }}>
-      {/* Left Column - Profile */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        {/* Profile Card */}
-        <div className="settings-card glass-morph" style={{
-          background: 'rgba(15, 23, 42, 0.8)',
-          border: '1px solid rgba(148, 163, 184, 0.1)',
-          borderRadius: '16px',
-          padding: '32px',
-          backdropFilter: 'blur(10px)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '24px', marginBottom: '32px' }}>
+    <div style={{
+      maxWidth: '960px', margin: '0 auto',
+      padding: '32px 32px 80px',
+      display: 'flex', flexDirection: 'column', gap: '32px',
+    }}>
+
+      {/* ── Profile & Branding ── */}
+      <section>
+        <GradientTitle>Profile & Branding</GradientTitle>
+        <GlassCard style={{ padding: '32px', display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          {/* Avatar */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
             <div style={{
-              width: '120px',
-              height: '120px',
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative'
+              width: '112px', height: '112px', borderRadius: '24px', overflow: 'hidden',
+              border: '2px solid rgba(210,187,255,0.3)',
+              background: 'linear-gradient(135deg, #7c3aed 0%, #aa0266 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '40px', color: 'white', fontWeight: '700',
+              transition: 'border-color 0.2s',
             }}>
-              <User size={48} color="white" />
-              <div style={{
-                position: 'absolute',
-                bottom: '-4px',
-                right: '-4px',
-                width: '32px',
-                height: '32px',
-                background: '#A78BFA',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '2px solid #0F172A'
-              }}>
-                <span style={{ fontSize: '18px' }}>✓</span>
-              </div>
+              {form.name ? form.name[0].toUpperCase() : '?'}
             </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ fontSize: '24px', fontWeight: '900', color: '#F1F5F9', marginBottom: '4px' }}>
-                {formData.firstName} {formData.lastName}
-              </h3>
-              <p style={{ color: '#94A3B8', fontSize: '14px', marginBottom: '16px' }}>
-                Creative Director @ MetaLabs
-              </p>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '24px', fontWeight: '900', color: '#F1F5F9' }}>42</div>
-                  <div style={{ fontSize: '12px', color: '#64748B', textTransform: 'uppercase', fontWeight: '600' }}>Projects</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '24px', fontWeight: '900', color: '#F1F5F9' }}>1.2k</div>
-                  <div style={{ fontSize: '12px', color: '#64748B', textTransform: 'uppercase', fontWeight: '600' }}>Generations</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button style={{
-            width: '100%',
-            padding: '12px',
-            background: 'linear-gradient(135deg, #C084FC 0%, #A78BFA 100%)',
-            border: 'none',
-            borderRadius: '8px',
-            color: '#0F172A',
-            fontWeight: '700',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}>
-            Upgrade Pro Plan
-          </button>
-        </div>
-
-        {/* Quick Links */}
-        <div className="settings-card glass-morph" style={{
-          background: 'rgba(15, 23, 42, 0.8)',
-          border: '1px solid rgba(148, 163, 184, 0.1)',
-          borderRadius: '16px',
-          padding: '24px',
-          backdropFilter: 'blur(10px)'
-        }}>
-          {[
-            { icon: User, label: 'Profile Info', color: '#4F46E5' },
-            { icon: Lock, label: 'Security', color: '#F59E0B' },
-            { icon: CreditCard, label: 'Billing & Subscriptions', color: '#10B981' },
-            { icon: Key, label: 'API Access', color: '#8B5CF6' }
-          ].map((item, idx) => (
-            <button key={idx} style={{
-              width: '100%',
-              padding: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'transparent',
-              border: 'none',
-              borderBottom: idx < 3 ? '1px solid rgba(148, 163, 184, 0.1)' : 'none',
-              cursor: 'pointer',
-              color: '#E2E8F0',
-              transition: 'all 0.3s ease'
-            }} onMouseEnter={(e) => e.target.style.background = 'rgba(148, 163, 184, 0.05)'} onMouseLeave={(e) => e.target.style.background = 'transparent'}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <item.icon size={20} color={item.color} />
-                <span style={{ fontWeight: '600' }}>{item.label}</span>
-              </div>
-              <span style={{ color: '#64748B' }}>›</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Right Column - Account Settings & API Keys */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        {/* Account Settings */}
-        <div className="settings-card glass-morph" style={{
-          background: 'rgba(15, 23, 42, 0.8)',
-          border: '1px solid rgba(148, 163, 184, 0.1)',
-          borderRadius: '16px',
-          padding: '32px',
-          backdropFilter: 'blur(10px)'
-        }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#F1F5F9', marginBottom: '24px' }}>Account Settings</h3>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase' }}>First Name</label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  marginTop: '8px',
-                  background: 'rgba(30, 41, 59, 0.8)',
-                  border: '1px solid rgba(148, 163, 184, 0.2)',
-                  borderRadius: '8px',
-                  color: '#F1F5F9',
-                  fontFamily: 'inherit',
-                  fontSize: '14px'
-                }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase' }}>Last Name</label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  marginTop: '8px',
-                  background: 'rgba(30, 41, 59, 0.8)',
-                  border: '1px solid rgba(148, 163, 184, 0.2)',
-                  borderRadius: '8px',
-                  color: '#F1F5F9',
-                  fontFamily: 'inherit',
-                  fontSize: '14px'
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '12px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase' }}>Email Address</label>
-            <input
-              type="email"
-              value={formData.email}
-              disabled
-              style={{
-                width: '100%',
-                padding: '12px',
-                marginTop: '8px',
-                background: 'rgba(30, 41, 59, 0.5)',
-                border: '1px solid rgba(148, 163, 184, 0.1)',
-                borderRadius: '8px',
-                color: '#64748B',
-                fontFamily: 'inherit',
-                fontSize: '14px',
-                cursor: 'not-allowed'
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ fontSize: '12px', fontWeight: '600', color: '#94A3B8', textTransform: 'uppercase' }}>Bio</label>
-            <textarea
-              name="bio"
-              value={formData.bio}
-              onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '12px',
-                marginTop: '8px',
-                background: 'rgba(30, 41, 59, 0.8)',
-                border: '1px solid rgba(148, 163, 184, 0.2)',
-                borderRadius: '8px',
-                color: '#F1F5F9',
-                fontFamily: 'inherit',
-                fontSize: '14px',
-                minHeight: '100px',
-                resize: 'vertical'
-              }}
-            />
-          </div>
-
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            style={{
-              width: '100%',
-              padding: '12px',
-              background: saving ? '#64748B' : 'linear-gradient(135deg, #A78BFA 0%, #C084FC 100%)',
-              border: 'none',
-              borderRadius: '8px',
-              color: '#0F172A',
-              fontWeight: '700',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            {saving ? 'Guardando...' : 'Save Settings'}
-          </button>
-        </div>
-
-        {/* API Keys */}
-        <div className="settings-card glass-morph" style={{
-          background: 'rgba(15, 23, 42, 0.8)',
-          border: '1px solid rgba(148, 163, 184, 0.1)',
-          borderRadius: '16px',
-          padding: '32px',
-          backdropFilter: 'blur(10px)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#F1F5F9' }}>API Keys</h3>
             <button style={{
-              padding: '8px 16px',
-              background: 'rgba(148, 163, 184, 0.1)',
-              border: '1px solid rgba(148, 163, 184, 0.2)',
-              borderRadius: '6px',
-              color: '#F1F5F9',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontSize: '12px'
+              position: 'absolute', bottom: '-6px', right: '-6px',
+              width: '30px', height: '30px', borderRadius: '10px',
+              background: 'linear-gradient(135deg, #7c3aed, #aa0266)',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(124,58,237,0.4)',
+              transition: 'transform 0.2s',
             }}>
-              + New Key
+              <Camera size={14} color="white" />
             </button>
           </div>
 
-          {[
-            { name: 'Production Main', key: 'sk-vidalis-••••••••12b' },
-            { name: 'Staging Test', key: 'sk-vidalis-••••••••23c' }
-          ].map((api, idx) => (
-            <div key={idx} style={{
-              padding: '16px',
-              background: 'rgba(30, 41, 59, 0.8)',
-              border: '1px solid rgba(148, 163, 184, 0.1)',
-              borderRadius: '8px',
-              marginBottom: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+          {/* Fields */}
+          <div style={{ flex: 1, minWidth: '260px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#F1F5F9' }}>{api.name}</div>
-                <div style={{ fontSize: '12px', color: '#64748B', fontFamily: 'monospace', marginTop: '4px' }}>{api.key}</div>
+                <label style={labelStyle}>Display Name</label>
+                <input
+                  style={{ ...inputStyle, borderColor: focusField === 'name' ? '#7c3aed' : 'rgba(255,255,255,0.1)' }}
+                  value={form.name}
+                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                  onFocus={() => setFocusField('name')}
+                  onBlur={() => setFocusField(null)}
+                />
               </div>
+              <div>
+                <label style={labelStyle}>Handle</label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(204,195,216,0.5)', fontSize: '14px' }}>@</span>
+                  <input
+                    style={{ ...inputStyle, paddingLeft: '28px', borderColor: focusField === 'handle' ? '#7c3aed' : 'rgba(255,255,255,0.1)' }}
+                    value={form.handle}
+                    onChange={e => setForm(p => ({ ...p, handle: e.target.value }))}
+                    onFocus={() => setFocusField('handle')}
+                    onBlur={() => setFocusField(null)}
+                  />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Bio</label>
+              <textarea
+                rows={3}
+                style={{ ...inputStyle, resize: 'none', borderColor: focusField === 'bio' ? '#7c3aed' : 'rgba(255,255,255,0.1)' }}
+                value={form.bio}
+                onChange={e => setForm(p => ({ ...p, bio: e.target.value }))}
+                onFocus={() => setFocusField('bio')}
+                onBlur={() => setFocusField(null)}
+              />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button
-                onClick={() => copyToClipboard(api.key, idx)}
+                onClick={handleSave}
+                disabled={saving}
                 style={{
-                  padding: '8px 12px',
-                  background: 'transparent',
-                  border: '1px solid rgba(148, 163, 184, 0.2)',
-                  borderRadius: '6px',
-                  color: copied === idx ? '#10B981' : '#94A3B8',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '12px'
+                  padding: '10px 28px', borderRadius: '12px', border: 'none',
+                  background: saved ? 'rgba(78,222,163,0.2)' : 'linear-gradient(135deg, #7c3aed, #aa0266)',
+                  color: saved ? '#4edea3' : '#fff', fontWeight: '700', fontSize: '14px',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  border: saved ? '1px solid rgba(78,222,163,0.4)' : 'none',
+                  transition: 'all 0.3s', opacity: saving ? 0.7 : 1,
+                  boxShadow: saved ? 'none' : '0 0 20px rgba(124,58,237,0.3)',
                 }}
               >
-                {copied === idx ? <Check size={14} /> : <Copy size={14} />}
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Danger Zone */}
-        <div className="settings-card glass-morph" style={{
-          background: 'rgba(127, 29, 29, 0.15)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
-          borderRadius: '16px',
-          padding: '24px',
-          backdropFilter: 'blur(10px)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-            <AlertTriangle size={20} color="#EF4444" style={{ marginTop: '2px', flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#EF4444', marginBottom: '4px' }}>Danger Zone</h4>
-              <p style={{ fontSize: '12px', color: '#94A3B8', marginBottom: '16px' }}>
-                Permanently delete your account and all associated creative assets.
-              </p>
-              <button style={{
-                padding: '8px 16px',
-                background: 'transparent',
-                border: '1px solid #EF4444',
-                borderRadius: '6px',
-                color: '#EF4444',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}>
-                Delete Account
+                {saved ? '✓ Guardado' : saving ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
           </div>
-        </div>
+        </GlassCard>
+      </section>
+
+      {/* ── Connected Accounts + Automation Rules ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+
+        {/* Connected Accounts */}
+        <section>
+          <GradientTitle>Cuentas Conectadas</GradientTitle>
+          <GlassCard style={{ overflow: 'hidden' }}>
+            {ALL_PLATFORMS.map((platform, idx) => {
+              const meta = PLATFORM_META[platform];
+              const connected = activePlatforms.includes(platform);
+              return (
+                <div key={platform} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '18px 20px',
+                  borderBottom: idx < ALL_PLATFORMS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                  transition: 'background 0.2s',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{
+                      width: '40px', height: '40px', borderRadius: '50%',
+                      background: meta.gradient,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: platform === 'youtube' ? '16px' : '13px',
+                      fontWeight: '800', color: '#fff', flexShrink: 0,
+                    }}>
+                      {meta.icon}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#e7dff0' }}>{meta.label}</div>
+                      <div style={{ fontSize: '11px', color: 'rgba(204,195,216,0.5)', marginTop: '2px' }}>
+                        {connected ? `@${activeArtist?.name?.toLowerCase().replace(/\s/g, '') || 'cuenta'}` : 'No conectado'}
+                      </div>
+                    </div>
+                  </div>
+                  {connected ? (
+                    <span style={{
+                      padding: '4px 12px', borderRadius: '999px', fontSize: '10px', fontWeight: '800',
+                      background: 'rgba(0,118,80,0.2)', color: '#4edea3',
+                      border: '1px solid rgba(78,222,163,0.25)', letterSpacing: '0.05em',
+                    }}>
+                      CONECTADO
+                    </span>
+                  ) : (
+                    <button style={{
+                      padding: '6px 14px', borderRadius: '8px', fontSize: '11px', fontWeight: '700',
+                      background: 'transparent', border: '1px solid rgba(255,255,255,0.2)',
+                      color: '#ccc3d8', cursor: 'pointer', transition: 'all 0.2s',
+                    }}>
+                      CONECTAR
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </GlassCard>
+        </section>
+
+        {/* Automation Rules */}
+        <section>
+          <GradientTitle>Reglas de Automatización</GradientTitle>
+          <GlassCard style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Smart Reply */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '12px', flexShrink: 0,
+                  background: 'rgba(124,58,237,0.15)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: '18px' }}>🤖</span>
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#e7dff0' }}>Smart Reply</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(204,195,216,0.5)', marginTop: '2px' }}>La IA genera respuestas contextuales a comentarios</div>
+                </div>
+              </div>
+              <Toggle on={smartReply} onChange={setSmartReply} />
+            </div>
+
+            {/* Auto-DM */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px',
+              opacity: autoDM ? 1 : 0.55, transition: 'opacity 0.3s',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '12px', flexShrink: 0,
+                  background: 'rgba(255,255,255,0.06)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: '18px' }}>✉️</span>
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#e7dff0' }}>Auto-DM</div>
+                  <div style={{ fontSize: '11px', color: 'rgba(204,195,216,0.5)', marginTop: '2px' }}>Saludo automático para nuevos seguidores</div>
+                </div>
+              </div>
+              <Toggle on={autoDM} onChange={setAutoDM} />
+            </div>
+
+            {/* Info note */}
+            <div style={{
+              paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)',
+              display: 'flex', alignItems: 'flex-start', gap: '8px',
+            }}>
+              <Info size={13} color="rgba(204,195,216,0.5)" style={{ marginTop: '2px', flexShrink: 0 }} />
+              <span style={{ fontSize: '11px', color: 'rgba(204,195,216,0.5)', fontStyle: 'italic', lineHeight: 1.6 }}>
+                Las automatizaciones aplican en todas las plataformas conectadas.
+              </span>
+            </div>
+          </GlassCard>
+        </section>
       </div>
+
+      {/* ── Subscription ── */}
+      <section>
+        <GradientTitle>Suscripción</GradientTitle>
+        <GlassCard style={{ overflow: 'hidden', position: 'relative' }}>
+          {/* Glow */}
+          <div style={{
+            position: 'absolute', top: '-60px', right: '-60px',
+            width: '220px', height: '220px',
+            background: 'rgba(124,58,237,0.1)',
+            borderRadius: '50%', filter: 'blur(80px)',
+            pointerEvents: 'none',
+          }} />
+          <div style={{
+            padding: '40px', position: 'relative', zIndex: 1,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            flexWrap: 'wrap', gap: '32px',
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                padding: '4px 14px', borderRadius: '999px',
+                background: 'rgba(170,2,102,0.15)', border: '1px solid rgba(255,176,205,0.3)',
+                width: 'fit-content',
+              }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ffb0cd', animation: 'pulse 2s infinite' }} />
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffb0cd', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Plan Activo</span>
+              </div>
+              <h3 style={{ fontSize: '26px', fontWeight: '800', color: '#e7dff0', margin: 0, fontFamily: 'Outfit, sans-serif' }}>
+                {plan.name}
+              </h3>
+              <p style={{ color: 'rgba(204,195,216,0.7)', fontSize: '14px', margin: 0, maxWidth: '380px', lineHeight: 1.6 }}>
+                {plan.desc}
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '20px' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div>
+                  <span style={{ fontSize: '32px', fontWeight: '800', color: '#e7dff0', fontFamily: 'Outfit, sans-serif' }}>{plan.price}</span>
+                  <span style={{ color: 'rgba(204,195,216,0.5)', fontSize: '14px' }}>{plan.price !== 'Gratis' ? '/mes' : ''}</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end' }}>
+                <button style={{
+                  padding: '12px 28px', borderRadius: '12px', border: 'none',
+                  background: 'linear-gradient(135deg, #7c3aed, #aa0266)',
+                  color: '#fff', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
+                  boxShadow: '0 4px 20px rgba(124,58,237,0.35)', transition: 'transform 0.2s',
+                }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  Administrar Facturación
+                </button>
+                <button style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  fontSize: '12px', color: 'rgba(204,195,216,0.5)',
+                  textDecoration: 'underline', textUnderlineOffset: '3px',
+                  textDecorationColor: 'rgba(204,195,216,0.2)',
+                }}>
+                  Cambiar Plan
+                </button>
+              </div>
+            </div>
+          </div>
+        </GlassCard>
+      </section>
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+      `}</style>
     </div>
   );
 };
