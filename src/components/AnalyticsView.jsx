@@ -6,18 +6,21 @@ import {
 } from 'lucide-react';
 
 const METRIC_EXPLANATIONS = {
-  seguidores:    'Personas que eligieron seguir tu cuenta. Es tu audiencia base — las personas que verán tu contenido primero.',
-  alcance:       'Cuántas personas DISTINTAS vieron tu publicación. Si llega a 1.000 personas, el alcance es 1.000, sin importar cuántas veces la vio cada una.',
-  impresiones:   'Cuántas veces se mostró tu contenido en total. Una persona puede verlo 3 veces = 3 impresiones. Más impresiones que alcance significa que tu contenido "engancha" y la gente lo vuelve a ver.',
-  likes:         'Personas que tocaron el corazón ❤️ en tu publicación. Es la interacción más fácil y básica.',
-  comentarios:   'Personas que escribieron algo en tu publicación. Vale mucho más que un like — significa que tu contenido generó una reacción real.',
-  compartidos:   'Personas que mandaron tu contenido a sus amigos o lo publicaron en su perfil. Es la forma más poderosa de crecer — tu contenido llega a personas que aún no te siguen.',
-  guardados:     '📌 La métrica más valiosa de Instagram. Cuando alguien guarda tu publicación significa que el contenido fue tan útil o inspirador que quiere volver a verlo. El algoritmo lo premia mucho.',
-  engagement:    'De cada 100 personas que ven tu contenido, cuántas interactúan (dan like, comentan o comparten). Un 3% ya es bueno. Por encima del 6% es excelente. Un artista con 500 seguidores y 10% ER supera a uno con 50.000 y 0.5% ER.',
-  viral_score:   'Puntuación de nuestra IA (0–10) sobre el potencial viral de este video. Evalúa el gancho inicial, la duración, el ritmo y el mensaje. Más de 7 = tiene posibilidades reales de explotar.',
-  best_times:    'Los días y horas en que tu audiencia interactuó más con tu contenido en el pasado. Publicar en esos momentos aumenta las probabilidades de que más personas lo vean.',
-  views:         'Cuántas veces se reprodujo tu video (al menos unos segundos). Es el primer filtro del algoritmo — si pocas personas lo ven, deja de mostrarlo.',
-  watch_time:    'YouTube: tiempo total que las personas pasaron viendo tu video. El algoritmo de YouTube premia los videos que la gente termina de ver. Un video de 10 min con 8 min de watch time promedio es un hit.',
+  seguidores:              'Personas que eligieron seguir tu cuenta. Es tu audiencia base — las personas que verán tu contenido primero.',
+  alcance:                 'Cuántas personas DISTINTAS vieron tu publicación. Si llega a 1.000 personas, el alcance es 1.000, sin importar cuántas veces la vio cada una.',
+  impresiones:             'Cuántas veces se mostró tu contenido en total. Una persona puede verlo 3 veces = 3 impresiones. Más impresiones que alcance significa que tu contenido "engancha" y la gente lo vuelve a ver.',
+  likes:                   'Personas que tocaron el corazón ❤️ en tu publicación. Es la interacción más fácil y básica.',
+  comentarios:             'Personas que escribieron algo en tu publicación. Vale mucho más que un like — significa que tu contenido generó una reacción real.',
+  compartidos:             'Personas que mandaron tu contenido a sus amigos o lo publicaron en su perfil. Es la forma más poderosa de crecer — tu contenido llega a personas que aún no te siguen.',
+  guardados:               '📌 La métrica más valiosa de Instagram. Cuando alguien guarda tu publicación significa que el contenido fue tan útil o inspirador que quiere volver a verlo. El algoritmo lo premia mucho.',
+  engagement:              'De cada 100 personas que ven tu contenido, cuántas interactúan (dan like, comentan o comparten). Un 3% ya es bueno. Por encima del 6% es excelente. Un artista con 500 seguidores y 10% ER supera a uno con 50.000 y 0.5% ER.',
+  viral_score:             'Puntuación de nuestra IA (0–10) sobre el potencial viral de este video. Evalúa el gancho inicial, la duración, el ritmo y el mensaje. Más de 7 = tiene posibilidades reales de explotar.',
+  best_times:              'Los días y horas en que tu audiencia interactuó más con tu contenido en el pasado. Publicar en esos momentos aumenta las probabilidades de que más personas lo vean.',
+  views:                   'Cuántas veces se reprodujo tu video (al menos unos segundos). Es el primer filtro del algoritmo — si pocas personas lo ven, deja de mostrarlo.',
+  watch_time:              'YouTube: tiempo total que las personas pasaron viendo tu video. El algoritmo de YouTube premia los videos que la gente termina de ver. Un video de 10 min con 8 min de watch time promedio es un hit.',
+  traccion_viral:          'Muestra cómo evolucionó el alcance total de tu contenido en los últimos 7 días. Un pico hacia arriba significa que un post pegó fuerte. Una línea plana indica que el contenido no está generando tracción nueva.',
+  comparativa_plataformas: 'Resumen de cada red social donde tienes presencia. Compara en qué plataforma tienes más alcance, más engagement y más seguidores. Haz clic en cualquier plataforma para ver el detalle completo.',
+  rendimiento_publicacion: 'Tabla con cada publicación y sus métricas reales de las redes sociales. Te permite identificar qué contenido funcionó mejor y repetir ese formato en el futuro.',
 };
 
 const InfoTooltip = ({ metricKey, position = 'top' }) => {
@@ -438,7 +441,9 @@ const AnalyticsView = ({ userId, activeArtist }) => {
       {/* ── VISTA TODO ── */}
       {activePlatform === 'all' && (
         <>
-          <div className="stats-section-label">COMPARATIVA DE PLATAFORMAS</div>
+          <div className="stats-section-label" style={{ display: 'flex', alignItems: 'center' }}>
+            COMPARATIVA DE PLATAFORMAS<InfoTooltip metricKey="comparativa_plataformas" />
+          </div>
           {connectedPlatforms.length === 0 ? (
             <div className="card-pro" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', marginBottom: '32px' }}>
               <BarChart3 size={32} style={{ marginBottom: '12px', opacity: 0.3 }} />
@@ -508,7 +513,10 @@ const AnalyticsView = ({ userId, activeArtist }) => {
           <div style={{ display: 'grid', gridTemplateColumns: bestTimes.length ? '2fr 1fr' : '1fr', gap: '20px', marginBottom: '32px' }}>
             <div className="card-pro chart-card-pro">
               <div className="chart-card-header">
-                <h3 className="chart-title">TRACCIÓN VIRAL (7 DÍAS)</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <h3 className="chart-title">TRACCIÓN VIRAL (7 DÍAS)</h3>
+                  <InfoTooltip metricKey="traccion_viral" />
+                </div>
                 <div className="chart-period">MÉTRICA LIVE</div>
               </div>
               <TrendChart data={data?.history} />
@@ -588,9 +596,12 @@ const AnalyticsView = ({ userId, activeArtist }) => {
       {/* Tabla de posts */}
       <div className="card-pro content-list-card-pro">
         <div className="chart-card-header" style={{ marginBottom: '24px' }}>
-          <h3 className="chart-title">
-            {activePlatform === 'all' ? 'RENDIMIENTO POR PUBLICACIÓN' : `PUBLICACIONES EN ${(PLATFORM_META[activePlatform]?.label || activePlatform).toUpperCase()}`}
-          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <h3 className="chart-title">
+              {activePlatform === 'all' ? 'RENDIMIENTO POR PUBLICACIÓN' : `PUBLICACIONES EN ${(PLATFORM_META[activePlatform]?.label || activePlatform).toUpperCase()}`}
+            </h3>
+            <InfoTooltip metricKey="rendimiento_publicacion" />
+          </div>
           {loadingPosts && <Loader2 size={14} className="animate-spin" color="var(--text-muted)" />}
         </div>
         <div className="table-wrapper">
