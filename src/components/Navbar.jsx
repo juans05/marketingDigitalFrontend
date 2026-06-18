@@ -6,10 +6,8 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="glass-morph" style={{
+    <nav className="glass-morph vidalis-nav" style={{
       width: '100%',
-      height: '80px',
-      padding: '0 40px',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -72,8 +70,9 @@ const Navbar = () => {
         }
         .btn-nav-login { padding: 10px 20px; font-size: 14px; border-radius: 8px; white-space: nowrap; }
         
+        .vidalis-nav { height: 80px; padding: 0 40px; }
         @media (max-width: 768px) {
-          nav { padding: 0 20px; height: 72px; }
+          .vidalis-nav { padding: 0 20px; height: 64px; }
           .nav-link { display: none; }
           .btn-nav-login { padding: 8px 14px; font-size: 13px; }
           .btn-nav-login span { display: inline; }

@@ -53,12 +53,12 @@ const Pricing = () => {
         </p>
       </div>
       
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-        gap: '32px', 
-        maxWidth: '1200px', 
-        margin: '0 auto' 
+      <div className="pricing-grid" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '32px',
+        maxWidth: '1200px',
+        margin: '0 auto'
       }}>
         {plans.map((plan, i) => (
           <div key={i} className="card-pro" style={{
@@ -153,10 +153,11 @@ const Pricing = () => {
         ))}
       </div>
       <style>{`
-        .price-card { transition: all 0.3s ease; }
-        .price-card:hover { transform: translateY(-4px); border-color: #666 !important; }
+        .card-pro { transition: all 0.3s ease; }
+        .card-pro:hover { transform: translateY(-4px); border-color: #666 !important; }
         @media (max-width: 768px) {
-          .price-card { transform: none !important; margin-bottom: 20px; }
+          .card-pro { transform: none !important; padding: 28px 20px !important; }
+          .pricing-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </section>

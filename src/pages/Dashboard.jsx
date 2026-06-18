@@ -264,7 +264,7 @@ const Dashboard = () => {
                 background: '#121214',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '16px',
-                padding: '48px',
+                padding: 'clamp(24px, 5vw, 48px)',
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
@@ -328,11 +328,14 @@ const Dashboard = () => {
 
         {/* Mobile Nav Premium */}
         <nav className="mobile-nav glass-morph">
-          <button className={activeView === 'analytics' ? 'active' : ''} onClick={() => setActiveView('analytics')}><BarChart3 size={22} /></button>
-          <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}><Film size={22} /></button>
-          <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}><Zap size={22} /></button>
-          <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}><Calendar size={22} /></button>
-          {/* Artists view hidden map */}
+          <button className={activeView === 'analytics' ? 'active' : ''} onClick={() => setActiveView('analytics')}><BarChart3 size={20} /></button>
+          <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}><Film size={20} /></button>
+          <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}><Zap size={20} /></button>
+          <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}><Calendar size={20} /></button>
+          {!isAgency && (
+            <button className={activeView === 'connect' ? 'active' : ''} onClick={() => setActiveView('connect')}><Share2 size={20} /></button>
+          )}
+          <button className={activeView === 'settings' ? 'active' : ''} onClick={() => setActiveView('settings')}><SettingsIcon size={20} /></button>
         </nav>
       </div>
 
@@ -397,11 +400,11 @@ const Dashboard = () => {
             background: #121214; border-top: 1px solid rgba(255,255,255,0.08); 
             display: flex; justify-content: space-between; align-items: center; 
             z-index: 2000; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); 
-            padding: 0 24px; box-sizing: border-box;
+            padding: 0 8px; box-sizing: border-box;
           }
-          .mobile-nav button { 
-             background: transparent; border: none; color: #71717A; 
-             padding: 12px 20px; border-radius: 16px; 
+          .mobile-nav button {
+             background: transparent; border: none; color: #71717A;
+             padding: 10px 12px; border-radius: 12px; flex: 1;
              display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
              transition: all 0.2s ease; cursor: pointer;
           }

@@ -76,11 +76,11 @@ const Login = () => {
       <div style={{ position: 'absolute', top: '10%', left: '10%', width: '400px', height: '400px', background: 'rgba(79, 70, 229, 0.1)', filter: 'blur(100px)', borderRadius: '50%', zIndex: 0 }}></div>
       <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: '300px', height: '300px', background: 'rgba(168, 85, 247, 0.08)', filter: 'blur(80px)', borderRadius: '50%', zIndex: 0 }}></div>
       
-      <div className="glass-morph animate-fade-in" style={{ 
-        width: '100%', 
-        maxWidth: '460px', 
-        padding: '56px 48px', 
-        textAlign: 'center', 
+      <div className="glass-morph animate-fade-in login-card" style={{
+        width: '100%',
+        maxWidth: '460px',
+        padding: '56px 48px',
+        textAlign: 'center',
         borderRadius: '24px',
         border: '1px solid var(--border-main)',
         position: 'relative',
@@ -244,7 +244,7 @@ const Login = () => {
 
       <style>{`
         @media (max-width: 640px) {
-          .card-pro { padding: 32px 20px !important; margin: 0; width: 100%; max-width: 100%; border-radius: 12px; }
+          .glass-morph.login-card { padding: 32px 20px !important; border-radius: 16px !important; }
         }
       `}</style>
     </div>

@@ -74,8 +74,8 @@ const Toggle = ({ on, onChange }) => (
   </button>
 );
 
-const GlassCard = ({ children, style = {} }) => (
-  <div style={{
+const GlassCard = ({ children, className, style = {} }) => (
+  <div className={className} style={{
     backdropFilter: 'blur(16px)',
     background: 'rgba(255,255,255,0.03)',
     border: '1px solid rgba(255,255,255,0.1)',
@@ -262,12 +262,12 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
   const plan = PLANS[user?.plan_type] || PLANS['Mini'];
 
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 32px 80px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <div className="settings-root" style={{ maxWidth: '960px', margin: '0 auto', padding: '32px 32px 80px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
       {/* ── Profile & Branding ─────────────────────────────────────────────── */}
       <section>
         <GradientTitle>Profile & Branding</GradientTitle>
-        <GlassCard style={{ padding: '32px', display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <GlassCard className="settings-profile-card" style={{ padding: '32px', display: 'flex', gap: '32px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
           {/* Avatar */}
           <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -322,7 +322,7 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
 
           {/* Form fields */}
           <div style={{ flex: 1, minWidth: '260px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="settings-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <label style={labelStyle}>Display Name</label>
                 <input
@@ -386,7 +386,7 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
       </section>
 
       {/* ── Connected Accounts + Automation Rules ──────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="settings-accounts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
 
         {/* Connected Accounts */}
         <section>
@@ -537,7 +537,7 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
             background: 'rgba(124,58,237,0.1)', borderRadius: '50%',
             filter: 'blur(80px)', pointerEvents: 'none',
           }} />
-          <div style={{
+          <div className="settings-sub-inner" style={{
             padding: '40px', position: 'relative', zIndex: 1,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             flexWrap: 'wrap', gap: '32px',
@@ -559,7 +559,7 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
               </p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '20px' }}>
+            <div className="settings-sub-actions" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '20px' }}>
               <div style={{ textAlign: 'right' }}>
                 <span style={{ fontSize: '34px', fontWeight: '800', color: '#e7dff0', fontFamily: 'Outfit, sans-serif' }}>{plan.price}</span>
                 {plan.price !== 'Gratis' && <span style={{ color: 'rgba(204,195,216,0.5)', fontSize: '14px' }}>/mes</span>}
@@ -600,6 +600,14 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
         @keyframes settingsPulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
+        }
+        @media (max-width: 768px) {
+          .settings-root { padding: 20px 16px 80px !important; }
+          .settings-profile-card { padding: 20px !important; }
+          .settings-form-grid { grid-template-columns: 1fr !important; }
+          .settings-accounts-grid { grid-template-columns: 1fr !important; }
+          .settings-sub-inner { padding: 24px !important; flex-direction: column !important; align-items: flex-start !important; }
+          .settings-sub-actions { align-items: flex-start !important; }
         }
       `}</style>
     </div>

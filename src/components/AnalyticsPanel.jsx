@@ -317,7 +317,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
             )}
 
             {/* Drawer Header */}
-            <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1C1C1F' }}>
+            <div className="drawer-header" style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1C1C1F' }}>
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: '#FAFAFA', marginBottom: '4px' }}>Resultados IA</h3>
                 <p style={{ fontSize: '12px', color: '#71717A', fontWeight: '600' }}>{initialData?.title}</p>
@@ -328,7 +328,7 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
             </div>
 
             {/* Drawer Content */}
-            <div style={{ flexGrow: 1, overflowY: 'auto', padding: '32px' }}>
+            <div className="drawer-body" style={{ flexGrow: 1, overflowY: 'auto', padding: '32px' }}>
               {loading ? (
                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', color: 'var(--text-muted)' }}>
                   <Loader className="animate-spin" size={32} color="var(--primary)" />
@@ -580,6 +580,10 @@ const AnalyticsPanel = ({ videoId, initialData, activePlatforms = [] }) => {
               @keyframes fadeIn {
                 from { opacity: 0; }
                 to { opacity: 1; }
+              }
+              @media (max-width: 768px) {
+                .drawer-header { padding: 16px 20px !important; }
+                .drawer-body { padding: 20px 16px !important; }
               }
             `}</style>
           </div>

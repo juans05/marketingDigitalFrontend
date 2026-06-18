@@ -114,7 +114,7 @@ const SocialConnect = ({ artistId, onPlatformsUpdated }) => {
   const hasConnections = connectedPlatforms.length > 0;
 
   return (
-    <div style={{
+    <div className="social-connect-root" style={{
       background: '#121214',
       padding: '40px',
       borderRadius: '16px',
@@ -249,12 +249,18 @@ const SocialConnect = ({ artistId, onPlatformsUpdated }) => {
       )}
 
       {/* Footer */}
-      <div style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+      <div style={{ marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <span style={{ fontSize: '11px', color: '#3F3F46', fontWeight: 600 }}>COMPATIBLE CON</span>
         {[Instagram, Facebook, Youtube, Sparkles, Building2].map((Icon, i) => (
           <Icon key={i} size={14} color="#3F3F46" />
         ))}
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .social-connect-root { padding: 24px 16px !important; }
+        }
+      `}</style>
     </div>
   );
 };

@@ -82,10 +82,10 @@ const SparksMarket = ({ user }) => {
         </div>
       </div>
 
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-        gap: '24px' 
+      <div className="sparks-grid" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '24px'
       }}>
         {pricingCards.map((card) => (
           <div key={card.id} className={`price-card ${card.popular ? 'popular' : ''}`} style={{
@@ -152,11 +152,11 @@ const SparksMarket = ({ user }) => {
         ))}
       </div>
 
-      <div style={{ 
-        marginTop: '60px', 
-        padding: '32px', 
-        background: '#121214', 
-        borderRadius: '20px', 
+      <div className="sparks-faq" style={{
+        marginTop: '60px',
+        padding: '32px',
+        background: '#121214',
+        borderRadius: '20px',
         border: '1px solid rgba(255,255,255,0.08)',
         display: 'flex',
         flexWrap: 'wrap',
@@ -164,7 +164,7 @@ const SparksMarket = ({ user }) => {
         alignItems: 'center',
         gap: '24px'
       }}>
-        <div style={{ flex: 1, minWidth: '300px' }}>
+        <div className="sparks-faq-text" style={{ flex: 1, minWidth: '300px' }}>
           <h4 style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <HelpCircle size={20} color="var(--primary)" /> ¿Diferencia entre Planes y Recargas?
           </h4>
@@ -197,6 +197,15 @@ const SparksMarket = ({ user }) => {
             <span style={{ fontWeight: 900, fontSize: '14px' }}>PAYPAL</span>
          </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .market-hero { padding: 24px 16px !important; }
+          .sparks-grid { grid-template-columns: 1fr !important; }
+          .sparks-faq { padding: 24px 16px !important; flex-direction: column !important; }
+          .sparks-faq-text { min-width: unset !important; }
+        }
+      `}</style>
     </div>
   );
 };

@@ -535,7 +535,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
           )}
 
           {/* Tracción global + Mejor hora para publicar */}
-          <div style={{ display: 'grid', gridTemplateColumns: bestTimes.length ? '2fr 1fr' : '1fr', gap: '20px', marginBottom: '32px' }}>
+          <div className="analytics-traction-grid" style={{ display: 'grid', gridTemplateColumns: bestTimes.length ? '2fr 1fr' : '1fr', gap: '20px', marginBottom: '32px' }}>
             <div className="card-pro chart-card-pro">
               <div className="chart-card-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -767,6 +767,7 @@ const AnalyticsView = ({ userId, activeArtist }) => {
           .chart-card-pro, .content-list-card-pro { padding: 20px 16px; margin: 0 0 24px 0; border-radius: 16px; }
           .stat-card-pro { padding: 20px; }
           .stat-card-value { font-size: 22px; }
+          .analytics-traction-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

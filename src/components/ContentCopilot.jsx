@@ -84,6 +84,7 @@ const PLATFORMS = [
 // ── Main Component ────────────────────────────────────────────────────────────
 const ContentCopilot = ({ artistId, onUploadSuccess }) => {
   const [script, setScript]     = useState('');
+  const [title, setTitle]       = useState('');
   const [tone, setTone]         = useState('controversial');
   const [platform, setPlatform] = useState('tiktok');
   const [file, setFile]         = useState(null);
@@ -131,7 +132,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
     }
     setFileError('');
     setFile(f);
-    if (!script) setScript(f.name.replace(/\.[^.]+$/, ''));
+    if (!title) setTitle(f.name.replace(/\.[^.]+$/, ''));
   };
 
   const uploadFileToCloudinary = async (f) => {
@@ -169,7 +170,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
       method: 'POST',
       headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        videoData: { title: f.name, source_url: uploaded.secure_url, artist_id: artistId, status: 'analyzing' }
+        videoData: { title: title || f.name, source_url: uploaded.secure_url, artist_id: artistId, status: 'analyzing' }
       }),
     });
 
@@ -190,7 +191,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
       const res = await fetch(`${API}/api/vidalis/analyze-content`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ script: script || file?.name, tone, platform, artist_id: artistId }),
+        body: JSON.stringify({ script: script || title || file?.name, tone, platform, artist_id: artistId }),
       });
       if (!res.ok) throw new Error('Error al analizar contenido');
       const data = await res.json();
@@ -202,7 +203,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
     }
   };
 
-  const canAnalyze = (script.trim().length > 5 || !!file) && !analyzing;
+  const canAnalyze = (script.trim().length > 5 || (!!file && title.trim().length > 0)) && !analyzing;
 
   return (
     <>
@@ -226,6 +227,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
         @media (max-width: 600px) {
           .cc-root { padding: 16px !important; }
           .cc-suggestions { grid-template-columns: 1fr !important; }
+          .cc-tone-platform { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -316,13 +318,37 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
 
               {/* File selected indicator */}
               {file && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'rgba(78,222,163,0.08)', border: '1px solid rgba(78,222,163,0.2)', borderRadius: '10px' }}>
-                  <ShieldCheck size={14} color="#4edea3" />
-                  <span style={{ fontSize: '12px', color: '#4edea3', fontWeight: '600', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
-                  <button onClick={() => setFile(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4edea3', padding: '2px', display: 'flex' }}>
-                    <X size={14} />
-                  </button>
-                </div>
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', background: 'rgba(78,222,163,0.08)', border: '1px solid rgba(78,222,163,0.2)', borderRadius: '10px' }}>
+                    <ShieldCheck size={14} color="#4edea3" />
+                    <span style={{ fontSize: '12px', color: '#4edea3', fontWeight: '600', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+                    <button onClick={() => { setFile(null); setTitle(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4edea3', padding: '2px', display: 'flex' }}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(204,195,216,0.6)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Título del contenido
+                    </span>
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={e => setTitle(e.target.value)}
+                      placeholder="Escribe un título para tu contenido..."
+                      style={{
+                        width: '100%', boxSizing: 'border-box',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '10px', padding: '12px 14px',
+                        color: '#e7dff0', fontSize: '14px',
+                        outline: 'none', fontFamily: 'Inter, sans-serif',
+                        transition: 'border-color 0.2s',
+                      }}
+                      onFocus={e => e.target.style.borderColor = 'rgba(124,58,237,0.6)'}
+                      onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                    />
+                  </div>
+                </>
               )}
               {fileError && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171', fontSize: '12px' }}>
@@ -350,7 +376,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
             </div>
 
             {/* Tone + Platform */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="cc-tone-platform" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               {/* Tone */}
               <div>
                 <span style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(204,195,216,0.6)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '10px' }}>

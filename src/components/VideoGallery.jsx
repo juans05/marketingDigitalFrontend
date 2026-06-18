@@ -274,7 +274,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
             const status = STATUS_CONFIG[video.status] || STATUS_CONFIG.processing;
             return (
               <div key={video.id} className="card-pro animate-fade-in" style={{ padding: '0', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ height: '400px', background: 'var(--bg-tertiary)', position: 'relative', overflow: 'hidden' }}>
+                <div className="video-media-area" style={{ height: '400px', background: 'var(--bg-tertiary)', position: 'relative', overflow: 'hidden' }}>
                   {video.source_url ? (
                     (video.processed_url || video.source_url).match(/\.(mp4|mov|webm)$/i) ? (
                       <video
@@ -388,6 +388,9 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
         @media (max-width: 768px) {
           .video-grid-pro {
             grid-template-columns: 1fr !important;
+          }
+          .video-media-area {
+            height: 280px !important;
           }
           .filter-pills-bar {
             flex-wrap: wrap !important;
