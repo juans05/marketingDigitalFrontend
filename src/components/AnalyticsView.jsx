@@ -91,7 +91,18 @@ const InfoTooltip = ({ metricKey }) => {
   );
 };
 
+const formatNumShort = (n) => {
+  if (!n || n === 0) return '0';
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return String(n);
+};
+
+const MONTHS_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
 const TrendChart = ({ data }) => {
+  const [activeIdx, setActiveIdx] = useState(null);
+
   if (!data || data.length < 2) return null;
   const width = 800;
   const height = 240;
@@ -113,7 +124,7 @@ const TrendChart = ({ data }) => {
   const areaD = `${pathD} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
 
   return (
-    <div className="chart-wrapper">
+    <div className="chart-wrapper" onMouseLeave={() => setActiveIdx(null)}>
       <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" preserveAspectRatio="none">
         <defs>
           <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -123,15 +134,75 @@ const TrendChart = ({ data }) => {
         </defs>
         <path d={areaD} fill="url(#chartGradient)" />
         <path d={pathD} fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 8px rgba(79, 70, 229, 0.4))' }} />
+
+        {/* Línea vertical al hacer hover */}
+        {activeIdx !== null && (
+          <line
+            x1={points[activeIdx].x} y1={padding}
+            x2={points[activeIdx].x} y2={height}
+            stroke="rgba(129,140,248,0.3)" strokeWidth="1" strokeDasharray="4 4"
+          />
+        )}
+
         {points.map((p, i) => (
-          <circle key={i} cx={p.x} cy={p.y} r="6" fill="var(--bg-primary)" stroke="var(--primary)" strokeWidth="3" />
+          <g key={i}>
+            <circle
+              cx={p.x} cy={p.y} r={activeIdx === i ? 9 : 6}
+              fill={activeIdx === i ? 'var(--primary)' : 'var(--bg-primary)'}
+              stroke="var(--primary)" strokeWidth="3"
+              style={{ transition: 'r 0.15s, fill 0.15s', cursor: 'pointer' }}
+            />
+            {/* Zona de hit invisible más grande para facilitar hover/tap */}
+            <circle
+              cx={p.x} cy={p.y} r="24" fill="transparent"
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setActiveIdx(i)}
+              onClick={() => setActiveIdx(prev => prev === i ? null : i)}
+            />
+          </g>
         ))}
+
+        {/* Tooltip sobre el punto activo */}
+        {activeIdx !== null && (() => {
+          const p = points[activeIdx];
+          const d = data[activeIdx];
+          const label = formatNumShort(d.value);
+          const boxW = Math.max(label.length * 10 + 20, 60);
+          const boxH = 30;
+          let tx = p.x - boxW / 2;
+          if (tx < 5) tx = 5;
+          if (tx + boxW > width - 5) tx = width - boxW - 5;
+          const ty = p.y - boxH - 14;
+          return (
+            <g style={{ pointerEvents: 'none' }}>
+              <rect x={tx} y={ty} width={boxW} height={boxH} rx="8"
+                fill="rgba(15,15,20,0.95)" stroke="rgba(129,140,248,0.4)" strokeWidth="1" />
+              <text x={tx + boxW / 2} y={ty + boxH / 2 + 1}
+                textAnchor="middle" dominantBaseline="central"
+                fill="#E2E8F0" fontSize="13" fontWeight="800" fontFamily="Outfit, sans-serif">
+                {d.value.toLocaleString()}
+              </text>
+              <polygon
+                points={`${p.x - 5},${ty + boxH} ${p.x + 5},${ty + boxH} ${p.x},${ty + boxH + 6}`}
+                fill="rgba(15,15,20,0.95)"
+              />
+            </g>
+          );
+        })()}
       </svg>
       <div className="chart-labels">
         {data.map((d, i) => (
-          <span key={i}>
+          <span key={i} style={{
+            color: activeIdx === i ? 'var(--primary)' : undefined,
+            fontWeight: activeIdx === i ? 900 : undefined,
+            transition: 'color 0.15s',
+            cursor: 'pointer',
+          }}
+            onMouseEnter={() => setActiveIdx(i)}
+            onClick={() => setActiveIdx(prev => prev === i ? null : i)}
+          >
             {d.date.split('-').reverse()[0]}{' '}
-            {['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'][parseInt(d.date.split('-')[1]) - 1]}
+            {MONTHS_ES[parseInt(d.date.split('-')[1]) - 1]}
           </span>
         ))}
       </div>
