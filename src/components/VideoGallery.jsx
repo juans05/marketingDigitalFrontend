@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter, RefreshCw } from 'lucide-react';
+import { Film, CheckCircle, Clock, AlertTriangle, XCircle, TrendingUp, Sparkles, Filter, RefreshCw, Eye, ChevronDown, ChevronUp } from 'lucide-react';
 import AnalyticsPanel from './AnalyticsPanel';
 
 const Loader2 = ({ className, style, size = 24 }) => (
@@ -22,17 +22,16 @@ const STATUS_CONFIG = {
   canceled: { label: 'Cancelado', icon: <XCircle size={12} />, color: '#6B7280', bg: '#F3F4F6' },
 };
 
-const ScoreBadge = ({ score }) => {
+const ScoreBadge = ({ score, calibration }) => {
   if (!score) return null;
   const color = score >= 8 ? '#10B981' : score >= 6 ? '#F59E0B' : '#EF4444';
+  const conf = calibration?.confidence;
+  const confDot = conf === 'high' ? '#10B981' : conf === 'medium' ? '#F59E0B' : conf ? '#EF4444' : null;
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: '6px',
-      fontSize: '14px', fontWeight: '800', color,
-      fontFamily: 'var(--font-heading)'
-    }}>
-      <TrendingUp size={14} />
-      {score}/10
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-heading)' }}>
+      {confDot && <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: confDot }} title={`Confianza: ${conf}`} />}
+      <TrendingUp size={14} color={color} />
+      <span style={{ fontSize: '14px', fontWeight: '800', color }}>{score}/10</span>
     </div>
   );
 };
@@ -141,10 +140,106 @@ const ErrorDetail = ({ errorLog }) => {
   );
 };
 
+const DimensionBar = ({ dim }) => {
+  const color = dim.score >= 75 ? '#10B981' : dim.score >= 50 ? '#F59E0B' : '#EF4444';
+  return (
+    <div style={{ marginBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+        <span style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-main)' }}>{dim.label}</span>
+        <span style={{ fontSize: '12px', fontWeight: '900', color }}>{dim.score}/100</span>
+      </div>
+      <div style={{ height: '6px', background: 'rgba(124,58,237,0.08)', borderRadius: '100px', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${dim.score}%`, background: color, borderRadius: '100px', transition: 'width 0.6s ease' }} />
+      </div>
+      <p style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '3px', fontWeight: '600' }}>{dim.detail}</p>
+    </div>
+  );
+};
+
+const VisualScorePanel = ({ result }) => {
+  const [expanded, setExpanded] = useState(false);
+  const overallColor = result.overall >= 75 ? '#10B981' : result.overall >= 50 ? '#F59E0B' : '#EF4444';
+  const dims = Object.values(result.dimensions || {});
+
+  return (
+    <div style={{ marginTop: '12px', background: 'rgba(124,58,237,0.04)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: '12px', overflow: 'hidden' }}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          width: '100%', padding: '12px 16px', background: 'transparent', border: 'none', cursor: 'pointer',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Eye size={14} color="#7c3aed" />
+          <span style={{ fontSize: '11px', fontWeight: '800', color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Visual Score</span>
+          <span style={{ fontSize: '16px', fontWeight: '900', color: overallColor }}>{result.overall}/100</span>
+          {result.score_confidence && (
+            <div style={{
+              width: '6px', height: '6px', borderRadius: '50%',
+              background: result.score_confidence === 'high' ? '#10B981' : result.score_confidence === 'medium' ? '#F59E0B' : '#EF4444',
+            }} title={`Confianza: ${result.score_confidence}`} />
+          )}
+        </div>
+        {expanded ? <ChevronUp size={16} color="var(--text-dim)" /> : <ChevronDown size={16} color="var(--text-dim)" />}
+      </button>
+
+      {expanded && (
+        <div style={{ padding: '0 16px 16px' }}>
+          {dims.map((d, i) => <DimensionBar key={i} dim={d} />)}
+
+          <div style={{ marginTop: '12px', padding: '10px 12px', background: 'rgba(124,58,237,0.06)', borderRadius: '8px' }}>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-main)', marginBottom: '8px' }}>{result.verdict}</p>
+            {result.quickFixes?.length > 0 && (
+              <ul style={{ margin: 0, paddingLeft: '16px' }}>
+                {result.quickFixes.map((fix, i) => (
+                  <li key={i} style={{ fontSize: '11px', color: 'var(--text-dim)', fontWeight: '600', marginBottom: '4px' }}>
+                    {fix}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }) => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [visualScores, setVisualScores] = useState({});
+  const [scanningId, setScanningId] = useState(null);
+
+  const handleVisualScan = async (video) => {
+    setScanningId(video.id);
+    const user = JSON.parse(localStorage.getItem('vidalis_user'));
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/visual-score`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user?.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          media_url: video.source_url,
+          media_type: (video.source_url || '').match(/\.(mp4|mov|webm)$/i) ? 'video' : 'image',
+          platform: 'tiktok',
+          artist_id: artistId
+        })
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setVisualScores(prev => ({ ...prev, [video.id]: result }));
+      }
+    } catch (e) {
+      console.error('Visual scan error:', e);
+    } finally {
+      setScanningId(null);
+    }
+  };
 
   const fetchGallery = (showLoader = false) => {
     if (!artistId) { setLoading(false); return; }
@@ -316,7 +411,7 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Viral IA</span>
-                      <ScoreBadge score={video.viral_score} />
+                      <ScoreBadge score={video.viral_score} calibration={video.score_calibration} />
                     </div>
                   </div>
 
@@ -328,6 +423,34 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
                   <div style={{ marginTop: 'auto' }}>
                     <AnalyticsPanel videoId={video.id} initialData={video} activePlatforms={activePlatforms} />
                   </div>
+
+                  {video.source_url && !visualScores[video.id] && (
+                    <button
+                      onClick={() => handleVisualScan(video)}
+                      disabled={scanningId === video.id}
+                      style={{
+                        width: '100%', marginTop: '12px', padding: '10px',
+                        background: scanningId === video.id ? 'rgba(124,58,237,0.08)' : 'rgba(124,58,237,0.06)',
+                        color: '#7c3aed',
+                        border: '1px dashed rgba(124,58,237,0.3)', borderRadius: '8px',
+                        fontWeight: '800', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em',
+                        cursor: scanningId === video.id ? 'wait' : 'pointer',
+                        display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseOver={(e) => { if (scanningId !== video.id) e.currentTarget.style.background = 'rgba(124,58,237,0.12)'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(124,58,237,0.06)'; }}
+                    >
+                      {scanningId === video.id ? (
+                        <><Loader2 size={14} className="animate-spin" /> Analizando Visual...</>
+                      ) : (
+                        <><Eye size={14} /> Scan Visual IA</>
+                      )}
+                    </button>
+                  )}
+
+                  {visualScores[video.id] && <VisualScorePanel result={visualScores[video.id]} />}
+
                   {video.status === 'error' && <ErrorDetail errorLog={video.error_log} />}
                 </div>
 

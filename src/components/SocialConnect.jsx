@@ -124,9 +124,40 @@ const SocialConnect = ({ artistId, onPlatformsUpdated }) => {
       marginBottom: '40px',
     }}>
       <h2 style={{ fontWeight: 800, fontSize: '20px', marginBottom: '8px' }}>Conecta tus redes sociales</h2>
-      <p style={{ color: '#71717A', fontSize: '14px', marginBottom: '32px' }}>
+      <p style={{ color: '#71717A', fontSize: '14px', marginBottom: '16px' }}>
         Vincula tu cuenta de Vidalis con tus redes sociales. Podés modificarlo más adelante.
       </p>
+
+      <div style={{
+        background: 'rgba(99,102,241,0.06)',
+        border: '1px solid rgba(99,102,241,0.15)',
+        borderRadius: '12px',
+        padding: '16px',
+        marginBottom: '28px',
+      }}>
+        <p style={{ fontSize: '12px', fontWeight: 700, color: '#A5B4FC', marginBottom: '10px' }}>
+          Al conectar tu cuenta importaremos:
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {[
+            { text: 'Métricas de los últimos 2 años', detail: 'views, likes, comentarios, shares y saves de cada post' },
+            { text: 'Engagement rate por plataforma', detail: 'para calibrar tu score viral con datos reales' },
+            { text: 'Mejores horarios de publicación', detail: 'basados en tu audiencia real' },
+            { text: 'Seguidores y crecimiento', detail: 'historial de evolución de tu cuenta' },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <CheckCircle2 size={13} color="#6366F1" style={{ marginTop: '2px', flexShrink: 0 }} />
+              <div>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#E4E4E7' }}>{item.text}</span>
+                <span style={{ fontSize: '11px', color: '#52525B', marginLeft: '6px' }}>— {item.detail}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontSize: '11px', color: '#3F3F46', marginTop: '10px', fontStyle: 'italic' }}>
+          No se importan imágenes, videos ni textos de tus publicaciones — solo las métricas numéricas.
+        </p>
+      </div>
 
       {/* Plataformas conectadas */}
       {hasConnections && (

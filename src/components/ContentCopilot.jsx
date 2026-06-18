@@ -228,6 +228,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
           .cc-root { padding: 16px !important; }
           .cc-suggestions { grid-template-columns: 1fr !important; }
           .cc-tone-platform { grid-template-columns: 1fr !important; }
+          .cc-diagnostico-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -493,8 +494,20 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                   <span style={{ fontSize: '12px', color: 'rgba(204,195,216,0.5)', marginTop: '4px' }}>/ 100</span>
                 </div>
               </div>
+              {result?.score_confidence && (
+                <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }} className="cc-fade-in">
+                  <div style={{
+                    width: '6px', height: '6px', borderRadius: '50%',
+                    background: result.score_confidence === 'high' ? '#10B981' : result.score_confidence === 'medium' ? '#F59E0B' : '#EF4444',
+                  }} />
+                  <span style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(204,195,216,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Confianza: {result.score_confidence === 'high' ? 'Alta' : result.score_confidence === 'medium' ? 'Media' : 'Baja'}
+                    {result.score_raw !== undefined && result.score_raw !== result.score && ` (crudo: ${result.score_raw})`}
+                  </span>
+                </div>
+              )}
               {result?.tags && (
-                <div style={{ marginTop: '16px', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px' }} className="cc-fade-in">
+                <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '6px' }} className="cc-fade-in">
                   {result.tags.map((tag, i) => {
                     const colors = ['#4edea3', '#d2bbff', '#ffb0cd'];
                     const bgs = ['rgba(78,222,163,0.1)', 'rgba(210,187,255,0.1)', 'rgba(255,176,205,0.1)'];
@@ -541,6 +554,44 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
         {/* ── RESULTS ───────────────────────────────────────────────────── */}
         {result && (
           <div className="cc-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+            {/* Diagnóstico Algorítmico */}
+            {(result.diagnostico_algoritmico || result.match_historico || result.mejora_del_gancho || result.ajuste_estrategico) && (
+              <Glass style={{ padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '16px' }}>🧠</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#818CF8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Diagnóstico Algorítmico
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="cc-diagnostico-grid">
+                  {result.diagnostico_algoritmico && (
+                    <div style={{ padding: '14px', background: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.15)', borderRadius: '10px' }}>
+                      <p style={{ fontSize: '10px', fontWeight: '700', color: '#818CF8', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px 0' }}>Predicción del Algoritmo</p>
+                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.diagnostico_algoritmico}</p>
+                    </div>
+                  )}
+                  {result.match_historico && (
+                    <div style={{ padding: '14px', background: 'rgba(78,222,163,0.06)', border: '1px solid rgba(78,222,163,0.15)', borderRadius: '10px' }}>
+                      <p style={{ fontSize: '10px', fontWeight: '700', color: '#4edea3', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px 0' }}>Match con tu Historial</p>
+                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.match_historico}</p>
+                    </div>
+                  )}
+                  {result.mejora_del_gancho && (
+                    <div style={{ padding: '14px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '10px' }}>
+                      <p style={{ fontSize: '10px', fontWeight: '700', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px 0' }}>Gancho Mejorado (3 seg)</p>
+                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0, fontStyle: 'italic' }}>{result.mejora_del_gancho}</p>
+                    </div>
+                  )}
+                  {result.ajuste_estrategico && (
+                    <div style={{ padding: '14px', background: 'rgba(255,176,205,0.06)', border: '1px solid rgba(255,176,205,0.15)', borderRadius: '10px' }}>
+                      <p style={{ fontSize: '10px', fontWeight: '700', color: '#ffb0cd', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px 0' }}>Ajuste Estratégico</p>
+                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.ajuste_estrategico}</p>
+                    </div>
+                  )}
+                </div>
+              </Glass>
+            )}
 
             {/* Strategic Suggestions */}
             <Glass style={{ padding: '24px' }}>
@@ -593,6 +644,30 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                 </div>
               </div>
             </Glass>
+
+            {/* Improvements */}
+            {result.improvements?.length > 0 && (
+              <Glass style={{ padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '16px' }}>🚀</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Cómo mejorar tu score
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {result.improvements.map((tip, i) => (
+                    <div key={i} style={{
+                      display: 'flex', gap: '12px', alignItems: 'flex-start',
+                      padding: '14px', background: 'rgba(245,158,11,0.05)',
+                      border: '1px solid rgba(245,158,11,0.15)', borderRadius: '10px',
+                    }}>
+                      <span style={{ fontSize: '14px', fontWeight: '800', color: '#f59e0b', flexShrink: 0, marginTop: '1px' }}>{i + 1}.</span>
+                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </Glass>
+            )}
 
             {/* Visual & Scene Breakdown */}
             {result.visualBreakdown && (
