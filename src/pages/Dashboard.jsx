@@ -5,7 +5,7 @@ import PlanningView from '../components/PlanningView';
 import SparksMarket from '../components/SparksMarket';
 import OnboardingWizard from '../components/OnboardingWizard';
 import AnalyticsView from '../components/AnalyticsView';
-import UploadSection from '../components/UploadSection';
+import ContentCopilot from '../components/ContentCopilot';
 import VideoGallery from '../components/VideoGallery';
 import SocialConnect from '../components/SocialConnect';
 import ArtistManager from '../components/ArtistManager';
@@ -194,7 +194,7 @@ const Dashboard = () => {
             <BarChart3 size={20} /> <span style={{ fontWeight: '600' }}>Analítica</span>
           </button>
           <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}>
-            <Film size={20} /> <span style={{ fontWeight: '600' }}>Producción</span>
+            <Sparkles size={20} /> <span style={{ fontWeight: '600' }}>Content Copilot</span>
           </button>
           {((user.plan !== 'Free' && user.plan !== 'Creator') || import.meta.env.VITE_BYPASS_PLAN_LIMITS === 'true') && (
             <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}>
@@ -224,7 +224,7 @@ const Dashboard = () => {
             <h1 className="view-title">
               {activeView === 'analytics' && 'Dashboard de Analítica'}
               {activeView === 'planning' && 'Planificación de Contenido'}
-              {activeView === 'content' && 'Producción y Medios'}
+              {activeView === 'content' && 'AI Content Copilot'}
               {activeView === 'connect' && 'Redes Sociales'}
               {activeView === 'artists' && 'Gestión de Marcas'}
               {activeView === 'sparks' && 'Mercado de Energía'}
@@ -243,13 +243,9 @@ const Dashboard = () => {
 
           {activeView === 'content' && (
             <div className="view-content" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              <section style={{ marginBottom: '40px' }}>
-                <h2 className="section-title">Nueva Publicación</h2>
-                <UploadSection artistId={currentArtistId} onUploadSuccess={() => setGalleryKey(k => k + 1)} />
-              </section>
-
+              <ContentCopilot artistId={currentArtistId} onUploadSuccess={() => setGalleryKey(k => k + 1)} />
               {currentArtistId && (
-                <section>
+                <section style={{ padding: '0 24px 32px' }}>
                   <h2 className="section-title">Biblioteca de Medios</h2>
                   <VideoGallery artistId={currentArtistId} artistName={activeArtist?.name} refreshKey={galleryKey} activePlatforms={activeArtist?.active_platforms || []} />
                 </section>

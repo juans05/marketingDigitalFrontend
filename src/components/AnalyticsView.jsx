@@ -340,14 +340,16 @@ const AnalyticsView = ({ userId, activeArtist }) => {
     return String(n);
   };
 
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const handleSync = async () => {
     const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
     const userStr = localStorage.getItem('vidalis_user');
     const token = userStr ? JSON.parse(userStr).token : '';
     if (activeArtist?.id) {
+      setIsSyncing(true);
       setLoadingStats(true);
       try {
-        // Sincronizar estado de cuentas Y analytics Zernio en paralelo
         await Promise.all([
           fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync`, {
             method: 'POST',
@@ -360,6 +362,8 @@ const AnalyticsView = ({ userId, activeArtist }) => {
         ]);
       } catch (err) {
         console.error('Sync error:', err);
+      } finally {
+        setIsSyncing(false);
       }
     }
     fetchStats();
@@ -406,9 +410,22 @@ const AnalyticsView = ({ userId, activeArtist }) => {
       {/* Header */}
       <div className="analytics-header">
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn-secondary" onClick={handleSync} disabled={loadingStats || loadingPosts} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <RefreshCw size={13} className={loadingStats ? 'animate-spin' : ''} />
-            Sincronizar
+          <button
+            className="btn-secondary"
+            onClick={handleSync}
+            disabled={isSyncing || loadingStats}
+            style={{
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              opacity: isSyncing ? 0.75 : 1,
+              transition: 'opacity 0.2s',
+              minWidth: '130px',
+            }}
+          >
+            <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
+            {isSyncing ? 'Actualizando...' : 'Sincronizar'}
           </button>
           {activeArtist?.id && (
             <button className="btn-primary" onClick={fetchInsights} disabled={loadingInsights} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
