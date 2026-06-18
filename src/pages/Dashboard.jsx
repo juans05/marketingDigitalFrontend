@@ -38,22 +38,28 @@ const Dashboard = () => {
 
       // Comprobación inicial de onboarding
       let needsOnboarding = !parsedUser.onboarding_completed;
+      let showWizard = false;
 
       // Logic for Agency vs Artist
       if (parsedUser.account_type === 'agency') {
         fetchAvailableArtists(parsedUser.id, parsedUser.token);
+        if (needsOnboarding) showWizard = true;
       } else {
         // Set partial data immediately so VideoGallery renders without waiting
         if (parsedUser.artist_id) {
           setActiveArtist({ id: parsedUser.artist_id, name: parsedUser.name });
-          needsOnboarding = false;
         }
         // Always fetch full artist from backend to get active_platforms and latest data
         fetchIndividualArtist(parsedUser.id, parsedUser.token);
-        if (parsedUser.onboarding_completed) needsOnboarding = false;
+        // Individuals skip the wizard and go directly to settings to complete onboarding
+        showWizard = false;
       }
 
-      setShowOnboarding(needsOnboarding);
+      setShowOnboarding(showWizard);
+
+      if (needsOnboarding) {
+        setActiveView('settings');
+      }
 
     } catch (err) {
       console.error("❌ Error loading dashboard session:", err);

@@ -216,7 +216,7 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
 
       // Actualizar localStorage y estado padre
       const stored = JSON.parse(localStorage.getItem('vidalis_user') || '{}');
-      const merged = { ...stored, name: updated.name, bio: updated.bio, handle: updated.handle, avatar_url: updated.avatar_url };
+      const merged = { ...stored, name: updated.name, bio: updated.bio, handle: updated.handle, avatar_url: updated.avatar_url, onboarding_completed: updated.onboarding_completed };
       localStorage.setItem('vidalis_user', JSON.stringify(merged));
       onUpdate?.({ firstName: updated.name, lastName: '', bio: updated.bio, avatar_url: updated.avatar_url });
 
