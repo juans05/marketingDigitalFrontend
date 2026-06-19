@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Info, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Info, Loader2, RefreshCw } from 'lucide-react';
 
 // ── Official SVG brand icons ──────────────────────────────────────────────────
 const IconInstagram = () => (
@@ -131,10 +131,16 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
   const [autoDM, setAutoDM]         = useState(false);
   const [connecting, setConnecting] = useState(null);
   const [connectError, setConnectError] = useState('');
+  const [popupOpened, setPopupOpened] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const fileRef = useRef(null);
 
-  const activePlatforms = activeArtist?.active_platforms || [];
+  const [activePlatforms, setActivePlatforms] = useState(activeArtist?.active_platforms || []);
   const artistId = activeArtist?.id;
+
+  useEffect(() => {
+    setActivePlatforms(activeArtist?.active_platforms || []);
+  }, [activeArtist?.id]);
   const API = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
   const getToken = () => {
@@ -244,11 +250,34 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al conectar');
-      if (data.url) window.open(data.url, '_blank', 'width=700,height=750');
+      if (data.url) {
+        window.open(data.url, '_blank', 'width=700,height=750');
+        setPopupOpened(true);
+      }
     } catch (err) {
       setConnectError(err.message);
     } finally {
       setConnecting(null);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!artistId) return;
+    setVerifying(true);
+    setConnectError('');
+    try {
+      const res = await fetch(
+        `${API}/api/vidalis/social-status/${artistId}?refresh=true`,
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al verificar');
+      setActivePlatforms(data.platforms || []);
+      setPopupOpened(false);
+    } catch (err) {
+      setConnectError(err.message);
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -468,6 +497,23 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
               Selecciona un artista para conectar cuentas.
             </p>
           )}
+          {popupOpened && (
+            <button
+              onClick={handleVerify}
+              disabled={verifying}
+              style={{
+                width: '100%', marginTop: '12px', height: '44px', borderRadius: '12px',
+                background: 'rgba(124,58,237,0.1)', color: '#A78BFA',
+                border: '1px solid rgba(124,58,237,0.3)', fontWeight: 700, fontSize: '12px',
+                cursor: verifying ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                transition: 'all 0.2s',
+              }}
+            >
+              <RefreshCw size={14} style={verifying ? { animation: 'spin 0.8s linear infinite' } : {}} />
+              {verifying ? 'VERIFICANDO...' : 'YA CONECTÉ — CONFIRMAR'}
+            </button>
+          )}
         </section>
 
         {/* Automation Rules */}
@@ -600,6 +646,10 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
         @keyframes settingsPulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
         @media (max-width: 768px) {
           .settings-root { padding: 20px 16px 80px !important; }
