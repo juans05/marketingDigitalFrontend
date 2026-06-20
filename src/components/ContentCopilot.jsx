@@ -238,11 +238,11 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
         }
 
         @media (max-width: 600px) {
-          .cc-root { padding: 12px !important; gap: 16px !important; }
-          .cc-grid { gap: 14px !important; }
-          .cc-left-panel { padding: 16px !important; gap: 16px !important; }
+          .cc-root { padding: 10px !important; gap: 12px !important; }
+          .cc-grid { gap: 12px !important; }
+          .cc-left-panel { padding: 14px !important; gap: 14px !important; }
           .cc-suggestions { grid-template-columns: 1fr !important; }
-          .cc-tone-platform { grid-template-columns: 1fr !important; gap: 14px !important; }
+          .cc-tone-platform { grid-template-columns: 1fr !important; gap: 12px !important; }
           .cc-diagnostico-grid { grid-template-columns: 1fr !important; }
           .cc-tones {
             flex-wrap: nowrap !important;
@@ -253,41 +253,45 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
           }
           .cc-tones::-webkit-scrollbar { display: none; }
           .cc-tone-chip { padding: 6px 10px !important; font-size: 11px !important; }
-          .cc-upload-grid { gap: 8px !important; }
-          .cc-upload-btn { padding: 14px 8px !important; gap: 6px !important; }
-          .cc-upload-icon { width: 22px !important; height: 22px !important; }
-          .cc-upload-label { font-size: 11px !important; }
-          .cc-textarea { font-size: 13px !important; padding: 12px 12px 42px !important; }
-          .cc-paste-btn { padding: 5px 10px !important; font-size: 11px !important; }
-          .cc-analyze-btn { padding: 14px !important; font-size: 13px !important; border-radius: 12px !important; }
+          .cc-upload-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+          .cc-upload-btn {
+            flex-direction: row !important;
+            padding: 12px !important;
+            gap: 8px !important;
+          }
+          .cc-upload-icon { width: 20px !important; height: 20px !important; }
+          .cc-upload-label { font-size: 12px !important; }
+          .cc-textarea { font-size: 13px !important; padding: 10px 10px 38px !important; min-height: 70px !important; }
+          .cc-paste-btn { padding: 4px 8px !important; font-size: 10px !important; bottom: 6px !important; right: 6px !important; }
+          .cc-analyze-btn { padding: 12px !important; font-size: 13px !important; border-radius: 12px !important; }
           .cc-right-inner { flex-direction: column !important; }
           .cc-right-inner > div { flex: unset !important; }
-          .cc-score-ring { width: 140px !important; height: 140px !important; }
-          .cc-score-number { font-size: 36px !important; }
-          .cc-score-panel { padding: 16px !important; }
-          .cc-audience-panel { padding: 14px !important; gap: 10px !important; }
-          .cc-result-panel { padding: 16px !important; }
+          .cc-score-ring { width: 130px !important; height: 130px !important; }
+          .cc-score-number { font-size: 34px !important; }
+          .cc-score-panel { padding: 14px !important; }
+          .cc-audience-panel { padding: 12px !important; gap: 8px !important; }
+          .cc-result-panel { padding: 14px !important; }
           .cc-result-title { font-size: 14px !important; }
-          .cc-hook-card { padding: 12px 36px 12px 12px !important; }
+          .cc-hook-card { padding: 10px 34px 10px 10px !important; }
           .cc-hook-text { font-size: 12px !important; }
-          .cc-diag-card { padding: 12px !important; }
+          .cc-diag-card { padding: 10px !important; }
           .cc-diag-text { font-size: 12px !important; }
-          .cc-improve-card { padding: 12px !important; }
+          .cc-improve-card { padding: 10px !important; }
           .cc-improve-text { font-size: 12px !important; }
           .cc-visual-grid { grid-template-columns: 1fr !important; }
-          .cc-visual-card { padding: 12px !important; }
+          .cc-visual-card { padding: 10px !important; }
           .cc-platform-card { padding: 8px 10px !important; }
-          .cc-platform-icon { width: 30px !important; height: 30px !important; min-width: 30px !important; font-size: 14px !important; }
+          .cc-platform-icon { width: 28px !important; height: 28px !important; min-width: 28px !important; font-size: 13px !important; }
           .cc-platform-label { font-size: 12px !important; }
           .cc-platform-sub { font-size: 9px !important; }
+          .cc-input-section { gap: 10px !important; }
         }
 
         @media (max-width: 380px) {
-          .cc-root { padding: 8px !important; }
-          .cc-left-panel { padding: 12px !important; }
-          .cc-score-ring { width: 120px !important; height: 120px !important; }
-          .cc-score-number { font-size: 30px !important; }
-          .cc-upload-grid { grid-template-columns: 1fr !important; }
+          .cc-root { padding: 6px !important; }
+          .cc-left-panel { padding: 10px !important; gap: 10px !important; }
+          .cc-score-ring { width: 110px !important; height: 110px !important; }
+          .cc-score-number { font-size: 28px !important; }
         }
       `}</style>
 
@@ -300,7 +304,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
           <Glass style={{ flex: 1, padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }} className="cc-left-panel">
 
             {/* Input Content */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="cc-input-section" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <span style={{ fontSize: '11px', fontWeight: '700', color: '#d2bbff', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 Input Content
               </span>
@@ -311,7 +315,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                   value={script}
                   onChange={e => setScript(e.target.value)}
                   placeholder="Pega tu link de video o el script aquí..."
-                  rows={5}
+                  rows={3}
                   className="cc-textarea"
                   style={{
                     width: '100%', boxSizing: 'border-box',
@@ -321,6 +325,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                     color: '#e7dff0', fontSize: '14px', resize: 'none',
                     outline: 'none', fontFamily: 'Inter, sans-serif',
                     lineHeight: '1.6',
+                    minHeight: '120px',
                     transition: 'border-color 0.2s',
                   }}
                   onFocus={e => e.target.style.borderColor = 'rgba(124,58,237,0.6)'}

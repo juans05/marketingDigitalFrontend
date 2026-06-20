@@ -25,7 +25,7 @@ const STEPS = [
     icon: <BarChart3 size={40} />,
     title: 'Paso 2: Revisa tus métricas',
     subtitle: 'Dashboard de Analítica',
-    description: 'Mira tus seguidores, alcance, engagement y tracción viral en tiempo real. Los datos se sincronizan automáticamente desde tus redes.',
+    description: 'Mira tu alcance, engagement, vistas y tracción viral en tiempo real. Los datos se sincronizan automáticamente desde tus redes.',
     tip: 'Dale a "Sincronizar" para traer los datos más recientes de TikTok, Instagram y YouTube.',
     color: '#38BDF8',
     bg: 'linear-gradient(135deg, rgba(56,189,248,0.15), rgba(59,130,246,0.1))',
