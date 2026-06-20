@@ -218,6 +218,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
     <>
       <style>{`
         .copy-reveal-wrap:hover .copy-reveal-btn { opacity: 1 !important; }
+        .cc-tone-select option { background: #1a1a2e; color: #e7dff0; padding: 8px; }
         @keyframes scoreGlow {
           0% { text-shadow: 0 0 0 transparent; }
           50% { text-shadow: 0 0 20px rgba(210,187,255,0.5); }
@@ -244,15 +245,9 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
           .cc-suggestions { grid-template-columns: 1fr !important; }
           .cc-tone-platform { grid-template-columns: 1fr !important; gap: 12px !important; }
           .cc-diagnostico-grid { grid-template-columns: 1fr !important; }
-          .cc-tones {
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            padding-bottom: 4px;
-          }
-          .cc-tones::-webkit-scrollbar { display: none; }
-          .cc-tone-chip { padding: 6px 10px !important; font-size: 11px !important; }
+          .cc-tones-desktop { display: none !important; }
+          .cc-tones-mobile { display: block !important; }
+          .cc-tone-select { font-size: 13px !important; padding: 10px 36px 10px 12px !important; border-radius: 10px !important; }
           .cc-upload-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
           .cc-upload-btn {
             flex-direction: row !important;
@@ -451,14 +446,14 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                 <span style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(204,195,216,0.6)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '10px' }}>
                   Tono objetivo
                 </span>
-                <div className="cc-tones" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {/* Desktop: chips */}
+                <div className="cc-tones-desktop" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {TONES.map(t => {
                     const active = tone === t.id;
                     return (
                       <button
                         key={t.id}
                         onClick={() => setTone(t.id)}
-                        className="cc-tone-chip"
                         style={{
                           display: 'flex', alignItems: 'center', gap: '4px',
                           padding: '7px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
@@ -474,6 +469,37 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                       </button>
                     );
                   })}
+                </div>
+                {/* Mobile: dropdown */}
+                <div className="cc-tones-mobile" style={{ position: 'relative', display: 'none' }}>
+                  <select
+                    value={tone}
+                    onChange={e => setTone(e.target.value)}
+                    className="cc-tone-select"
+                    style={{
+                      width: '100%', boxSizing: 'border-box',
+                      appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(210,187,255,0.3)',
+                      borderRadius: '12px', padding: '12px 40px 12px 14px',
+                      color: '#d2bbff', fontSize: '14px', fontWeight: '600',
+                      cursor: 'pointer', outline: 'none',
+                      fontFamily: 'Inter, sans-serif',
+                      transition: 'border-color 0.2s, box-shadow 0.2s',
+                    }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(124,58,237,0.6)'; e.target.style.boxShadow = '0 0 12px rgba(210,187,255,0.1)'; }}
+                    onBlur={e => { e.target.style.borderColor = 'rgba(210,187,255,0.3)'; e.target.style.boxShadow = 'none'; }}
+                  >
+                    {TONES.map(t => (
+                      <option key={t.id} value={t.id}>{t.emoji}  {t.label}</option>
+                    ))}
+                  </select>
+                  <div style={{
+                    position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
+                    pointerEvents: 'none', color: '#d2bbff', fontSize: '10px',
+                  }}>
+                    ▼
+                  </div>
                 </div>
               </div>
 

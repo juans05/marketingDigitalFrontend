@@ -69,6 +69,7 @@ const InboxView = ({ artistId, artistName }) => {
       if (!res.ok) throw new Error(data.error || 'Error cargando comentarios');
       const items = data.comments || data.posts || data.data || (Array.isArray(data) ? data : []);
       setComments(Array.isArray(items) ? items : []);
+      if (data.notice) setError(data.notice);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -246,7 +247,10 @@ const InboxView = ({ artistId, artistName }) => {
           </div>
         ) : error && comments.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-            <p style={{ color: '#EF4444', fontSize: '13px', marginBottom: 12 }}>{error}</p>
+            <div style={{ background: 'rgba(251,191,36,0.1)', borderRadius: '50%', width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <MessageCircle size={24} color="#FBBF24" />
+            </div>
+            <p style={{ color: '#FBBF24', fontSize: '13px', marginBottom: 12, lineHeight: '1.6', maxWidth: 320, margin: '0 auto 16px' }}>{error}</p>
             <button onClick={() => fetchComments()} style={{
               background: 'rgba(79,70,229,0.15)', color: '#818CF8', border: '1px solid rgba(79,70,229,0.3)',
               padding: '8px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
