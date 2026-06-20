@@ -9,8 +9,9 @@ import ContentCopilot from '../components/ContentCopilot';
 import VideoGallery from '../components/VideoGallery';
 import SocialConnect from '../components/SocialConnect';
 import ArtistManager from '../components/ArtistManager';
+import InboxView from '../components/InboxView';
 import Settings from '../components/Settings';
-import { LogOut, Sparkles, Upload, Film, BarChart3, Building2, User, ChevronRight, Trash2, Calendar, Users, Loader2, Share2, Zap, Settings as SettingsIcon } from 'lucide-react';
+import { LogOut, Sparkles, BarChart3, Calendar, Loader2, Share2, Zap, MessageCircle, Settings as SettingsIcon } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -207,6 +208,9 @@ const Dashboard = () => {
               <Calendar size={20} /> Calendario
             </button>
           )}
+          <button className={activeView === 'inbox' ? 'active' : ''} onClick={() => setActiveView('inbox')}>
+            <MessageCircle size={20} /> <span style={{ fontWeight: '600' }}>Inbox</span>
+          </button>
           {!isAgency && (
             <button className={activeView === 'connect' ? 'active' : ''} onClick={() => setActiveView('connect')}>
               <Share2 size={20} /> <span style={{ fontWeight: '600' }}>Redes Sociales</span>
@@ -231,6 +235,7 @@ const Dashboard = () => {
               {activeView === 'analytics' && 'Dashboard de Analítica'}
               {activeView === 'planning' && 'Planificación de Contenido'}
               {activeView === 'content' && 'AI Content Copilot'}
+              {activeView === 'inbox' && 'Inbox'}
               {activeView === 'connect' && 'Redes Sociales'}
               {activeView === 'artists' && 'Gestión de Marcas'}
               {activeView === 'sparks' && 'Mercado de Energía'}
@@ -256,6 +261,12 @@ const Dashboard = () => {
                   <VideoGallery artistId={currentArtistId} artistName={activeArtist?.name} refreshKey={galleryKey} activePlatforms={activeArtist?.active_platforms || []} />
                 </section>
               )}
+            </div>
+          )}
+
+          {activeView === 'inbox' && (
+            <div className="card-pro" style={{ padding: 0, overflow: 'hidden' }}>
+              <InboxView artistId={currentArtistId} artistName={activeArtist?.name} />
             </div>
           )}
 
@@ -333,15 +344,22 @@ const Dashboard = () => {
         </main>
 
         {/* Mobile Nav Premium */}
-        <nav className="mobile-nav glass-morph">
-          <button className={activeView === 'analytics' ? 'active' : ''} onClick={() => setActiveView('analytics')}><BarChart3 size={20} /></button>
-          <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}><Film size={20} /></button>
-          <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}><Zap size={20} /></button>
-          <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}><Calendar size={20} /></button>
-          {!isAgency && (
-            <button className={activeView === 'connect' ? 'active' : ''} onClick={() => setActiveView('connect')}><Share2 size={20} /></button>
-          )}
-          <button className={activeView === 'settings' ? 'active' : ''} onClick={() => setActiveView('settings')}><SettingsIcon size={20} /></button>
+        <nav className="mobile-nav">
+          <button className={`mobile-nav-btn ${activeView === 'analytics' ? 'active' : ''}`} onClick={() => setActiveView('analytics')}>
+            <BarChart3 size={20} /><span className="mobile-nav-label">Inicio</span>
+          </button>
+          <button className={`mobile-nav-btn ${activeView === 'content' ? 'active' : ''}`} onClick={() => setActiveView('content')}>
+            <Sparkles size={20} /><span className="mobile-nav-label">Copilot</span>
+          </button>
+          <button className={`mobile-nav-btn ${activeView === 'inbox' ? 'active' : ''}`} onClick={() => setActiveView('inbox')}>
+            <MessageCircle size={20} /><span className="mobile-nav-label">Inbox</span>
+          </button>
+          <button className={`mobile-nav-btn ${activeView === 'planning' ? 'active' : ''}`} onClick={() => setActiveView('planning')}>
+            <Calendar size={20} /><span className="mobile-nav-label">Plan</span>
+          </button>
+          <button className={`mobile-nav-btn ${activeView === 'settings' ? 'active' : ''}`} onClick={() => setActiveView('settings')}>
+            <SettingsIcon size={20} /><span className="mobile-nav-label">Config</span>
+          </button>
         </nav>
       </div>
 
@@ -382,6 +400,7 @@ const Dashboard = () => {
 
         .main-content-pro { flex-grow: 1; padding: 32px 40px; overflow-y: auto; max-width: 1400px; margin: 0 auto; width: 100%; min-width: 0; }
         .mobile-nav { display: none; }
+        .mobile-nav-label { display: none; }
         .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
         .view-title { font-size: 24px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; }
         .active-artist-tag { font-size: 12px; font-weight: 600; color: var(--primary); background: rgba(79, 70, 229, 0.12); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(79, 70, 229, 0.3); }
@@ -396,28 +415,48 @@ const Dashboard = () => {
           .header-actions { gap: 8px; }
           .brand-dropdown-pro { font-size: 12px; padding: 6px 10px; max-width: 140px; margin-left: auto; }
           .btn-exit-pro { padding: 8px; }
-          .main-content-pro { padding: 20px; padding-bottom: 100px; }
+          .main-content-pro { padding: 20px; padding-bottom: 110px; }
           .view-header { flex-direction: column; align-items: flex-start; gap: 12px; }
           .active-artist-tag { align-self: flex-start; font-size: 11px; padding: 4px 10px; }
-          .mobile-nav { 
-            position: fixed; bottom: 0; left: 0; width: 100%; 
-            height: calc(75px + env(safe-area-inset-bottom)); 
+
+          .mobile-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
             padding-bottom: env(safe-area-inset-bottom);
-            background: #121214; border-top: 1px solid rgba(255,255,255,0.08); 
-            display: flex; justify-content: space-between; align-items: center; 
-            z-index: 2000; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); 
-            padding: 0 8px; box-sizing: border-box;
+            background: linear-gradient(to top, #18181B 0%, #18181B 85%, rgba(24,24,27,0.95) 100%);
+            border-top: 1px solid rgba(255,255,255,0.12);
+            display: flex; justify-content: space-around; align-items: stretch;
+            z-index: 2000;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.6), 0 -1px 0 rgba(255,255,255,0.06);
+            padding: 6px 4px 4px; box-sizing: border-box;
           }
-          .mobile-nav button {
-             background: transparent; border: none; color: #71717A;
-             padding: 10px 12px; border-radius: 12px; flex: 1;
-             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-             transition: all 0.2s ease; cursor: pointer;
+          .mobile-nav-btn {
+            background: transparent; border: none;
+            color: #6B6B76;
+            padding: 6px 4px 4px; border-radius: 12px; flex: 1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+            transition: all 0.2s ease; cursor: pointer;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
           }
-          .mobile-nav button.active { 
-             color: #4F46E5; background: rgba(79, 70, 229, 0.15); transform: translateY(-2px);
+          .mobile-nav-label {
+            display: block;
+            font-size: 10px; font-weight: 600; letter-spacing: 0.01em;
+            font-family: var(--font-body);
+            line-height: 1;
           }
-          .mobile-nav button:hover { background: rgba(255,255,255,0.06); }
+          .mobile-nav-btn.active {
+            color: #A78BFA;
+          }
+          .mobile-nav-btn.active::before {
+            content: '';
+            position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+            width: 24px; height: 3px;
+            background: linear-gradient(90deg, #6366F1, #8B5CF6);
+            border-radius: 0 0 3px 3px;
+          }
+          .mobile-nav-btn:active {
+            transform: scale(0.92);
+          }
         }
       `}</style>
     </div>
