@@ -10,6 +10,7 @@ import VideoGallery from '../components/VideoGallery';
 import SocialConnect from '../components/SocialConnect';
 import ArtistManager from '../components/ArtistManager';
 import InboxView from '../components/InboxView';
+import WelcomeTour from '../components/WelcomeTour';
 import Settings from '../components/Settings';
 import { LogOut, Sparkles, BarChart3, Calendar, Loader2, Share2, Zap, MessageCircle, Settings as SettingsIcon } from 'lucide-react';
 
@@ -22,6 +23,7 @@ const Dashboard = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [galleryKey, setGalleryKey] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
     console.log("🚀 Dashboard initializing...");
@@ -36,6 +38,10 @@ const Dashboard = () => {
       const parsedUser = JSON.parse(saved);
       console.log("👤 User loaded:", parsedUser.email, "| Type:", parsedUser.account_type);
       setUser(parsedUser);
+
+      if (!parsedUser.tour_completed) {
+        setShowTour(true);
+      }
 
       // Comprobación inicial de onboarding
       let needsOnboarding = !parsedUser.onboarding_completed;
@@ -156,6 +162,25 @@ const Dashboard = () => {
           userId={user.id}
           userType={user.account_type}
           onComplete={handleOnboardingComplete}
+        />
+      )}
+
+      {showTour && !showOnboarding && (
+        <WelcomeTour
+          onClose={() => {
+            setShowTour(false);
+            const updated = { ...user, tour_completed: true };
+            setUser(updated);
+            localStorage.setItem('vidalis_user', JSON.stringify(updated));
+            fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/complete-tour`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+                'Content-Type': 'application/json',
+              },
+            }).catch(() => {});
+          }}
+          onNavigate={(view) => setActiveView(view)}
         />
       )}
 

@@ -67,7 +67,7 @@ const InboxView = ({ artistId, artistName }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error cargando comentarios');
-      const items = data.comments || data.data || data || [];
+      const items = data.comments || data.posts || data.data || (Array.isArray(data) ? data : []);
       setComments(Array.isArray(items) ? items : []);
     } catch (err) {
       setError(err.message);
@@ -84,12 +84,13 @@ const InboxView = ({ artistId, artistName }) => {
     setReplyText('');
     try {
       const postId = post.latePostId || post.postId || post.id;
-      const res = await fetch(`${API}/api/vidalis/comments/${postId}/replies`, {
+      const params = new URLSearchParams({ artistId });
+      const res = await fetch(`${API}/api/vidalis/comments/${postId}/replies?${params}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
-      const items = data.comments || data.data || data || [];
+      const items = data.comments || data.posts || data.data || (Array.isArray(data) ? data : []);
       setPostComments(Array.isArray(items) ? items : []);
     } catch (err) {
       setError(err.message);

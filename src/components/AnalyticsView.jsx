@@ -105,13 +105,13 @@ const TrendChart = ({ data }) => {
 
   if (!data || data.length < 2) return null;
   const width = 800;
-  const height = 240;
-  const padding = 40;
+  const height = 300;
+  const padL = 50, padR = 20, padT = 40, padB = 50;
   const maxVal = Math.max(...data.map(d => d.value)) || 100;
 
   const points = data.map((d, i) => ({
-    x: (i / (data.length - 1)) * (width - padding * 2) + padding,
-    y: height - ((d.value / maxVal) * (height - padding * 2) + padding)
+    x: (i / (data.length - 1)) * (width - padL - padR) + padL,
+    y: padT + (1 - d.value / maxVal) * (height - padT - padB),
   }));
 
   let pathD = `M ${points[0].x} ${points[0].y}`;
@@ -121,40 +121,51 @@ const TrendChart = ({ data }) => {
     const cp1x = curr.x + (next.x - curr.x) / 2;
     pathD += ` C ${cp1x} ${curr.y}, ${cp1x} ${next.y}, ${next.x} ${next.y}`;
   }
-  const areaD = `${pathD} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
+  const areaD = `${pathD} L ${points[points.length - 1].x} ${height - padB} L ${points[0].x} ${height - padB} Z`;
+
+  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(pct => ({
+    y: padT + (1 - pct) * (height - padT - padB),
+    label: formatNumShort(Math.round(maxVal * pct)),
+  }));
 
   return (
     <div className="chart-wrapper" onMouseLeave={() => setActiveIdx(null)}>
-      <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" preserveAspectRatio="none">
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" preserveAspectRatio="xMidYMid meet" style={{ display: 'block' }}>
         <defs>
           <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+            <stop offset="0%" stopColor="#818CF8" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#818CF8" stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        <path d={areaD} fill="url(#chartGradient)" />
-        <path d={pathD} fill="none" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 8px rgba(79, 70, 229, 0.4))' }} />
 
-        {/* Línea vertical al hacer hover */}
+        {gridLines.map((g, i) => (
+          <g key={i}>
+            <line x1={padL} y1={g.y} x2={width - padR} y2={g.y} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+            <text x={padL - 8} y={g.y + 4} textAnchor="end" fill="#6B6B76" fontSize="11" fontWeight="600" fontFamily="Inter, sans-serif">{g.label}</text>
+          </g>
+        ))}
+
+        <path d={areaD} fill="url(#chartGradient)" />
+        <path d={pathD} fill="none" stroke="#818CF8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 6px rgba(129, 140, 248, 0.5))' }} />
+
         {activeIdx !== null && (
           <line
-            x1={points[activeIdx].x} y1={padding}
-            x2={points[activeIdx].x} y2={height}
-            stroke="rgba(129,140,248,0.3)" strokeWidth="1" strokeDasharray="4 4"
+            x1={points[activeIdx].x} y1={padT}
+            x2={points[activeIdx].x} y2={height - padB}
+            stroke="rgba(129,140,248,0.25)" strokeWidth="1" strokeDasharray="4 4"
           />
         )}
 
         {points.map((p, i) => (
           <g key={i}>
             <circle
-              cx={p.x} cy={p.y} r={activeIdx === i ? 9 : 6}
-              fill={activeIdx === i ? 'var(--primary)' : 'var(--bg-primary)'}
-              stroke="var(--primary)" strokeWidth="3"
+              cx={p.x} cy={p.y} r={activeIdx === i ? 8 : 5}
+              fill={activeIdx === i ? '#818CF8' : '#1C1C1F'}
+              stroke="#818CF8" strokeWidth="2.5"
               style={{ transition: 'r 0.15s, fill 0.15s', cursor: 'pointer' }}
             />
-            {/* Zona de hit invisible más grande para facilitar hover/tap */}
             <circle
-              cx={p.x} cy={p.y} r="24" fill="transparent"
+              cx={p.x} cy={p.y} r="28" fill="transparent"
               style={{ cursor: 'pointer' }}
               onMouseEnter={() => setActiveIdx(i)}
               onClick={() => setActiveIdx(prev => prev === i ? null : i)}
@@ -162,53 +173,49 @@ const TrendChart = ({ data }) => {
           </g>
         ))}
 
-        {/* Tooltip sobre el punto activo */}
+        {data.map((d, i) => (
+          <text key={i} x={points[i].x} y={height - 10}
+            textAnchor="middle" fill={activeIdx === i ? '#A78BFA' : '#6B6B76'}
+            fontSize="11" fontWeight={activeIdx === i ? '800' : '600'} fontFamily="Inter, sans-serif"
+            style={{ cursor: 'pointer', transition: 'fill 0.15s' }}
+            onMouseEnter={() => setActiveIdx(i)}
+            onClick={() => setActiveIdx(prev => prev === i ? null : i)}
+          >
+            {d.date.split('-').reverse()[0]} {MONTHS_ES[parseInt(d.date.split('-')[1]) - 1]}
+          </text>
+        ))}
+
         {activeIdx !== null && (() => {
           const p = points[activeIdx];
           const d = data[activeIdx];
-          const label = formatNumShort(d.value);
-          const boxW = Math.max(label.length * 10 + 20, 60);
-          const boxH = 30;
+          const label = d.value.toLocaleString();
+          const boxW = Math.max(label.length * 9 + 24, 60);
+          const boxH = 32;
           let tx = p.x - boxW / 2;
           if (tx < 5) tx = 5;
           if (tx + boxW > width - 5) tx = width - boxW - 5;
-          const ty = p.y - boxH - 14;
+          const ty = Math.max(p.y - boxH - 14, 4);
           return (
             <g style={{ pointerEvents: 'none' }}>
               <rect x={tx} y={ty} width={boxW} height={boxH} rx="8"
-                fill="rgba(15,15,20,0.95)" stroke="rgba(129,140,248,0.4)" strokeWidth="1" />
+                fill="rgba(24,24,27,0.95)" stroke="rgba(129,140,248,0.5)" strokeWidth="1" />
               <text x={tx + boxW / 2} y={ty + boxH / 2 + 1}
                 textAnchor="middle" dominantBaseline="central"
                 fill="#E2E8F0" fontSize="13" fontWeight="800" fontFamily="Outfit, sans-serif">
-                {d.value.toLocaleString()}
+                {label}
               </text>
               <polygon
                 points={`${p.x - 5},${ty + boxH} ${p.x + 5},${ty + boxH} ${p.x},${ty + boxH + 6}`}
-                fill="rgba(15,15,20,0.95)"
+                fill="rgba(24,24,27,0.95)"
               />
             </g>
           );
         })()}
       </svg>
-      <div className="chart-labels">
-        {data.map((d, i) => (
-          <span key={i} style={{
-            color: activeIdx === i ? 'var(--primary)' : undefined,
-            fontWeight: activeIdx === i ? 900 : undefined,
-            transition: 'color 0.15s',
-            cursor: 'pointer',
-          }}
-            onMouseEnter={() => setActiveIdx(i)}
-            onClick={() => setActiveIdx(prev => prev === i ? null : i)}
-          >
-            {d.date.split('-').reverse()[0]}{' '}
-            {MONTHS_ES[parseInt(d.date.split('-')[1]) - 1]}
-          </span>
-        ))}
-      </div>
       <style>{`
-        .chart-wrapper { width: 100%; height: 280px; position: relative; margin-top: 32px; }
-        .chart-labels { display: flex; justify-content: space-between; padding: 16px 0; color: var(--text-dim); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+        .chart-wrapper { width: 100%; position: relative; margin-top: 16px; }
+        .chart-wrapper svg { max-height: 320px; }
+        @media (max-width: 600px) { .chart-wrapper svg { max-height: 260px; } }
       `}</style>
     </div>
   );

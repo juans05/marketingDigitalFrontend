@@ -7,7 +7,7 @@ const ViralScoreRing = ({ score, animate }) => {
   const circ = 2 * Math.PI * r;
   const offset = circ - (score / 100) * circ;
   return (
-    <svg width="192" height="192" style={{ transform: 'rotate(-90deg)' }}>
+    <svg className="cc-score-ring" viewBox="0 0 192 192" width="192" height="192" style={{ transform: 'rotate(-90deg)', maxWidth: '100%' }}>
       <defs>
         <linearGradient id="vsr-grad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#7c3aed" />
@@ -57,8 +57,8 @@ const CopyBtn = ({ text, accent }) => {
 };
 
 // ── Glass panel ───────────────────────────────────────────────────────────────
-const Glass = ({ children, style = {} }) => (
-  <div style={{
+const Glass = ({ children, style = {}, className = '' }) => (
+  <div className={className} style={{
     backdropFilter: 'blur(16px)',
     background: 'rgba(255,255,255,0.03)',
     border: '1px solid rgba(255,255,255,0.09)',
@@ -228,14 +228,21 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
           to { opacity: 1; transform: translateY(0); }
         }
         .cc-fade-in { animation: ccFadeIn 0.5s ease forwards; }
+
         @media (max-width: 900px) {
           .cc-grid { flex-direction: column !important; }
           .cc-right { width: 100% !important; min-width: unset !important; }
-        }
-        @media (max-width: 600px) {
-          .cc-root { padding: 16px !important; }
+          .cc-right-inner { flex-direction: row !important; gap: 12px !important; }
+          .cc-right-inner > div { flex: 1 !important; min-width: 0 !important; }
           .cc-suggestions { grid-template-columns: 1fr !important; }
-          .cc-tone-platform { grid-template-columns: 1fr !important; }
+        }
+
+        @media (max-width: 600px) {
+          .cc-root { padding: 12px !important; gap: 16px !important; }
+          .cc-grid { gap: 14px !important; }
+          .cc-left-panel { padding: 16px !important; gap: 16px !important; }
+          .cc-suggestions { grid-template-columns: 1fr !important; }
+          .cc-tone-platform { grid-template-columns: 1fr !important; gap: 14px !important; }
           .cc-diagnostico-grid { grid-template-columns: 1fr !important; }
           .cc-tones {
             flex-wrap: nowrap !important;
@@ -246,6 +253,41 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
           }
           .cc-tones::-webkit-scrollbar { display: none; }
           .cc-tone-chip { padding: 6px 10px !important; font-size: 11px !important; }
+          .cc-upload-grid { gap: 8px !important; }
+          .cc-upload-btn { padding: 14px 8px !important; gap: 6px !important; }
+          .cc-upload-icon { width: 22px !important; height: 22px !important; }
+          .cc-upload-label { font-size: 11px !important; }
+          .cc-textarea { font-size: 13px !important; padding: 12px 12px 42px !important; }
+          .cc-paste-btn { padding: 5px 10px !important; font-size: 11px !important; }
+          .cc-analyze-btn { padding: 14px !important; font-size: 13px !important; border-radius: 12px !important; }
+          .cc-right-inner { flex-direction: column !important; }
+          .cc-right-inner > div { flex: unset !important; }
+          .cc-score-ring { width: 140px !important; height: 140px !important; }
+          .cc-score-number { font-size: 36px !important; }
+          .cc-score-panel { padding: 16px !important; }
+          .cc-audience-panel { padding: 14px !important; gap: 10px !important; }
+          .cc-result-panel { padding: 16px !important; }
+          .cc-result-title { font-size: 14px !important; }
+          .cc-hook-card { padding: 12px 36px 12px 12px !important; }
+          .cc-hook-text { font-size: 12px !important; }
+          .cc-diag-card { padding: 12px !important; }
+          .cc-diag-text { font-size: 12px !important; }
+          .cc-improve-card { padding: 12px !important; }
+          .cc-improve-text { font-size: 12px !important; }
+          .cc-visual-grid { grid-template-columns: 1fr !important; }
+          .cc-visual-card { padding: 12px !important; }
+          .cc-platform-card { padding: 8px 10px !important; }
+          .cc-platform-icon { width: 30px !important; height: 30px !important; min-width: 30px !important; font-size: 14px !important; }
+          .cc-platform-label { font-size: 12px !important; }
+          .cc-platform-sub { font-size: 9px !important; }
+        }
+
+        @media (max-width: 380px) {
+          .cc-root { padding: 8px !important; }
+          .cc-left-panel { padding: 12px !important; }
+          .cc-score-ring { width: 120px !important; height: 120px !important; }
+          .cc-score-number { font-size: 30px !important; }
+          .cc-upload-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -255,7 +297,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
         <div className="cc-grid" style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
 
           {/* LEFT: Input Panel */}
-          <Glass style={{ flex: 1, padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <Glass style={{ flex: 1, padding: '28px', display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }} className="cc-left-panel">
 
             {/* Input Content */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -270,6 +312,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                   onChange={e => setScript(e.target.value)}
                   placeholder="Pega tu link de video o el script aquí..."
                   rows={5}
+                  className="cc-textarea"
                   style={{
                     width: '100%', boxSizing: 'border-box',
                     background: 'rgba(255,255,255,0.04)',
@@ -284,6 +327,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                   onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
                 />
                 <button
+                  className="cc-paste-btn"
                   style={{
                     position: 'absolute', bottom: '10px', right: '10px',
                     display: 'flex', alignItems: 'center', gap: '6px',
@@ -298,8 +342,9 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
               </div>
 
               {/* Upload buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="cc-upload-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <button
+                  className="cc-upload-btn"
                   onClick={() => { fileRef.current.accept = 'video/*'; fileRef.current.click(); }}
                   style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -312,10 +357,11 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(210,187,255,0.5)'; e.currentTarget.style.color = '#d2bbff'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(204,195,216,0.7)'; }}
                 >
-                  <Film size={28} />
-                  <span style={{ fontSize: '13px', fontWeight: '500' }}>Subir Video</span>
+                  <Film size={28} className="cc-upload-icon" />
+                  <span className="cc-upload-label" style={{ fontSize: '13px', fontWeight: '500' }}>Subir Video</span>
                 </button>
                 <button
+                  className="cc-upload-btn"
                   onClick={() => { fileRef.current.accept = 'image/*'; fileRef.current.click(); }}
                   style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -328,8 +374,8 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,176,205,0.5)'; e.currentTarget.style.color = '#ffb0cd'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'rgba(204,195,216,0.7)'; }}
                 >
-                  <Image size={28} />
-                  <span style={{ fontSize: '13px', fontWeight: '500' }}>Subir Imagen</span>
+                  <Image size={28} className="cc-upload-icon" />
+                  <span className="cc-upload-label" style={{ fontSize: '13px', fontWeight: '500' }}>Subir Imagen</span>
                 </button>
               </div>
               <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={handleFileSelect} />
@@ -437,6 +483,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                     return (
                       <div
                         key={p.id}
+                        className="cc-platform-card"
                         onClick={() => setPlatform(p.id)}
                         style={{
                           display: 'flex', alignItems: 'center', gap: '10px',
@@ -446,12 +493,12 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                           transition: 'all 0.2s',
                         }}
                       >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: p.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0, border: '1px solid rgba(255,255,255,0.15)' }}>
+                        <div className="cc-platform-icon" style={{ width: '36px', height: '36px', borderRadius: '8px', background: p.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0, border: '1px solid rgba(255,255,255,0.15)' }}>
                           {p.icon}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: '13px', fontWeight: '600', color: '#e7dff0', margin: 0 }}>{p.label}</p>
-                          <p style={{ fontSize: '10px', color: 'rgba(204,195,216,0.5)', margin: 0 }}>{p.sub}</p>
+                          <p className="cc-platform-label" style={{ fontSize: '13px', fontWeight: '600', color: '#e7dff0', margin: 0 }}>{p.label}</p>
+                          <p className="cc-platform-sub" style={{ fontSize: '10px', color: 'rgba(204,195,216,0.5)', margin: 0 }}>{p.sub}</p>
                         </div>
                         <div style={{
                           width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
@@ -470,6 +517,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
 
             {/* Analyze button */}
             <button
+              className="cc-analyze-btn"
               onClick={handleAnalyze}
               disabled={!canAnalyze}
               style={{
@@ -483,18 +531,19 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
               }}
             >
               {analyzing ? (
-                <><Loader2 size={16} className="animate-spin" /> Analizando estrategia...</>
+                <><Loader2 size={16} className="animate-spin" /> Analizando...</>
               ) : (
-                <><span style={{ fontSize: '16px' }}>⚡</span> Analizar Estrategia de Contenido</>
+                <><span style={{ fontSize: '16px' }}>⚡</span> Analizar Estrategia</>
               )}
             </button>
           </Glass>
 
           {/* RIGHT: Score + Audience */}
           <div className="cc-right" style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '260px', width: '300px' }}>
+           <div className="cc-right-inner" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
             {/* Viral Score */}
-            <Glass style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+            <Glass className="cc-score-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '120px', height: '120px', background: 'rgba(124,58,237,0.2)', borderRadius: '50%', filter: 'blur(50px)' }} />
               <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '120px', height: '120px', background: 'rgba(170,2,102,0.2)', borderRadius: '50%', filter: 'blur(50px)' }} />
               <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffb0cd', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '16px' }}>
@@ -503,7 +552,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <ViralScoreRing score={result?.score || 0} animate={animScore} />
                 <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{
+                  <span className="cc-score-number" style={{
                     fontSize: '48px', fontWeight: '800', color: '#e7dff0', lineHeight: 1,
                     fontFamily: 'Outfit, sans-serif',
                     ...(animScore ? { animation: 'scoreGlow 1s ease' } : {}),
@@ -552,7 +601,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
 
             {/* Audience Insight */}
             {result?.audience && (
-              <Glass style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }} className="cc-fade-in">
+              <Glass className="cc-audience-panel cc-fade-in" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13px', fontWeight: '600', color: '#e7dff0' }}>Audiencia</span>
                   <span style={{ fontSize: '18px' }}>👥</span>
@@ -567,6 +616,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                 </div>
               </Glass>
             )}
+           </div>
           </div>
         </div>
 
@@ -576,7 +626,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
 
             {/* Diagnóstico Algorítmico */}
             {(result.diagnostico_algoritmico || result.match_historico || result.mejora_del_gancho || result.ajuste_estrategico) && (
-              <Glass style={{ padding: '24px' }}>
+              <Glass className="cc-result-panel" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                   <span style={{ fontSize: '16px' }}>🧠</span>
                   <span style={{ fontSize: '11px', fontWeight: '700', color: '#818CF8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -585,27 +635,27 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="cc-diagnostico-grid">
                   {result.diagnostico_algoritmico && (
-                    <div style={{ padding: '14px', background: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.15)', borderRadius: '10px' }}>
+                    <div className="cc-diag-card" style={{ padding: '14px', background: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.15)', borderRadius: '10px' }}>
                       <p style={{ fontSize: '10px', fontWeight: '700', color: '#818CF8', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px 0' }}>Predicción del Algoritmo</p>
-                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.diagnostico_algoritmico}</p>
+                      <p className="cc-diag-text" style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.diagnostico_algoritmico}</p>
                     </div>
                   )}
                   {result.match_historico && (
-                    <div style={{ padding: '14px', background: 'rgba(78,222,163,0.06)', border: '1px solid rgba(78,222,163,0.15)', borderRadius: '10px' }}>
+                    <div className="cc-diag-card" style={{ padding: '14px', background: 'rgba(78,222,163,0.06)', border: '1px solid rgba(78,222,163,0.15)', borderRadius: '10px' }}>
                       <p style={{ fontSize: '10px', fontWeight: '700', color: '#4edea3', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px 0' }}>Match con tu Historial</p>
-                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.match_historico}</p>
+                      <p className="cc-diag-text" style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.match_historico}</p>
                     </div>
                   )}
                   {result.mejora_del_gancho && (
-                    <div style={{ padding: '14px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '10px' }}>
+                    <div className="cc-diag-card" style={{ padding: '14px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '10px' }}>
                       <p style={{ fontSize: '10px', fontWeight: '700', color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px 0' }}>Gancho Mejorado (3 seg)</p>
-                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0, fontStyle: 'italic' }}>{result.mejora_del_gancho}</p>
+                      <p className="cc-diag-text" style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0, fontStyle: 'italic' }}>{result.mejora_del_gancho}</p>
                     </div>
                   )}
                   {result.ajuste_estrategico && (
-                    <div style={{ padding: '14px', background: 'rgba(255,176,205,0.06)', border: '1px solid rgba(255,176,205,0.15)', borderRadius: '10px' }}>
+                    <div className="cc-diag-card" style={{ padding: '14px', background: 'rgba(255,176,205,0.06)', border: '1px solid rgba(255,176,205,0.15)', borderRadius: '10px' }}>
                       <p style={{ fontSize: '10px', fontWeight: '700', color: '#ffb0cd', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 6px 0' }}>Ajuste Estratégico</p>
-                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.ajuste_estrategico}</p>
+                      <p className="cc-diag-text" style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{result.ajuste_estrategico}</p>
                     </div>
                   )}
                 </div>
@@ -613,9 +663,9 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
             )}
 
             {/* Strategic Suggestions */}
-            <Glass style={{ padding: '24px' }}>
+            <Glass className="cc-result-panel" style={{ padding: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#e7dff0', margin: 0 }}>Sugerencias Estratégicas</h3>
+                <h3 className="cc-result-title" style={{ fontSize: '16px', fontWeight: '700', color: '#e7dff0', margin: 0 }}>Sugerencias Estratégicas</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     style={{ padding: '8px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#e7dff0', fontSize: '12px', cursor: 'pointer' }}
@@ -635,11 +685,11 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                     <span style={{ fontSize: '11px', fontWeight: '700', color: '#d2bbff', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Viral Hooks</span>
                   </div>
                   {(result.hooks || []).map((hook, i) => (
-                    <div key={i} className="copy-reveal-wrap" style={{ position: 'relative', padding: '14px 40px 14px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', cursor: 'default', transition: 'border-color 0.2s' }}
+                    <div key={i} className="copy-reveal-wrap cc-hook-card" style={{ position: 'relative', padding: '14px 40px 14px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', cursor: 'default', transition: 'border-color 0.2s' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(210,187,255,0.3)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
                     >
-                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{hook}</p>
+                      <p className="cc-hook-text" style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{hook}</p>
                       <CopyBtn text={hook} accent="primary" />
                     </div>
                   ))}
@@ -652,11 +702,11 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                     <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffb0cd', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Descripciones</span>
                   </div>
                   {(result.descriptions || []).map((desc, i) => (
-                    <div key={i} className="copy-reveal-wrap" style={{ position: 'relative', padding: '14px 40px 14px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', cursor: 'default', transition: 'border-color 0.2s' }}
+                    <div key={i} className="copy-reveal-wrap cc-hook-card" style={{ position: 'relative', padding: '14px 40px 14px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', cursor: 'default', transition: 'border-color 0.2s' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,176,205,0.3)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
                     >
-                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{desc}</p>
+                      <p className="cc-hook-text" style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{desc}</p>
                       <CopyBtn text={desc} accent="secondary" />
                     </div>
                   ))}
@@ -666,7 +716,7 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
 
             {/* Improvements */}
             {result.improvements?.length > 0 && (
-              <Glass style={{ padding: '24px' }}>
+              <Glass className="cc-result-panel" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                   <span style={{ fontSize: '16px' }}>🚀</span>
                   <span style={{ fontSize: '11px', fontWeight: '700', color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -675,13 +725,13 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {result.improvements.map((tip, i) => (
-                    <div key={i} style={{
+                    <div key={i} className="cc-improve-card" style={{
                       display: 'flex', gap: '12px', alignItems: 'flex-start',
                       padding: '14px', background: 'rgba(245,158,11,0.05)',
                       border: '1px solid rgba(245,158,11,0.15)', borderRadius: '10px',
                     }}>
                       <span style={{ fontSize: '14px', fontWeight: '800', color: '#f59e0b', flexShrink: 0, marginTop: '1px' }}>{i + 1}.</span>
-                      <p style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{tip}</p>
+                      <p className="cc-improve-text" style={{ fontSize: '13px', color: '#e7dff0', lineHeight: '1.6', margin: 0 }}>{tip}</p>
                     </div>
                   ))}
                 </div>
@@ -690,16 +740,16 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
 
             {/* Visual & Scene Breakdown */}
             {result.visualBreakdown && (
-              <Glass style={{ padding: '24px' }}>
+              <Glass className="cc-result-panel" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
                   <span style={{ fontSize: '16px' }}>🎬</span>
                   <span style={{ fontSize: '11px', fontWeight: '700', color: '#4edea3', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     Visual & Scene Breakdown
                   </span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                <div className="cc-visual-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
                   {result.visualBreakdown.map((item, i) => (
-                    <div key={i} style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(78,222,163,0.1)', borderRadius: '12px', transition: 'border-color 0.2s' }}
+                    <div key={i} className="cc-visual-card" style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(78,222,163,0.1)', borderRadius: '12px', transition: 'border-color 0.2s' }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(78,222,163,0.3)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(78,222,163,0.1)'}
                     >
