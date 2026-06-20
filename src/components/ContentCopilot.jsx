@@ -74,6 +74,15 @@ const TONES = [
   { id: 'controversial', label: 'Controversial',  emoji: '📢' },
   { id: 'educational',   label: 'Educational',    emoji: '🎓' },
   { id: 'inspirational', label: 'Inspirational',  emoji: '📈' },
+  { id: 'sensual',       label: 'Sensual',        emoji: '🔥' },
+  { id: 'storytelling',  label: 'Storytelling',   emoji: '📖' },
+  { id: 'motivacional',  label: 'Motivacional',   emoji: '💪' },
+  { id: 'sarcastico',    label: 'Sarcástico',     emoji: '😏' },
+  { id: 'trending',      label: 'Trending',       emoji: '🤯' },
+  { id: 'romantico',     label: 'Romántico',      emoji: '🤍' },
+  { id: 'urbano',        label: 'Urbano',         emoji: '🎤' },
+  { id: 'profesional',   label: 'Profesional',    emoji: '💼' },
+  { id: 'chill',         label: 'Chill / ASMR',   emoji: '✨' },
 ];
 
 const PLATFORMS = [
@@ -222,13 +231,21 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
         @media (max-width: 900px) {
           .cc-grid { flex-direction: column !important; }
           .cc-right { width: 100% !important; min-width: unset !important; }
-          .cc-tones { grid-template-columns: 1fr 1fr !important; }
         }
         @media (max-width: 600px) {
           .cc-root { padding: 16px !important; }
           .cc-suggestions { grid-template-columns: 1fr !important; }
           .cc-tone-platform { grid-template-columns: 1fr !important; }
           .cc-diagnostico-grid { grid-template-columns: 1fr !important; }
+          .cc-tones {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 4px;
+          }
+          .cc-tones::-webkit-scrollbar { display: none; }
+          .cc-tone-chip { padding: 6px 10px !important; font-size: 11px !important; }
         }
       `}</style>
 
@@ -383,24 +400,26 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
                 <span style={{ fontSize: '11px', fontWeight: '600', color: 'rgba(204,195,216,0.6)', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '10px' }}>
                   Tono objetivo
                 </span>
-                <div className="cc-tones" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div className="cc-tones" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {TONES.map(t => {
                     const active = tone === t.id;
                     return (
                       <button
                         key={t.id}
                         onClick={() => setTone(t.id)}
+                        className="cc-tone-chip"
                         style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                          padding: '10px 8px', borderRadius: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', gap: '4px',
+                          padding: '7px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
                           border: active ? '1px solid rgba(210,187,255,0.6)' : '1px solid rgba(255,255,255,0.08)',
                           background: active ? 'rgba(210,187,255,0.15)' : 'rgba(255,255,255,0.03)',
                           color: active ? '#d2bbff' : 'rgba(204,195,216,0.7)',
                           boxShadow: active ? '0 0 12px rgba(210,187,255,0.1)' : 'none',
                           transition: 'all 0.2s',
+                          whiteSpace: 'nowrap', flexShrink: 0,
                         }}
                       >
-                        <span style={{ fontSize: '14px' }}>{t.emoji}</span> {t.label}
+                        <span style={{ fontSize: '13px' }}>{t.emoji}</span> {t.label}
                       </button>
                     );
                   })}
