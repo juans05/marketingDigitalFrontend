@@ -181,7 +181,7 @@ const InboxView = ({ artistId, artistName }) => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0', height: 'calc(100vh - 180px)', maxHeight: '800px' }}>
+    <div className="inbox-container" style={{ display: 'flex', flexDirection: 'column', gap: '0', height: 'calc(100vh - 180px)', maxHeight: '800px' }}>
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -429,6 +429,9 @@ const InboxView = ({ artistId, artistName }) => {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin 1s linear infinite; }
+        @media (max-width: 768px) {
+          .inbox-container { height: calc(100vh - 220px) !important; max-height: unset !important; }
+        }
       `}</style>
     </div>
   );

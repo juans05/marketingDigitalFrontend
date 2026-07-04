@@ -12,7 +12,14 @@ import ArtistManager from '../components/ArtistManager';
 import InboxView from '../components/InboxView';
 import WelcomeTour from '../components/WelcomeTour';
 import Settings from '../components/Settings';
-import { LogOut, Sparkles, BarChart3, Calendar, Loader2, Share2, Zap, MessageCircle, Settings as SettingsIcon } from 'lucide-react';
+import IdeaBankView from '../components/IdeaBankView';
+import GrowthChart from '../components/GrowthChart';
+import CollaborationsView from '../components/CollaborationsView';
+import MediaKitView from '../components/MediaKitView';
+import CompetitorSpyView from '../components/CompetitorSpyView';
+import GrowthToolsView from '../components/GrowthToolsView';
+import NotificationsPanel from '../components/NotificationsPanel';
+import { LogOut, Sparkles, BarChart3, Calendar, Loader2, Share2, Zap, MessageCircle, Settings as SettingsIcon, Lightbulb, TrendingUp, Handshake, FileText, Bell, MoreHorizontal, Search, FlaskConical } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -24,6 +31,21 @@ const Dashboard = () => {
   const [galleryKey, setGalleryKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showTour, setShowTour] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showMobileMore, setShowMobileMore] = useState(false);
+  const [sparksBalance, setSparksBalance] = useState(null);
+
+  const fetchSparksBalance = async (token) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSparksBalance(data.sparks_balance ?? null);
+      }
+    } catch (e) { console.error('Sparks fetch error:', e); }
+  };
 
   useEffect(() => {
     console.log("🚀 Dashboard initializing...");
@@ -42,6 +64,8 @@ const Dashboard = () => {
       if (!parsedUser.tour_completed) {
         setShowTour(true);
       }
+
+      fetchSparksBalance(parsedUser.token);
 
       // Comprobación inicial de onboarding
       let needsOnboarding = !parsedUser.onboarding_completed;
@@ -92,7 +116,8 @@ const Dashboard = () => {
         if (data.length > 0) {
           console.log("🎨 Individual artist found:", data[0].name);
           setActiveArtist(data[0]);
-          setShowOnboarding(false); // Artist exists — no need for onboarding
+          setShowOnboarding(false);
+          setActiveView(prev => prev === 'settings' ? 'analytics' : prev);
         }
       }
     } catch (err) {
@@ -208,15 +233,23 @@ const Dashboard = () => {
               <span style={{ fontSize: '9px', fontWeight: '900', color: 'var(--primary)', background: 'rgba(79, 70, 229, 0.15)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
                 PLAN {user.plan || 'PRO'}
               </span>
-              <span style={{ fontSize: '9px', fontWeight: '700', color: '#A1A1AA' }}>Recargar ⚡</span>
+              <span style={{ fontSize: '9px', fontWeight: '800', color: '#F59E0B', background: 'rgba(245,158,11,0.12)', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                ⚡ {sparksBalance !== null ? sparksBalance : '...'} Sparks
+              </span>
             </div>
           </div>
+
+          <button onClick={() => setShowNotifications(!showNotifications)} className="btn-exit-pro glass-morph" style={{ background: 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.2)', color: '#818CF8', height: '40px', position: 'relative' }}>
+            <Bell size={14} />
+          </button>
 
           <button onClick={handleLogout} className="btn-exit-pro glass-morph" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: '#EF4444', height: '40px' }}>
             <LogOut size={14} /> <span className="hide-mobile">Salir</span>
           </button>
         </div>
       </header>
+
+      <NotificationsPanel artistId={currentArtistId} isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
 
       <div className="dashboard-container">
         {/* Sidebar Pro Premium */}
@@ -236,16 +269,34 @@ const Dashboard = () => {
           <button className={activeView === 'inbox' ? 'active' : ''} onClick={() => setActiveView('inbox')}>
             <MessageCircle size={20} /> <span style={{ fontWeight: '600' }}>Inbox</span>
           </button>
+          <button className={activeView === 'ideabank' ? 'active' : ''} onClick={() => setActiveView('ideabank')}>
+            <Lightbulb size={20} /> <span style={{ fontWeight: '600' }}>Idea Bank</span>
+          </button>
+          <button className={activeView === 'growth' ? 'active' : ''} onClick={() => setActiveView('growth')}>
+            <TrendingUp size={20} /> <span style={{ fontWeight: '600' }}>Crecimiento</span>
+          </button>
           {!isAgency && (
             <button className={activeView === 'connect' ? 'active' : ''} onClick={() => setActiveView('connect')}>
               <Share2 size={20} /> <span style={{ fontWeight: '600' }}>Redes Sociales</span>
             </button>
           )}
 
-          {/* Agency section hidden */}
+          <div className="sidebar-section-label" style={{ padding: '24px 24px 12px' }}>MONETIZACIÓN</div>
+          <button className={activeView === 'collabs' ? 'active' : ''} onClick={() => setActiveView('collabs')}>
+            <Handshake size={20} /> <span style={{ fontWeight: '600' }}>Colaboraciones</span>
+          </button>
+          <button className={activeView === 'mediakit' ? 'active' : ''} onClick={() => setActiveView('mediakit')}>
+            <FileText size={20} /> <span style={{ fontWeight: '600' }}>Media Kit</span>
+          </button>
+          <button className={activeView === 'spy' ? 'active' : ''} onClick={() => setActiveView('spy')}>
+            <Search size={20} /> <span style={{ fontWeight: '600' }}>Spy Mode</span>
+          </button>
+          <button className={activeView === 'growthtools' ? 'active' : ''} onClick={() => setActiveView('growthtools')}>
+            <FlaskConical size={20} /> <span style={{ fontWeight: '600' }}>Growth Tools</span>
+          </button>
 
           <div className="sidebar-section-label" style={{ marginTop: 'auto', padding: '32px 24px 12px' }}>SOPORTE</div>
-          <button className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}>
+          <button data-view="sparks" className={activeView === 'sparks' ? 'active' : ''} onClick={() => setActiveView('sparks')}>
             <Zap size={20} /> <span style={{ fontWeight: '600' }}>Recargar Energía</span>
           </button>
           <button className={activeView === 'settings' ? 'active' : ''} onClick={() => setActiveView('settings')}>
@@ -264,6 +315,12 @@ const Dashboard = () => {
               {activeView === 'connect' && 'Redes Sociales'}
               {activeView === 'artists' && 'Gestión de Marcas'}
               {activeView === 'sparks' && 'Mercado de Energía'}
+              {activeView === 'ideabank' && 'Idea Bank'}
+              {activeView === 'growth' && 'Historial de Crecimiento'}
+              {activeView === 'collabs' && 'Colaboraciones'}
+              {activeView === 'mediakit' && 'Media Kit'}
+              {activeView === 'spy' && 'Spy Mode'}
+              {activeView === 'growthtools' && 'Growth Tools'}
               {activeView === 'settings' && 'Configuración'}
             </h1>
             {activeArtist && activeView !== 'settings' && <div className="active-artist-tag">Editando: {activeArtist.name}</div>}
@@ -279,7 +336,7 @@ const Dashboard = () => {
 
           {activeView === 'content' && (
             <div className="view-content" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              <ContentCopilot artistId={currentArtistId} onUploadSuccess={() => setGalleryKey(k => k + 1)} />
+              <ContentCopilot artistId={currentArtistId} activePlatforms={activeArtist?.active_platforms || []} onUploadSuccess={() => setGalleryKey(k => k + 1)} />
               {currentArtistId && (
                 <section style={{ padding: '0 24px 32px' }}>
                   <h2 className="section-title">Biblioteca de Medios</h2>
@@ -343,10 +400,34 @@ const Dashboard = () => {
 
           {activeView === 'sparks' && <SparksMarket user={user} />}
 
+          {activeView === 'ideabank' && currentArtistId && (
+            <IdeaBankView artistId={currentArtistId} />
+          )}
+
+          {activeView === 'growth' && currentArtistId && (
+            <GrowthChart artistId={currentArtistId} />
+          )}
+
+          {activeView === 'collabs' && currentArtistId && (
+            <CollaborationsView artistId={currentArtistId} />
+          )}
+
+          {activeView === 'mediakit' && currentArtistId && (
+            <MediaKitView artistId={currentArtistId} activeArtist={activeArtist} />
+          )}
+
+          {activeView === 'spy' && currentArtistId && (
+            <CompetitorSpyView artistId={currentArtistId} />
+          )}
+
+          {activeView === 'growthtools' && currentArtistId && (
+            <GrowthToolsView artistId={currentArtistId} />
+          )}
+
           {activeView === 'settings' && <Settings user={user} activeArtist={activeArtist} onUpdate={(data) => {
             const updated = { ...user, name: data.firstName, bio: data.bio, avatar_url: data.avatar_url };
             setUser(updated);
-          }} />}
+          }} onPlatformsUpdated={(platforms) => setActiveArtist(prev => ({ ...prev, active_platforms: platforms }))} />}
 
           {activeView === 'artists' && (
             <div className="view-artists">
@@ -370,22 +451,46 @@ const Dashboard = () => {
 
         {/* Mobile Nav Premium */}
         <nav className="mobile-nav">
-          <button className={`mobile-nav-btn ${activeView === 'analytics' ? 'active' : ''}`} onClick={() => setActiveView('analytics')}>
+          <button className={`mobile-nav-btn ${activeView === 'analytics' ? 'active' : ''}`} onClick={() => { setActiveView('analytics'); setShowMobileMore(false); }}>
             <BarChart3 size={20} /><span className="mobile-nav-label">Inicio</span>
           </button>
-          <button className={`mobile-nav-btn ${activeView === 'content' ? 'active' : ''}`} onClick={() => setActiveView('content')}>
+          <button className={`mobile-nav-btn ${activeView === 'content' ? 'active' : ''}`} onClick={() => { setActiveView('content'); setShowMobileMore(false); }}>
             <Sparkles size={20} /><span className="mobile-nav-label">Copilot</span>
           </button>
-          <button className={`mobile-nav-btn ${activeView === 'inbox' ? 'active' : ''}`} onClick={() => setActiveView('inbox')}>
-            <MessageCircle size={20} /><span className="mobile-nav-label">Inbox</span>
+          <button className={`mobile-nav-btn ${activeView === 'growth' ? 'active' : ''}`} onClick={() => { setActiveView('growth'); setShowMobileMore(false); }}>
+            <TrendingUp size={20} /><span className="mobile-nav-label">Crecer</span>
           </button>
-          <button className={`mobile-nav-btn ${activeView === 'planning' ? 'active' : ''}`} onClick={() => setActiveView('planning')}>
-            <Calendar size={20} /><span className="mobile-nav-label">Plan</span>
+          <button className={`mobile-nav-btn ${activeView === 'ideabank' ? 'active' : ''}`} onClick={() => { setActiveView('ideabank'); setShowMobileMore(false); }}>
+            <Lightbulb size={20} /><span className="mobile-nav-label">Ideas</span>
           </button>
-          <button className={`mobile-nav-btn ${activeView === 'settings' ? 'active' : ''}`} onClick={() => setActiveView('settings')}>
-            <SettingsIcon size={20} /><span className="mobile-nav-label">Config</span>
+          <button className={`mobile-nav-btn ${showMobileMore ? 'active' : ''}`} onClick={() => setShowMobileMore(!showMobileMore)}>
+            <MoreHorizontal size={20} /><span className="mobile-nav-label">Más</span>
           </button>
         </nav>
+
+        {/* Mobile More Menu */}
+        {showMobileMore && (
+          <div className="mobile-more-menu" onClick={() => setShowMobileMore(false)}>
+            <div className="mobile-more-content" onClick={e => e.stopPropagation()}>
+              {[
+                { view: 'inbox', icon: MessageCircle, label: 'Inbox' },
+                { view: 'planning', icon: Calendar, label: 'Calendario' },
+                ...(!isAgency ? [{ view: 'connect', icon: Share2, label: 'Redes Sociales' }] : []),
+                { view: 'collabs', icon: Handshake, label: 'Colaboraciones' },
+                { view: 'mediakit', icon: FileText, label: 'Media Kit' },
+                { view: 'spy', icon: Search, label: 'Spy Mode' },
+                { view: 'growthtools', icon: FlaskConical, label: 'Growth Tools' },
+                { view: 'sparks', icon: Zap, label: 'Recargar Energía' },
+                { view: 'settings', icon: SettingsIcon, label: 'Configuración' },
+              ].map(item => (
+                <button key={item.view} className={`mobile-more-btn ${activeView === item.view ? 'active' : ''}`}
+                  onClick={() => { setActiveView(item.view); setShowMobileMore(false); }}>
+                  <item.icon size={18} /> {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -482,6 +587,31 @@ const Dashboard = () => {
           .mobile-nav-btn:active {
             transform: scale(0.92);
           }
+
+          .mobile-more-menu {
+            position: fixed; inset: 0; z-index: 1999;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+          }
+          .mobile-more-content {
+            position: fixed; bottom: 60px; left: 8px; right: 8px;
+            background: #1C1C1F; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 8px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
+            animation: slideUp 0.2s ease;
+          }
+          @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+          .mobile-more-btn {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 16px; border-radius: 12px; border: none;
+            background: transparent; color: #A1A1AA;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s;
+          }
+          .mobile-more-btn:active { transform: scale(0.96); }
+          .mobile-more-btn.active { color: #A78BFA; background: rgba(124,58,237,0.1); }
+
+          .view-title { font-size: 18px !important; }
         }
       `}</style>
     </div>

@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IdeaBank — Vidalis.AI Mockup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: #09090B;
+    color: #FAFAFA;
+    min-height: 100vh;
+    padding: 32px;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-icon {
+    background: #1C1C1F; padding: 14px; border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .header h2 { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em; }
+  .header p { color: #71717A; font-size: 0.9rem; font-weight: 500; margin-top: 2px; }
+  .btn-generate {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    border: none; color: #fff; padding: 12px 24px; border-radius: 12px;
+    font-weight: 800; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 20px rgba(79,70,229,0.3);
+    transition: all 0.2s;
+  }
+  .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(79,70,229,0.4); }
+
+  /* TABS */
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 32px;
+    background: #1C1C1F; padding: 6px; border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+    width: fit-content;
+  }
+  .tab {
+    padding: 10px 20px; border-radius: 10px; border: none;
+    background: transparent; color: #71717A; font-weight: 700;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: #fff; box-shadow: 0 2px 10px rgba(79,70,229,0.3);
+  }
+  .tab:not(.active):hover { color: #A1A1AA; background: rgba(255,255,255,0.04); }
+
+  /* TAB CONTENT */
+  .tab-content { display: none; animation: fadeUp 0.3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ====== TAB 1: IDEAS DEL DÍA (SWIPE) ====== */
+  .swipe-container {
+    display: flex; justify-content: center; align-items: center;
+    min-height: 520px; position: relative; perspective: 1000px;
+  }
+  .swipe-stack { position: relative; width: 420px; height: 520px; }
+  .swipe-card {
+    position: absolute; width: 100%; border-radius: 24px;
+    background: #111113; border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    padding: 28px; display: flex; flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s;
+    cursor: grab;
+  }
+  .swipe-card:nth-child(3) { transform: scale(0.92) translateY(16px); opacity: 0.5; z-index: 1; }
+  .swipe-card:nth-child(2) { transform: scale(0.96) translateY(8px); opacity: 0.7; z-index: 2; }
+  .swipe-card:nth-child(1) { transform: scale(1); z-index: 3; }
+  .swipe-card.swiping-left { transform: translateX(-300px) rotate(-15deg) !important; opacity: 0 !important; }
+  .swipe-card.swiping-right { transform: translateX(300px) rotate(15deg) !important; opacity: 0 !important; }
+
+  .card-source {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(79,70,229,0.12); color: #818CF8;
+    padding: 6px 12px; border-radius: 8px; font-size: 11px;
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 20px; width: fit-content;
+  }
+  .card-hook {
+    font-size: 20px; font-weight: 800; line-height: 1.4;
+    color: #FAFAFA; margin-bottom: 20px; letter-spacing: -0.01em;
+  }
+  .card-divider {
+    height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 16px;
+  }
+  .card-bullets { list-style: none; margin-bottom: 16px; }
+  .card-bullets li {
+    padding: 6px 0; font-size: 14px; color: #A1A1AA;
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.5;
+  }
+  .card-bullets li::before {
+    content: '▸'; color: #4F46E5; font-weight: 900; font-size: 14px; margin-top: 1px;
+  }
+  .card-cta {
+    background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.15);
+    border-radius: 10px; padding: 10px 14px; font-size: 12px;
+    color: #FBBF24; font-weight: 700; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+  .card-tags span {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    padding: 4px 10px; border-radius: 6px; font-size: 11px;
+    color: #71717A; font-weight: 600;
+  }
+
+  .swipe-actions {
+    display: flex; justify-content: center; gap: 24px;
+    margin-top: auto; padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .swipe-btn {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1); background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; font-size: 22px;
+  }
+  .swipe-btn.skip { color: #EF4444; }
+  .swipe-btn.skip:hover { border-color: #EF4444; background: rgba(239,68,68,0.1); transform: scale(1.1); }
+  .swipe-btn.save { color: #10B981; }
+  .swipe-btn.save:hover { border-color: #10B981; background: rgba(16,185,129,0.1); transform: scale(1.1); }
+  .swipe-btn.star { color: #FBBF24; }
+  .swipe-btn.star:hover { border-color: #FBBF24; background: rgba(251,191,36,0.1); transform: scale(1.1); }
+  .swipe-btn.expand { color: #818CF8; font-size: 16px; }
+  .swipe-btn.expand:hover { border-color: #818CF8; background: rgba(129,140,248,0.1); transform: scale(1.1); }
+
+  .swipe-counter {
+    text-align: center; margin-top: 20px; font-size: 13px;
+    color: #52525B; font-weight: 700;
+  }
+  .swipe-dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+  .swipe-dots span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .swipe-dots span.active {
+    width: 24px; border-radius: 4px;
+    background: linear-gradient(90deg, #4F46E5, #7C3AED);
+  }
+
+  /* ====== TAB 2: BANCO DE IDEAS ====== */
+  .bank-filters {
+    display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; align-items: center;
+  }
+  .filter-btn {
+    padding: 8px 16px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: #1C1C1F; color: #71717A;
+    font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn.active { background: #4F46E5; color: #fff; border-color: #4F46E5; }
+  .filter-btn:hover:not(.active) { border-color: rgba(255,255,255,0.2); color: #A1A1AA; }
+  .search-input {
+    margin-left: auto; background: #1C1C1F;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 8px 16px;
+    color: #FAFAFA; font-size: 13px; width: 220px; outline: none;
+    font-family: 'Outfit', sans-serif;
+  }
+  .search-input::placeholder { color: #3F3F46; }
+  .search-input:focus { border-color: #4F46E5; }
+
+  .bank-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+  .bank-card {
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 20px; transition: all 0.2s;
+    display: flex; flex-direction: column;
+  }
+  .bank-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+  .bank-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .bank-stars { display: flex; gap: 2px; }
+  .bank-stars span { font-size: 16px; cursor: pointer; }
+  .bank-stars span.filled { color: #FBBF24; }
+  .bank-stars span.empty { color: #27272A; }
+  .bank-card-hook { font-size: 15px; font-weight: 800; color: #FAFAFA; margin-bottom: 14px; line-height: 1.4; }
+  .bank-card-bullets { list-style: none; margin-bottom: 16px; }
+  .bank-card-bullets li { font-size: 13px; color: #71717A; padding: 3px 0; display: flex; gap: 8px; }
+  .bank-card-bullets li::before { content: '•'; color: #4F46E5; font-weight: 900; }
+  .bank-card-meta {
+    display: flex; align-items: center; gap: 8px; font-size: 11px;
+    color: #52525B; font-weight: 600; margin-bottom: 16px;
+  }
+  .bank-card-meta .platform-tag {
+    background: rgba(79,70,229,0.1); color: #818CF8;
+    padding: 3px 8px; border-radius: 6px;
+  }
+  .bank-card-actions { display: flex; gap: 8px; margin-top: auto; }
+  .bank-btn {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: transparent; color: #A1A1AA;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .bank-btn:hover { border-color: #4F46E5; color: #FAFAFA; background: rgba(79,70,229,0.08); }
+  .bank-btn.primary {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: #fff; border: none;
+  }
+  .bank-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(79,70,229,0.3); }
+
+  /* ====== TAB 3: TENDENCIAS ====== */
+  .sources-row { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+  .source-card {
+    flex: 1; min-width: 140px; background: #111113;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 16px; text-align: center;
+    transition: all 0.2s; cursor: pointer;
+  }
+  .source-card:hover { border-color: rgba(255,255,255,0.12); }
+  .source-card .emoji { font-size: 28px; margin-bottom: 8px; }
+  .source-card .name { font-size: 13px; font-weight: 800; color: #FAFAFA; }
+  .source-card .count { font-size: 11px; color: #52525B; font-weight: 600; margin-top: 4px; }
+
+  .section-label {
+    font-size: 13px; font-weight: 800; color: #52525B;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06);
+  }
+
+  .trend-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 36px; }
+  .trend-item {
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 18px 20px;
+    display: flex; align-items: center; gap: 16px;
+    transition: all 0.2s; cursor: pointer;
+  }
+  .trend-item:hover { border-color: rgba(255,255,255,0.12); }
+  .trend-rank {
+    font-size: 20px; font-weight: 900; color: #27272A;
+    min-width: 30px; text-align: center;
+  }
+  .trend-item:nth-child(1) .trend-rank { color: #FBBF24; }
+  .trend-item:nth-child(2) .trend-rank { color: #A1A1AA; }
+  .trend-item:nth-child(3) .trend-rank { color: #B45309; }
+  .trend-platform { font-size: 24px; }
+  .trend-body { flex: 1; min-width: 0; }
+  .trend-title { font-size: 14px; font-weight: 700; color: #FAFAFA; margin-bottom: 4px; line-height: 1.4; }
+  .trend-meta-row { display: flex; gap: 12px; font-size: 11px; color: #52525B; font-weight: 600; }
+  .trend-score {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 800; white-space: nowrap;
+  }
+  .trend-score.hot { color: #EF4444; }
+  .trend-score.views { color: #38BDF8; }
+  .trend-score.viral { color: #10B981; }
+  .trend-score.rising { color: #F59E0B; }
+  .trend-gen-btn {
+    padding: 8px 14px; border-radius: 8px;
+    background: rgba(79,70,229,0.1); border: 1px solid rgba(79,70,229,0.2);
+    color: #818CF8; font-size: 11px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  }
+  .trend-gen-btn:hover { background: #4F46E5; color: #fff; }
+
+  /* Sources manage list */
+  .sources-manage { display: flex; flex-direction: column; gap: 8px; }
+  .source-row {
+    display: flex; align-items: center; gap: 12px;
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 12px 16px;
+  }
+  .source-row .s-emoji { font-size: 18px; }
+  .source-row .s-name { flex: 1; font-size: 13px; font-weight: 700; color: #FAFAFA; }
+  .source-row .s-platform { font-size: 11px; color: #52525B; font-weight: 600; min-width: 70px; }
+  .source-row .s-status {
+    font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px;
+    background: rgba(16,185,129,0.1); color: #10B981;
+  }
+  .source-row .s-remove {
+    background: none; border: none; color: #3F3F46;
+    cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .source-row .s-remove:hover { color: #EF4444; background: rgba(239,68,68,0.1); }
+
+  /* ====== TAB 4: MI ESTILO ====== */
+  .style-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+  .style-card {
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 24px; text-align: center;
+  }
+  .style-card .sc-icon { font-size: 32px; margin-bottom: 12px; }
+  .style-card .sc-label { font-size: 11px; color: #52525B; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .style-card .sc-values { display: flex; flex-direction: column; gap: 4px; }
+  .style-card .sc-values span { font-size: 15px; font-weight: 700; color: #FAFAFA; }
+
+  .hook-patterns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+  .hook-row { display: flex; align-items: center; gap: 16px; }
+  .hook-label { min-width: 200px; font-size: 14px; font-weight: 700; color: #A1A1AA; }
+  .hook-bar-bg {
+    flex: 1; height: 10px; background: rgba(255,255,255,0.04);
+    border-radius: 100px; overflow: hidden;
+  }
+  .hook-bar-fill {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, #4F46E5, #7C3AED);
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+  .hook-pct { min-width: 65px; text-align: right; font-size: 13px; font-weight: 800; color: #818CF8; }
+
+  .themes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .theme-card {
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 18px; transition: all 0.2s;
+  }
+  .theme-card:hover { border-color: rgba(255,255,255,0.12); }
+  .theme-card .tc-icon { font-size: 24px; margin-bottom: 10px; }
+  .theme-card .tc-name { font-size: 14px; font-weight: 800; color: #FAFAFA; margin-bottom: 4px; }
+  .theme-card .tc-stat { font-size: 12px; color: #52525B; font-weight: 600; }
+  .theme-card .tc-avg { font-size: 12px; color: #10B981; font-weight: 700; margin-top: 4px; }
+
+  .hashtags-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; }
+  .hashtag-chip {
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 12px 18px; text-align: center;
+    transition: all 0.2s;
+  }
+  .hashtag-chip:hover { border-color: #4F46E5; }
+  .hashtag-chip .ht-tag { font-size: 14px; font-weight: 800; color: #FAFAFA; }
+  .hashtag-chip .ht-growth { font-size: 12px; font-weight: 700; color: #10B981; margin-top: 4px; }
+
+  /* Schedule heatmap */
+  .heatmap-container {
+    background: #111113; border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 24px;
+  }
+  .heatmap-grid { display: grid; grid-template-columns: 50px repeat(7, 1fr); gap: 4px; }
+  .heatmap-label { font-size: 11px; color: #52525B; font-weight: 700; display: flex; align-items: center; }
+  .heatmap-header { font-size: 11px; color: #52525B; font-weight: 700; text-align: center; padding: 4px; }
+  .heatmap-cell {
+    aspect-ratio: 1; border-radius: 6px; min-height: 28px;
+    transition: all 0.2s;
+  }
+  .heatmap-cell.low { background: rgba(79,70,229,0.08); }
+  .heatmap-cell.mid { background: rgba(79,70,229,0.25); }
+  .heatmap-cell.high { background: rgba(79,70,229,0.5); }
+  .heatmap-cell.peak { background: #4F46E5; box-shadow: 0 0 10px rgba(79,70,229,0.3); }
+  .heatmap-legend {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 16px; justify-content: flex-end;
+    font-size: 11px; color: #52525B; font-weight: 600;
+  }
+  .heatmap-legend .hl-box { width: 14px; height: 14px; border-radius: 3px; }
+  .best-time {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(251,191,36,0.1); color: #FBBF24;
+    padding: 6px 14px; border-radius: 8px; font-size: 12px;
+    font-weight: 700; margin-top: 12px;
+  }
+
+  /* Add source modal */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+    z-index: 10000; display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #111113; border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; padding: 28px; width: 100%; max-width: 420px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+  }
+  .modal-box h3 { font-size: 18px; font-weight: 800; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+  .modal-box h3 button { background: none; border: none; color: #52525B; cursor: pointer; font-size: 20px; }
+  .modal-label { font-size: 11px; font-weight: 800; color: #71717A; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: block; }
+  .modal-platforms { display: flex; gap: 8px; margin-bottom: 20px; }
+  .modal-plat-btn {
+    flex: 1; padding: 10px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: transparent; color: #71717A;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    text-align: center; transition: all 0.2s;
+  }
+  .modal-plat-btn.active { background: #4F46E5; color: #fff; border-color: #4F46E5; }
+  .modal-types { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .modal-type-btn {
+    padding: 8px 14px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: transparent; color: #71717A;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .modal-type-btn.active { border-color: #4F46E5; color: #818CF8; background: rgba(79,70,229,0.1); }
+  .modal-input {
+    width: 100%; background: #1C1C1F;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 12px 16px;
+    color: #FAFAFA; font-size: 14px; margin-bottom: 20px;
+    outline: none; font-family: 'Outfit', sans-serif;
+  }
+  .modal-input:focus { border-color: #4F46E5; }
+  .modal-submit {
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    color: #fff; font-weight: 800; font-size: 14px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .modal-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.3); }
+
+  /* Expanded script modal */
+  .script-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+    z-index: 10001; display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .script-overlay.show { display: flex; }
+  .script-box {
+    background: #111113; border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px; width: 100%; max-width: 560px;
+    max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+  }
+  .script-header {
+    padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .script-header h3 { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+  .script-body { padding: 24px; overflow-y: auto; flex: 1; }
+  .script-section { margin-bottom: 20px; }
+  .script-section-label {
+    font-size: 10px; font-weight: 800; color: #4F46E5;
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+  }
+  .script-text { font-size: 14px; color: #A1A1AA; line-height: 1.7; }
+  .script-highlight {
+    background: rgba(79,70,229,0.08); border-left: 3px solid #4F46E5;
+    padding: 12px 16px; border-radius: 0 10px 10px 0;
+    font-size: 14px; color: #FAFAFA; font-weight: 600; line-height: 1.6;
+  }
+  .script-footer {
+    padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; gap: 10px;
+  }
+  .script-footer button { flex: 1; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    body { padding: 16px; }
+    .tabs { width: 100%; overflow-x: auto; }
+    .tab { white-space: nowrap; font-size: 12px; padding: 8px 14px; }
+    .swipe-stack { width: 100%; max-width: 360px; }
+    .bank-grid { grid-template-columns: 1fr; }
+    .style-cards { grid-template-columns: 1fr; }
+    .hook-label { min-width: 140px; font-size: 12px; }
+    .search-input { width: 100%; margin-left: 0; }
+    .bank-filters { flex-direction: column; }
+    .sources-row { flex-direction: column; }
+    .heatmap-grid { gap: 2px; }
+    .themes-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m9 22 3-8 3 8"/><path d="M12 6a2 2 0 0 0-2-2"/></svg>
+    </div>
+    <div>
+      <h2>Idea Bank</h2>
+      <p>Tu banco de ideas personalizado con IA</p>
+    </div>
+  </div>
+  <button class="btn-generate" onclick="alert('Generando 5 ideas nuevas...')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+    Generar Ideas
+  </button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(0)">🎯 Ideas del Día</button>
+  <button class="tab" onclick="switchTab(1)">⭐ Banco de Ideas</button>
+  <button class="tab" onclick="switchTab(2)">📈 Tendencias</button>
+  <button class="tab" onclick="switchTab(3)">🎨 Mi Estilo</button>
+</div>
+
+<!-- ====== TAB 1: IDEAS DEL DÍA ====== -->
+<div class="tab-content active" id="tab-0">
+  <div class="swipe-container">
+    <div class="swipe-stack" id="swipeStack">
+      <div class="swipe-card">
+        <div class="card-source">📱 Reddit · r/socialmedia</div>
+        <div class="card-hook">"Dejé de postear diario y mi cuenta creció 3x — aquí está el framework"</div>
+        <div class="card-divider"></div>
+        <ul class="card-bullets">
+          <li>Abre con la métrica: "Antes posteaba 7/7, ahora 3/7 y gano más"</li>
+          <li>Muestra el calendario antes vs después en pantalla dividida</li>
+          <li>Explica el framework: calidad > cantidad con datos</li>
+          <li>Cierra con tu rutina semanal de 3 posts</li>
+        </ul>
+        <div class="card-cta">✨ CTA: "¿Cuántas veces posteas a la semana? Dímelo en comentarios"</div>
+        <div class="card-tags">
+          <span>#contentcreator</span><span>#estrategia</span><span>#crecimiento</span>
+        </div>
+        <div class="swipe-actions">
+          <button class="swipe-btn skip" title="Descartar">✕</button>
+          <button class="swipe-btn expand" title="Expandir guión">📝</button>
+          <button class="swipe-btn star" title="Favorita">⭐</button>
+          <button class="swipe-btn save" title="Guardar">♥</button>
+        </div>
+      </div>
+      <div class="swipe-card">
+        <div class="card-source">🔴 YouTube · Trending</div>
+        <div class="card-hook">"POV: Tu primer video llega a 10K vistas y no sabes qué hacer después"</div>
+        <div class="card-divider"></div>
+        <ul class="card-bullets">
+          <li>Reacción genuina frente a cámara viendo las analytics</li>
+          <li>Mostrar el dashboard en tiempo real con las vistas subiendo</li>
+          <li>3 tips de qué hacer cuando un video se viraliza</li>
+        </ul>
+        <div class="card-cta">✨ CTA: "¿Te pasó? Cuenta tu experiencia abajo"</div>
+        <div class="card-tags">
+          <span>#viral</span><span>#primerVideo</span><span>#creador</span>
+        </div>
+        <div class="swipe-actions">
+          <button class="swipe-btn skip" title="Descartar">✕</button>
+          <button class="swipe-btn expand" title="Expandir guión">📝</button>
+          <button class="swipe-btn star" title="Favorita">⭐</button>
+          <button class="swipe-btn save" title="Guardar">♥</button>
+        </div>
+      </div>
+      <div class="swipe-card">
+        <div class="card-source">📈 Trending en TikTok</div>
+        <div class="card-hook">"¿Sabías que el 90% de los creadores pierden views por este error en los primeros 3 segundos?"</div>
+        <div class="card-divider"></div>
+        <ul class="card-bullets">
+          <li>Abre con dato impactante (estadística real o referencia)</li>
+          <li>Muestra el error común en pantalla dividida</li>
+          <li>Revela la solución con transición visual llamativa</li>
+          <li>Cierra con un antes/después comparativo</li>
+        </ul>
+        <div class="card-cta">✨ CTA: "Guarda esto para tu próximo reel y etiquétame cuando lo hagas"</div>
+        <div class="card-tags">
+          <span>#hooks</span><span>#viralreels</span><span>#tips2026</span><span>#contenido</span>
+        </div>
+        <div class="swipe-actions">
+          <button class="swipe-btn skip" title="Descartar">✕</button>
+          <button class="swipe-btn expand" title="Expandir guión">📝</button>
+          <button class="swipe-btn star" title="Favorita">⭐</button>
+          <button class="swipe-btn save" title="Guardar">♥</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="swipe-counter">Idea 1 de 5</div>
+  <div class="swipe-dots">
+    <span class="active"></span><span></span><span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- ====== TAB 2: BANCO DE IDEAS ====== -->
+<div class="tab-content" id="tab-1">
+  <div class="bank-filters">
+    <button class="filter-btn active">Todas</button>
+    <button class="filter-btn">⭐ Favoritas</button>
+    <button class="filter-btn">Más recientes</button>
+    <button class="filter-btn">Mejor rating</button>
+    <input class="search-input" placeholder="🔍 Buscar ideas..." />
+  </div>
+  <div class="bank-grid">
+    <div class="bank-card">
+      <div class="bank-card-top">
+        <div class="bank-stars"><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span></div>
+        <span style="font-size:11px;color:#52525B">hace 2h</span>
+      </div>
+      <div class="bank-card-hook">"¿Sabías que el 90% de los creadores pierden views por este error en los primeros 3 segundos?"</div>
+      <ul class="bank-card-bullets">
+        <li>Abre con dato impactante</li>
+        <li>Muestra el error en pantalla dividida</li>
+        <li>Solución con transición visual</li>
+        <li>Antes/después comparativo</li>
+      </ul>
+      <div class="bank-card-meta">
+        <span class="platform-tag">TikTok</span>
+        <span class="platform-tag">Instagram</span>
+        <span>· 📈 Trending TikTok</span>
+      </div>
+      <div class="bank-card-actions">
+        <button class="bank-btn">📝 Ver Guión</button>
+        <button class="bank-btn primary">📅 Usar Idea</button>
+      </div>
+    </div>
+    <div class="bank-card">
+      <div class="bank-card-top">
+        <div class="bank-stars"><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span class="empty">★</span></div>
+        <span style="font-size:11px;color:#52525B">hace 1d</span>
+      </div>
+      <div class="bank-card-hook">"POV: Tu primer video llega a 10K vistas y no sabes qué hacer después"</div>
+      <ul class="bank-card-bullets">
+        <li>Reacción genuina frente a cámara</li>
+        <li>Mostrar analytics en vivo</li>
+        <li>Tips de qué hacer después</li>
+      </ul>
+      <div class="bank-card-meta">
+        <span class="platform-tag">YouTube</span>
+        <span class="platform-tag">TikTok</span>
+        <span>· 🔴 YouTube Trending</span>
+      </div>
+      <div class="bank-card-actions">
+        <button class="bank-btn">📝 Ver Guión</button>
+        <button class="bank-btn primary">📅 Usar Idea</button>
+      </div>
+    </div>
+    <div class="bank-card">
+      <div class="bank-card-top">
+        <div class="bank-stars"><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span></div>
+        <span style="font-size:11px;color:#52525B">hace 2d</span>
+      </div>
+      <div class="bank-card-hook">"3 trucos de edición que usan los creadores con +1M de seguidores"</div>
+      <ul class="bank-card-bullets">
+        <li>Truco 1: corte rápido en el hook</li>
+        <li>Truco 2: zoom dinámico en la acción</li>
+        <li>Truco 3: texto animado sincronizado</li>
+      </ul>
+      <div class="bank-card-meta">
+        <span class="platform-tag">Instagram</span>
+        <span>· 📱 Reddit r/editing</span>
+      </div>
+      <div class="bank-card-actions">
+        <button class="bank-btn">📝 Ver Guión</button>
+        <button class="bank-btn primary">📅 Usar Idea</button>
+      </div>
+    </div>
+    <div class="bank-card">
+      <div class="bank-card-top">
+        <div class="bank-stars"><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span class="empty">★</span><span class="empty">★</span></div>
+        <span style="font-size:11px;color:#52525B">hace 3d</span>
+      </div>
+      <div class="bank-card-hook">"Responde a este comentario viral con un stitch — así ganas seguidores gratis"</div>
+      <ul class="bank-card-bullets">
+        <li>Muestra el comentario viral</li>
+        <li>Tu reacción auténtica</li>
+        <li>Respuesta completa con valor</li>
+      </ul>
+      <div class="bank-card-meta">
+        <span class="platform-tag">TikTok</span>
+        <span>· 🟣 Instagram trending</span>
+      </div>
+      <div class="bank-card-actions">
+        <button class="bank-btn">📝 Ver Guión</button>
+        <button class="bank-btn primary">📅 Usar Idea</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TAB 3: TENDENCIAS ====== -->
+<div class="tab-content" id="tab-2">
+  <div class="sources-row">
+    <div class="source-card"><div class="emoji">🔴</div><div class="name">Reddit</div><div class="count">3 fuentes activas</div></div>
+    <div class="source-card"><div class="emoji">🎵</div><div class="name">TikTok</div><div class="count">2 fuentes activas</div></div>
+    <div class="source-card"><div class="emoji">🟣</div><div class="name">Instagram</div><div class="count">1 fuente activa</div></div>
+    <div class="source-card"><div class="emoji">🔴</div><div class="name">YouTube</div><div class="count">2 fuentes activas</div></div>
+    <div class="source-card" style="border-style:dashed;cursor:pointer" onclick="document.getElementById('addSourceModal').classList.add('show')">
+      <div class="emoji">➕</div><div class="name" style="color:#71717A">Agregar</div><div class="count">nueva fuente</div>
+    </div>
+  </div>
+
+  <div class="section-label">🔥 Top tendencias hoy</div>
+  <div class="trend-list">
+    <div class="trend-item">
+      <div class="trend-rank">1</div>
+      <div class="trend-platform">🔴</div>
+      <div class="trend-body">
+        <div class="trend-title">"Los algoritmos en 2026 premian contenido de &lt;60s más que nunca — data de 50K cuentas"</div>
+        <div class="trend-meta-row"><span>Reddit · r/socialmedia</span><span>💬 847 comments</span><span>⏰ hace 6h</span></div>
+      </div>
+      <div class="trend-score hot">🔥 4,521</div>
+      <button class="trend-gen-btn">💡 Generar idea</button>
+    </div>
+    <div class="trend-item">
+      <div class="trend-rank">2</div>
+      <div class="trend-platform">🔴</div>
+      <div class="trend-body">
+        <div class="trend-title">"Hice esto durante 30 días y mi cuenta explotó — experimento documentado"</div>
+        <div class="trend-meta-row"><span>YouTube · Trending Entretenimiento</span><span>👍 95K likes</span><span>⏰ hace 12h</span></div>
+      </div>
+      <div class="trend-score views">👁 2.1M</div>
+      <button class="trend-gen-btn">💡 Generar idea</button>
+    </div>
+    <div class="trend-item">
+      <div class="trend-rank">3</div>
+      <div class="trend-platform">🎵</div>
+      <div class="trend-body">
+        <div class="trend-title">Formato "3 cosas que nadie te dice sobre..." está explotando esta semana</div>
+        <div class="trend-meta-row"><span>TikTok · #CreadorDeContenido</span><span>📊 +500% engagement</span><span>⏰ hace 8h</span></div>
+      </div>
+      <div class="trend-score viral">🚀 Viral</div>
+      <button class="trend-gen-btn">💡 Generar idea</button>
+    </div>
+    <div class="trend-item">
+      <div class="trend-rank">4</div>
+      <div class="trend-platform">🟣</div>
+      <div class="trend-body">
+        <div class="trend-title">Carousels educativos con hook visual en slide 1 superan a reels en reach esta semana</div>
+        <div class="trend-meta-row"><span>Instagram · #ReelsStrategy</span><span>📊 +200% reach</span><span>⏰ hace 1d</span></div>
+      </div>
+      <div class="trend-score rising">📈 Subiendo</div>
+      <button class="trend-gen-btn">💡 Generar idea</button>
+    </div>
+  </div>
+
+  <div class="section-label">⚙️ Mis fuentes de monitoreo</div>
+  <div class="sources-manage">
+    <div class="source-row"><span class="s-emoji">🔴</span><span class="s-name">r/socialmedia</span><span class="s-platform">Reddit</span><span class="s-status">activo</span><button class="s-remove">✕</button></div>
+    <div class="source-row"><span class="s-emoji">🔴</span><span class="s-name">r/tiktokhelp</span><span class="s-platform">Reddit</span><span class="s-status">activo</span><button class="s-remove">✕</button></div>
+    <div class="source-row"><span class="s-emoji">🔴</span><span class="s-name">r/contentcreation</span><span class="s-platform">Reddit</span><span class="s-status">activo</span><button class="s-remove">✕</button></div>
+    <div class="source-row"><span class="s-emoji">🎵</span><span class="s-name">#creadorcontenido</span><span class="s-platform">TikTok</span><span class="s-status">activo</span><button class="s-remove">✕</button></div>
+    <div class="source-row"><span class="s-emoji">🎵</span><span class="s-name">#marketingdigital</span><span class="s-platform">TikTok</span><span class="s-status">activo</span><button class="s-remove">✕</button></div>
+    <div class="source-row"><span class="s-emoji">🟣</span><span class="s-name">#reelsstrategy</span><span class="s-platform">Instagram</span><span class="s-status">activo</span><button class="s-remove">✕</button></div>
+    <div class="source-row"><span class="s-emoji">🔴</span><span class="s-name">Trending Música</span><span class="s-platform">YouTube</span><span class="s-status">activo</span><button class="s-remove">✕</button></div>
+    <div class="source-row"><span class="s-emoji">🔴</span><span class="s-name">Trending Entretenimiento</span><span class="s-platform">YouTube</span><span class="s-status">activo</span><button class="s-remove">✕</button></div>
+  </div>
+</div>
+
+<!-- ====== TAB 4: MI ESTILO ====== -->
+<div class="tab-content" id="tab-3">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <div>
+      <div class="section-label" style="margin-bottom:4px">Tu perfil de estilo</div>
+      <p style="font-size:12px;color:#3F3F46;font-weight:500">Basado en el análisis de tus últimos 20 videos</p>
+    </div>
+    <button class="btn-generate" style="font-size:12px;padding:10px 18px">🔄 Re-analizar</button>
+  </div>
+
+  <div class="style-cards">
+    <div class="style-card">
+      <div class="sc-icon">🎭</div>
+      <div class="sc-label">Tono</div>
+      <div class="sc-values">
+        <span>Energético</span><span>Directo</span><span>Educativo</span>
+      </div>
+    </div>
+    <div class="style-card">
+      <div class="sc-icon">🎯</div>
+      <div class="sc-label">Nicho</div>
+      <div class="sc-values">
+        <span>Marketing Digital</span><span>Creación de Contenido</span>
+      </div>
+    </div>
+    <div class="style-card">
+      <div class="sc-icon">📊</div>
+      <div class="sc-label">Formato Top</div>
+      <div class="sc-values">
+        <span>Reel / Video Corto</span><span>60 – 90 segundos</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">🎣 Tus patrones de hooks</div>
+  <div class="hook-patterns">
+    <div class="hook-row"><span class="hook-label">"¿Sabías que...?"</span><div class="hook-bar-bg"><div class="hook-bar-fill" style="width:78%"></div></div><span class="hook-pct">78% eficaz</span></div>
+    <div class="hook-row"><span class="hook-label">"3 cosas que..."</span><div class="hook-bar-bg"><div class="hook-bar-fill" style="width:62%"></div></div><span class="hook-pct">62% eficaz</span></div>
+    <div class="hook-row"><span class="hook-label">"POV:"</span><div class="hook-bar-bg"><div class="hook-bar-fill" style="width:58%"></div></div><span class="hook-pct">58% eficaz</span></div>
+    <div class="hook-row"><span class="hook-label">"El error que todos..."</span><div class="hook-bar-bg"><div class="hook-bar-fill" style="width:51%"></div></div><span class="hook-pct">51% eficaz</span></div>
+    <div class="hook-row"><span class="hook-label">"Nadie te dice esto..."</span><div class="hook-bar-bg"><div class="hook-bar-fill" style="width:43%"></div></div><span class="hook-pct">43% eficaz</span></div>
+  </div>
+
+  <div class="section-label">📂 Temas recurrentes</div>
+  <div class="themes-grid">
+    <div class="theme-card"><div class="tc-icon">📱</div><div class="tc-name">Social Media</div><div class="tc-stat">12 videos</div><div class="tc-avg">Avg: 4.2K views</div></div>
+    <div class="theme-card"><div class="tc-icon">🤖</div><div class="tc-name">IA & Tech</div><div class="tc-stat">8 videos</div><div class="tc-avg">Avg: 6.1K views</div></div>
+    <div class="theme-card"><div class="tc-icon">💰</div><div class="tc-name">Monetización</div><div class="tc-stat">5 videos</div><div class="tc-avg">Avg: 3.8K views</div></div>
+    <div class="theme-card"><div class="tc-icon">🎬</div><div class="tc-name">Edición</div><div class="tc-stat">3 videos</div><div class="tc-avg">Avg: 5.5K views</div></div>
+  </div>
+
+  <div class="section-label"># Hashtags que te funcionan</div>
+  <div class="hashtags-row">
+    <div class="hashtag-chip"><div class="ht-tag">#marketing</div><div class="ht-growth">⬆ +340%</div></div>
+    <div class="hashtag-chip"><div class="ht-tag">#emprender</div><div class="ht-growth">⬆ +210%</div></div>
+    <div class="hashtag-chip"><div class="ht-tag">#reels2026</div><div class="ht-growth">⬆ +180%</div></div>
+    <div class="hashtag-chip"><div class="ht-tag">#contenido</div><div class="ht-growth">⬆ +150%</div></div>
+    <div class="hashtag-chip"><div class="ht-tag">#creador</div><div class="ht-growth">⬆ +120%</div></div>
+    <div class="hashtag-chip"><div class="ht-tag">#viral</div><div class="ht-growth">⬆ +95%</div></div>
+  </div>
+
+  <div class="section-label">⏰ Tu mejor horario</div>
+  <div class="heatmap-container">
+    <div class="heatmap-grid">
+      <div class="heatmap-label"></div>
+      <div class="heatmap-header">Lun</div><div class="heatmap-header">Mar</div><div class="heatmap-header">Mié</div><div class="heatmap-header">Jue</div><div class="heatmap-header">Vie</div><div class="heatmap-header">Sáb</div><div class="heatmap-header">Dom</div>
+
+      <div class="heatmap-label">8:00</div>
+      <div class="heatmap-cell low"></div><div class="heatmap-cell low"></div><div class="heatmap-cell low"></div><div class="heatmap-cell low"></div><div class="heatmap-cell low"></div><div class="heatmap-cell high"></div><div class="heatmap-cell high"></div>
+
+      <div class="heatmap-label">10:00</div>
+      <div class="heatmap-cell low"></div><div class="heatmap-cell low"></div><div class="heatmap-cell mid"></div><div class="heatmap-cell low"></div><div class="heatmap-cell low"></div><div class="heatmap-cell high"></div><div class="heatmap-cell high"></div>
+
+      <div class="heatmap-label">12:00</div>
+      <div class="heatmap-cell high"></div><div class="heatmap-cell high"></div><div class="heatmap-cell high"></div><div class="heatmap-cell high"></div><div class="heatmap-cell high"></div><div class="heatmap-cell mid"></div><div class="heatmap-cell low"></div>
+
+      <div class="heatmap-label">14:00</div>
+      <div class="heatmap-cell mid"></div><div class="heatmap-cell low"></div><div class="heatmap-cell low"></div><div class="heatmap-cell mid"></div><div class="heatmap-cell low"></div><div class="heatmap-cell low"></div><div class="heatmap-cell low"></div>
+
+      <div class="heatmap-label">18:00</div>
+      <div class="heatmap-cell high"></div><div class="heatmap-cell peak"></div><div class="heatmap-cell high"></div><div class="heatmap-cell high"></div><div class="heatmap-cell high"></div><div class="heatmap-cell mid"></div><div class="heatmap-cell low"></div>
+
+      <div class="heatmap-label">20:00</div>
+      <div class="heatmap-cell peak"></div><div class="heatmap-cell peak"></div><div class="heatmap-cell peak"></div><div class="heatmap-cell peak"></div><div class="heatmap-cell high"></div><div class="heatmap-cell peak"></div><div class="heatmap-cell high"></div>
+
+      <div class="heatmap-label">22:00</div>
+      <div class="heatmap-cell mid"></div><div class="heatmap-cell mid"></div><div class="heatmap-cell low"></div><div class="heatmap-cell mid"></div><div class="heatmap-cell low"></div><div class="heatmap-cell high"></div><div class="heatmap-cell mid"></div>
+    </div>
+    <div class="heatmap-legend">
+      <div class="hl-box" style="background:rgba(79,70,229,0.08)"></div> Bajo
+      <div class="hl-box" style="background:rgba(79,70,229,0.25)"></div> Medio
+      <div class="hl-box" style="background:rgba(79,70,229,0.5)"></div> Alto
+      <div class="hl-box" style="background:#4F46E5"></div> Peak
+    </div>
+    <div class="best-time">🏆 Mejor horario: Martes y Jueves a las 20:00</div>
+  </div>
+</div>
+
+<!-- MODAL: Agregar Fuente -->
+<div class="modal-overlay" id="addSourceModal">
+  <div class="modal-box">
+    <h3>Agregar Fuente <button onclick="document.getElementById('addSourceModal').classList.remove('show')">✕</button></h3>
+    <label class="modal-label">Plataforma</label>
+    <div class="modal-platforms">
+      <button class="modal-plat-btn active">🔴 Reddit</button>
+      <button class="modal-plat-btn">🎵 TikTok</button>
+      <button class="modal-plat-btn">🟣 IG</button>
+      <button class="modal-plat-btn">🔴 YT</button>
+    </div>
+    <label class="modal-label">Tipo</label>
+    <div class="modal-types">
+      <button class="modal-type-btn active">Subreddit</button>
+      <button class="modal-type-btn">Hashtag</button>
+      <button class="modal-type-btn">Perfil</button>
+      <button class="modal-type-btn">Categoría</button>
+    </div>
+    <label class="modal-label">Valor</label>
+    <input class="modal-input" placeholder="Ej: r/fitness, #marketing, @usuario..." />
+    <button class="modal-submit" onclick="document.getElementById('addSourceModal').classList.remove('show')">Agregar Fuente</button>
+  </div>
+</div>
+
+<!-- MODAL: Guión Expandido -->
+<div class="script-overlay" id="scriptModal">
+  <div class="script-box">
+    <div class="script-header">
+      <h3>📝 Guión Expandido</h3>
+      <button onclick="document.getElementById('scriptModal').classList.remove('show')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;cursor:pointer;color:#71717A;font-size:16px">✕</button>
+    </div>
+    <div class="script-body">
+      <div class="script-section">
+        <div class="script-section-label">🎣 Hook (segundos 0-3)</div>
+        <div class="script-highlight">"¿Sabías que el 90% de los creadores pierden views por este error en los primeros 3 segundos? Yo también lo hacía hasta que descubrí esto..."</div>
+      </div>
+      <div class="script-section">
+        <div class="script-section-label">📖 Desarrollo (segundos 3-45)</div>
+        <div class="script-text">
+          <strong>Escena 1 (seg 3-12):</strong> Muestra en pantalla dividida un video tuyo antiguo vs uno nuevo. Señala el error: "Mira, aquí estaba arrancando con una intro larga. Nadie se queda a ver eso."<br><br>
+          <strong>Escena 2 (seg 12-25):</strong> Transición visual (zoom rápido). "El secreto es empezar con una pregunta, un dato loco, o algo que interrumpa el scroll. Así:" — muestra 3 ejemplos rápidos de hooks que funcionaron.<br><br>
+          <strong>Escena 3 (seg 25-45):</strong> "Desde que cambié mis primeros 3 segundos, mis views subieron un 340%. No es magia, es psicología. Tu hook tiene que generar curiosidad instantánea."
+        </div>
+      </div>
+      <div class="script-section">
+        <div class="script-section-label">🎯 CTA & Cierre (segundos 45-60)</div>
+        <div class="script-highlight">"Guarda este video para tu próximo reel. Y si quieres los 10 hooks que mejor me funcionaron, déjame un 🔥 en comentarios y te lo mando. ¡Dale follow para más tips!"</div>
+      </div>
+      <div class="script-section">
+        <div class="script-section-label"># Hashtags sugeridos</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span style="background:rgba(79,70,229,0.1);color:#818CF8;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600">#hooks</span>
+          <span style="background:rgba(79,70,229,0.1);color:#818CF8;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600">#viralreels</span>
+          <span style="background:rgba(79,70,229,0.1);color:#818CF8;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600">#tips2026</span>
+          <span style="background:rgba(79,70,229,0.1);color:#818CF8;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600">#contenido</span>
+          <span style="background:rgba(79,70,229,0.1);color:#818CF8;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600">#creadordecontenido</span>
+        </div>
+      </div>
+    </div>
+    <div class="script-footer">
+      <button class="bank-btn">📋 Copiar Guión</button>
+      <button class="bank-btn primary">📅 Programar en Calendario</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(idx) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-content').forEach((c, i) => {
+    c.classList.toggle('active', i === idx);
+    if (i === idx) { c.style.animation = 'none'; c.offsetHeight; c.style.animation = ''; }
+  });
+}
+
+let currentIdea = 1;
+const totalIdeas = 3;
+
+function updateCounter() {
+  const counter = document.querySelector('.swipe-counter');
+  const dots = document.querySelector('.swipe-dots');
+  const remaining = document.querySelectorAll('#swipeStack .swipe-card').length;
+  if (remaining > 0) {
+    const current = totalIdeas - remaining + 1;
+    counter.textContent = `Idea ${current} de ${totalIdeas}`;
+    dots.innerHTML = '';
+    for (let i = 0; i < totalIdeas; i++) {
+      const d = document.createElement('span');
+      if (i === current - 1) d.classList.add('active');
+      dots.appendChild(d);
+    }
+  }
+}
+
+function swipeCard(dir) {
+  const stack = document.getElementById('swipeStack');
+  const top = stack.querySelector('.swipe-card:last-child');
+  if (!top) return;
+  top.classList.add(dir === 'left' ? 'swiping-left' : 'swiping-right');
+  setTimeout(() => {
+    top.remove();
+    const remaining = stack.querySelectorAll('.swipe-card');
+    remaining.forEach((c, i) => {
+      const pos = remaining.length - 1 - i;
+      if (pos === 0) { c.style.transform = 'scale(1)'; c.style.opacity = '1'; c.style.zIndex = 3; }
+      else if (pos === 1) { c.style.transform = 'scale(0.96) translateY(8px)'; c.style.opacity = '0.7'; c.style.zIndex = 2; }
+      else { c.style.transform = 'scale(0.92) translateY(16px)'; c.style.opacity = '0.5'; c.style.zIndex = 1; }
+    });
+    if (remaining.length === 0) {
+      stack.innerHTML = '<div style="text-align:center;padding:80px 20px"><div style="font-size:48px;margin-bottom:16px">🎉</div><h3 style="font-size:20px;font-weight:800;margin-bottom:8px">¡Revisaste todas las ideas!</h3><p style="color:#71717A;font-size:14px">Vuelve mañana para 5 ideas nuevas o genera más ahora</p><button class="btn-generate" style="margin:20px auto 0" onclick="location.reload()">✨ Generar más ideas</button></div>';
+      document.querySelector('.swipe-counter').textContent = '';
+      document.querySelector('.swipe-dots').innerHTML = '';
+    } else {
+      updateCounter();
+    }
+  }, 400);
+}
+
+function starCard() {
+  const stack = document.getElementById('swipeStack');
+  const top = stack.querySelector('.swipe-card:last-child');
+  if (!top) return;
+  const starBtn = top.querySelector('.swipe-btn.star');
+  if (starBtn.classList.contains('starred')) {
+    starBtn.classList.remove('starred');
+    starBtn.style.background = '';
+    starBtn.style.borderColor = '';
+  } else {
+    starBtn.classList.add('starred');
+    starBtn.style.background = 'rgba(251,191,36,0.15)';
+    starBtn.style.borderColor = '#FBBF24';
+  }
+}
+
+function showScript() {
+  document.getElementById('scriptModal').classList.add('show');
+}
+
+// Event delegation for ALL swipe cards
+document.getElementById('swipeStack').addEventListener('click', function(e) {
+  const btn = e.target.closest('.swipe-btn');
+  if (!btn) return;
+  e.stopPropagation();
+  if (btn.classList.contains('skip')) swipeCard('left');
+  else if (btn.classList.contains('save')) swipeCard('right');
+  else if (btn.classList.contains('expand')) showScript();
+  else if (btn.classList.contains('star')) starCard();
+});
+
+// Modal platform/type toggle
+document.querySelectorAll('.modal-platforms .modal-plat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.modal-platforms .modal-plat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+document.querySelectorAll('.modal-types .modal-type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.modal-types .modal-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Bank filter toggle
+document.querySelectorAll('.bank-filters .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.bank-filters .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Star rating interaction
+document.querySelectorAll('.bank-stars').forEach(container => {
+  container.querySelectorAll('span').forEach((star, idx) => {
+    star.addEventListener('click', (e) => {
+      e.stopPropagation();
+      container.querySelectorAll('span').forEach((s, i) => {
+        s.classList.toggle('filled', i <= idx);
+        s.classList.toggle('empty', i > idx);
+      });
+    });
+  });
+});
+</script>
+
+</body>
+</html>

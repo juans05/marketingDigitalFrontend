@@ -1,9 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, UserPlus, Mail, Lock, User, Building2, Sparkles, ArrowRight, X } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('vidalis_user');
+      if (saved) {
+        const u = JSON.parse(saved);
+        if (u?.token) navigate('/dashboard', { replace: true });
+      }
+    } catch { localStorage.removeItem('vidalis_user'); }
+  }, []);
 
   const [mode, setMode]           = useState('login');
   const [regStep, setRegStep]     = useState(1);
@@ -38,7 +48,7 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al procesar la solicitud');
       localStorage.setItem('vidalis_user', JSON.stringify(data));
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {

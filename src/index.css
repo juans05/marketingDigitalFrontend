@@ -15,8 +15,9 @@
   --text-muted: #B8B8C0;
   --text-dim: #8A8A92;
   
-  --border-main: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(255, 255, 255, 0.15);
+  --border-main: rgba(255, 255, 255, 0.14);
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-active: rgba(255, 255, 255, 0.24);
   
   /* Typos */
   --font-heading: 'Outfit', sans-serif;
@@ -54,6 +55,22 @@ h1, h2, h3, .font-heading {
   line-height: 1.25;
   font-weight: 700;
   color: var(--text-main);
+}
+
+/* ── Global card border enforcement ─────────────────────────────────────────
+   Inline styles with rgba(255,255,255,0.04-0.08) are nearly invisible on dark
+   backgrounds. This rule boosts border visibility on all card-like containers. */
+[style*="border: 1px solid rgba(255,255,255,0.04)"],
+[style*="border: 1px solid rgba(255,255,255,0.05)"],
+[style*="border: 1px solid rgba(255,255,255,0.06)"],
+[style*="border: 1px solid rgba(255,255,255,0.07)"],
+[style*="border: 1px solid rgba(255,255,255,0.08)"],
+[style*="border:1px solid rgba(255,255,255,0.04)"],
+[style*="border:1px solid rgba(255,255,255,0.05)"],
+[style*="border:1px solid rgba(255,255,255,0.06)"],
+[style*="border:1px solid rgba(255,255,255,0.07)"],
+[style*="border:1px solid rgba(255,255,255,0.08)"] {
+  border-color: rgba(255, 255, 255, 0.16) !important;
 }
 
 /* Professional Card System */
@@ -244,6 +261,28 @@ textarea::placeholder {
 }
 
 @media (max-width: 768px) {
-  h1 { font-size: 2.2rem !important; }
-  .card-pro { padding: 20px !important; }
+  h1 { font-size: 1.6rem !important; }
+  h2 { font-size: 1.2rem !important; }
+  .card-pro { padding: 16px !important; border-radius: 12px !important; }
+
+  /* Grid helpers: stack single column on mobile */
+  .card-pro > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Buttons & tags: smaller on mobile */
+  .btn-primary, .btn-secondary { padding: 10px 18px; font-size: 0.85rem; }
+  .platform-btn { padding: 8px 12px; font-size: 11px; }
+  .seg-btn { padding: 8px; font-size: 11px; }
+
+  /* Tooltips: ensure they stay in viewport */
+  .modal-portal { padding: 8px; }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.3rem !important; }
+  h2 { font-size: 1.1rem !important; }
+  .card-pro { padding: 12px !important; border-radius: 10px !important; }
+  .btn-primary, .btn-secondary { padding: 8px 14px; font-size: 0.8rem; }
+  .section-title { font-size: 14px !important; }
 }

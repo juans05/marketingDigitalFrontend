@@ -1,34 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  Sparkles, BarChart3, Upload, Loader2, TrendingUp, Users, Film,
+  Sparkles, BarChart3, Loader2, TrendingUp, Users, Film,
   Heart, MessageCircle, Eye, Share2, Lightbulb, Target, AlertCircle,
-  RefreshCw, Bookmark, Clock, Zap, Info
+  RefreshCw, Bookmark, Clock, Zap, Info, ArrowUpRight, ArrowDownRight,
+  MousePointerClick, UserPlus, UserMinus, Timer, Activity
 } from 'lucide-react';
 
-const METRIC_EXPLANATIONS = {
-  seguidores:              'Personas que eligieron seguir tu cuenta. Es tu audiencia base — las personas que verán tu contenido primero.',
-  alcance:                 'Cuántas personas DISTINTAS vieron tu publicación. Si llega a 1.000 personas, el alcance es 1.000, sin importar cuántas veces la vio cada una.',
-  impresiones:             'Cuántas veces se mostró tu contenido en total. Una persona puede verlo 3 veces = 3 impresiones. Más impresiones que alcance significa que tu contenido "engancha" y la gente lo vuelve a ver.',
-  likes:                   'Personas que tocaron el corazón ❤️ en tu publicación. Es la interacción más fácil y básica.',
-  comentarios:             'Personas que escribieron algo en tu publicación. Vale mucho más que un like — significa que tu contenido generó una reacción real.',
-  compartidos:             'Personas que mandaron tu contenido a sus amigos o lo publicaron en su perfil. Es la forma más poderosa de crecer — tu contenido llega a personas que aún no te siguen.',
-  guardados:               '📌 La métrica más valiosa de Instagram. Cuando alguien guarda tu publicación significa que el contenido fue tan útil o inspirador que quiere volver a verlo. El algoritmo lo premia mucho.',
-  engagement:              'De cada 100 personas que ven tu contenido, cuántas interactúan (dan like, comentan o comparten). Un 3% ya es bueno. Por encima del 6% es excelente. Un artista con 500 seguidores y 10% ER supera a uno con 50.000 y 0.5% ER.',
-  viral_score:             'Puntuación de nuestra IA (0–10) sobre el potencial viral de este video. Evalúa el gancho inicial, la duración, el ritmo y el mensaje. Más de 7 = tiene posibilidades reales de explotar.',
-  best_times:              'Los días y horas en que tu audiencia interactuó más con tu contenido en el pasado. Publicar en esos momentos aumenta las probabilidades de que más personas lo vean.',
-  views:                   'Cuántas veces se reprodujo tu video (al menos unos segundos). Es el primer filtro del algoritmo — si pocas personas lo ven, deja de mostrarlo.',
-  watch_time:              'YouTube: tiempo total que las personas pasaron viendo tu video. El algoritmo de YouTube premia los videos que la gente termina de ver. Un video de 10 min con 8 min de watch time promedio es un hit.',
-  traccion_viral:          'Muestra cómo evolucionó el alcance total de tu contenido en los últimos 7 días. Un pico hacia arriba significa que un post pegó fuerte. Una línea plana indica que el contenido no está generando tracción nueva.',
-  comparativa_plataformas: 'Resumen de cada red social donde tienes presencia. Compara en qué plataforma tienes más alcance, más engagement y más seguidores. Haz clic en cualquier plataforma para ver el detalle completo.',
-  rendimiento_publicacion: 'Tabla con cada publicación y sus métricas reales de las redes sociales. Te permite identificar qué contenido funcionó mejor y repetir ese formato en el futuro.',
-};
-
-const InfoTooltip = ({ metricKey }) => {
+// ── Tooltip with portal ──────────────────────────────────────────────────────
+const InfoTooltip = ({ text }) => {
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const iconRef = useRef(null);
-  const text = METRIC_EXPLANATIONS[metricKey];
   if (!text) return null;
 
   const show = (e) => {
@@ -39,51 +22,28 @@ const InfoTooltip = ({ metricKey }) => {
     }
     setVisible(true);
   };
-
   const hide = () => setVisible(false);
   const toggle = (e) => { e.stopPropagation(); setVisible(v => !v); };
 
   const tooltip = visible ? createPortal(
-    <span
-      style={{
-        position: 'fixed',
-        top: coords.top,
-        left: coords.left,
-        transform: 'translate(-50%, -100%)',
-        zIndex: 99999,
-        background: 'rgba(15,15,20,0.97)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: '10px',
-        padding: '10px 14px',
-        fontSize: '12px',
-        lineHeight: '1.6',
-        color: '#E2E8F0',
-        maxWidth: '240px',
-        width: 'max-content',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-        pointerEvents: 'none',
-      }}
-    >
+    <span style={{
+      position: 'fixed', top: coords.top, left: coords.left,
+      transform: 'translate(-50%, -100%)', zIndex: 99999,
+      background: 'rgba(15,15,20,0.97)', border: '1px solid rgba(255,255,255,0.12)',
+      borderRadius: '10px', padding: '10px 14px', fontSize: '12px', lineHeight: '1.6',
+      color: '#E2E8F0', maxWidth: '260px', width: 'max-content',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.5)', pointerEvents: 'none',
+    }}>
       {text}
-      <span style={{
-        position: 'absolute', bottom: '-6px', left: '50%', transform: 'translateX(-50%)',
-        width: 0, height: 0,
-        borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
-        borderTop: '6px solid rgba(15,15,20,0.97)',
-      }} />
+      <span style={{ position: 'absolute', bottom: '-6px', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid rgba(15,15,20,0.97)' }} />
     </span>,
     document.body
   ) : null;
 
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-      <span
-        ref={iconRef}
-        onMouseEnter={show}
-        onMouseLeave={hide}
-        onClick={toggle}
-        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', color: 'var(--text-dim)', marginLeft: '4px', opacity: 0.6 }}
-      >
+      <span ref={iconRef} onMouseEnter={show} onMouseLeave={hide} onClick={toggle}
+        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', color: 'var(--text-dim)', marginLeft: '4px', opacity: 0.5 }}>
         <Info size={11} />
       </span>
       {tooltip}
@@ -91,765 +51,580 @@ const InfoTooltip = ({ metricKey }) => {
   );
 };
 
-const formatNumShort = (n) => {
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fmt = (n) => {
   if (!n || n === 0) return '0';
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
   if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
   return String(n);
 };
 
-const MONTHS_ES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const pct = (n) => {
+  if (typeof n !== 'number') return '0%';
+  return n.toFixed(1) + '%';
+};
 
-const TrendChart = ({ data }) => {
-  const [activeIdx, setActiveIdx] = useState(null);
+const PLATFORM_META = {
+  instagram: { label: 'Instagram', emoji: '📸', color: '#E1306C', bg: 'rgba(225,48,108,0.1)' },
+  tiktok:    { label: 'TikTok',    emoji: '🎵', color: '#69C9D0', bg: 'rgba(105,201,208,0.1)' },
+  youtube:   { label: 'YouTube',   emoji: '▶',  color: '#FF0000', bg: 'rgba(255,0,0,0.1)' },
+  facebook:  { label: 'Facebook',  emoji: '📘', color: '#1877F2', bg: 'rgba(24,119,242,0.1)' },
+};
 
-  if (!data || data.length < 2) return null;
-  const width = 800;
-  const height = 300;
-  const padL = 50, padR = 20, padT = 40, padB = 50;
-  const maxVal = Math.max(...data.map(d => d.value)) || 100;
+// ── KPI Card ─────────────────────────────────────────────────────────────────
+const KPICard = ({ icon, value, label, explanation, color = '#818CF8', trend, small }) => (
+  <div style={{
+    padding: small ? '14px' : '20px', borderRadius: '14px',
+    background: '#111113', border: '1px solid rgba(255,255,255,0.06)',
+    display: 'flex', flexDirection: 'column', gap: '8px',
+    transition: 'border-color 0.2s',
+  }}
+    onMouseEnter={e => e.currentTarget.style.borderColor = `${color}44`}
+    onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
+  >
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ background: `${color}18`, color, padding: '6px', borderRadius: '8px', display: 'flex' }}>{icon}</div>
+      {trend !== undefined && trend !== 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', fontSize: '11px', fontWeight: '700', color: trend > 0 ? '#10B981' : '#EF4444' }}>
+          {trend > 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+          {Math.abs(trend)}%
+        </div>
+      )}
+    </div>
+    <div style={{ fontSize: small ? '20px' : '26px', fontWeight: '800', color: '#FAFAFA', fontFamily: 'Outfit, sans-serif', lineHeight: 1 }}>{value}</div>
+    <div style={{ fontSize: '11px', fontWeight: '600', color: '#71717A', display: 'flex', alignItems: 'center' }}>
+      {label}<InfoTooltip text={explanation} />
+    </div>
+  </div>
+);
 
-  const points = data.map((d, i) => ({
-    x: (i / (data.length - 1)) * (width - padL - padR) + padL,
-    y: padT + (1 - d.value / maxVal) * (height - padT - padB),
-  }));
-
-  let pathD = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 0; i < points.length - 1; i++) {
-    const curr = points[i];
-    const next = points[i + 1];
-    const cp1x = curr.x + (next.x - curr.x) / 2;
-    pathD += ` C ${cp1x} ${curr.y}, ${cp1x} ${next.y}, ${next.x} ${next.y}`;
-  }
-  const areaD = `${pathD} L ${points[points.length - 1].x} ${height - padB} L ${points[0].x} ${height - padB} Z`;
-
-  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(pct => ({
-    y: padT + (1 - pct) * (height - padT - padB),
-    label: formatNumShort(Math.round(maxVal * pct)),
-  }));
-
+// ── Content Decay Chart ──────────────────────────────────────────────────────
+const ContentDecayChart = ({ buckets, color = '#818CF8' }) => {
+  if (!buckets || buckets.length === 0) return null;
+  const maxPct = Math.max(...buckets.map(b => b.avg_pct || b.percentage || b.value || 0), 1);
   return (
-    <div className="chart-wrapper" onMouseLeave={() => setActiveIdx(null)}>
-      <svg viewBox={`0 0 ${width} ${height}`} width="100%" preserveAspectRatio="xMidYMid meet" style={{ display: 'block' }}>
-        <defs>
-          <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#818CF8" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#818CF8" stopOpacity="0.02" />
-          </linearGradient>
-        </defs>
-
-        {gridLines.map((g, i) => (
-          <g key={i}>
-            <line x1={padL} y1={g.y} x2={width - padR} y2={g.y} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-            <text x={padL - 8} y={g.y + 4} textAnchor="end" fill="#6B6B76" fontSize="11" fontWeight="600" fontFamily="Inter, sans-serif">{g.label}</text>
-          </g>
-        ))}
-
-        <path d={areaD} fill="url(#chartGradient)" />
-        <path d={pathD} fill="none" stroke="#818CF8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 6px rgba(129, 140, 248, 0.5))' }} />
-
-        {activeIdx !== null && (
-          <line
-            x1={points[activeIdx].x} y1={padT}
-            x2={points[activeIdx].x} y2={height - padB}
-            stroke="rgba(129,140,248,0.25)" strokeWidth="1" strokeDasharray="4 4"
-          />
-        )}
-
-        {points.map((p, i) => (
-          <g key={i}>
-            <circle
-              cx={p.x} cy={p.y} r={activeIdx === i ? 8 : 5}
-              fill={activeIdx === i ? '#818CF8' : '#1C1C1F'}
-              stroke="#818CF8" strokeWidth="2.5"
-              style={{ transition: 'r 0.15s, fill 0.15s', cursor: 'pointer' }}
-            />
-            <circle
-              cx={p.x} cy={p.y} r="28" fill="transparent"
-              style={{ cursor: 'pointer' }}
-              onMouseEnter={() => setActiveIdx(i)}
-              onClick={() => setActiveIdx(prev => prev === i ? null : i)}
-            />
-          </g>
-        ))}
-
-        {data.map((d, i) => (
-          <text key={i} x={points[i].x} y={height - 10}
-            textAnchor="middle" fill={activeIdx === i ? '#A78BFA' : '#6B6B76'}
-            fontSize="11" fontWeight={activeIdx === i ? '800' : '600'} fontFamily="Inter, sans-serif"
-            style={{ cursor: 'pointer', transition: 'fill 0.15s' }}
-            onMouseEnter={() => setActiveIdx(i)}
-            onClick={() => setActiveIdx(prev => prev === i ? null : i)}
-          >
-            {d.date.split('-').reverse()[0]} {MONTHS_ES[parseInt(d.date.split('-')[1]) - 1]}
-          </text>
-        ))}
-
-        {activeIdx !== null && (() => {
-          const p = points[activeIdx];
-          const d = data[activeIdx];
-          const label = d.value.toLocaleString();
-          const boxW = Math.max(label.length * 9 + 24, 60);
-          const boxH = 32;
-          let tx = p.x - boxW / 2;
-          if (tx < 5) tx = 5;
-          if (tx + boxW > width - 5) tx = width - boxW - 5;
-          const ty = Math.max(p.y - boxH - 14, 4);
-          return (
-            <g style={{ pointerEvents: 'none' }}>
-              <rect x={tx} y={ty} width={boxW} height={boxH} rx="8"
-                fill="rgba(24,24,27,0.95)" stroke="rgba(129,140,248,0.5)" strokeWidth="1" />
-              <text x={tx + boxW / 2} y={ty + boxH / 2 + 1}
-                textAnchor="middle" dominantBaseline="central"
-                fill="#E2E8F0" fontSize="13" fontWeight="800" fontFamily="Outfit, sans-serif">
-                {label}
-              </text>
-              <polygon
-                points={`${p.x - 5},${ty + boxH} ${p.x + 5},${ty + boxH} ${p.x},${ty + boxH + 6}`}
-                fill="rgba(24,24,27,0.95)"
-              />
-            </g>
-          );
-        })()}
-      </svg>
-      <style>{`
-        .chart-wrapper { width: 100%; position: relative; margin-top: 16px; }
-        .chart-wrapper svg { max-height: 320px; }
-        @media (max-width: 600px) { .chart-wrapper svg { max-height: 260px; } }
-      `}</style>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {buckets.slice(0, 8).map((b, i) => {
+        const val = b.avg_pct || b.percentage || b.value || 0;
+        const label = b.label || b.period || `${b.hours || b.days || i}h`;
+        return (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 40px', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '11px', fontWeight: '700', color: '#71717A', textAlign: 'right' }}>{label}</span>
+            <div style={{ height: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '99px', overflow: 'hidden' }}>
+              <div style={{ width: `${(val / maxPct) * 100}%`, height: '100%', background: `linear-gradient(90deg, ${color}, ${color}88)`, borderRadius: '99px', transition: 'width 0.6s ease' }} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: '700', color: '#FAFAFA' }}>{val.toFixed(0)}%</span>
+          </div>
+        );
+      })}
     </div>
   );
 };
 
-const MetricPill = ({ icon, value, label, color = '#6366F1' }) => (
-  <div className="metric-pill" style={{ borderColor: `${color}22`, background: `${color}08` }}>
-    <span style={{ color }}>{icon}</span>
-    <span className="metric-pill-value">{value}</span>
-    {label && <span className="metric-pill-label">{label}</span>}
-  </div>
-);
+// ── Posting Frequency Chart ──────────────────────────────────────────────────
+const PostingFreqChart = ({ rows, color = '#818CF8' }) => {
+  if (!rows || rows.length === 0) return null;
+  const maxEng = Math.max(...rows.map(r => r.avg_engagement || r.engagement_rate || 0), 1);
+  const bestRow = rows.reduce((best, r) => (r.avg_engagement || r.engagement_rate || 0) > (best.avg_engagement || best.engagement_rate || 0) ? r : best, rows[0]);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {rows.slice(0, 8).map((r, i) => {
+        const eng = r.avg_engagement || r.engagement_rate || 0;
+        const freq = r.posts_per_week || r.frequency || r.label || `${i + 1}/sem`;
+        const isBest = r === bestRow;
+        return (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '70px 1fr 55px', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '11px', fontWeight: isBest ? '800' : '600', color: isBest ? color : '#71717A', textAlign: 'right' }}>
+              {typeof freq === 'number' ? `${freq}/sem` : freq}
+            </span>
+            <div style={{ height: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '99px', overflow: 'hidden' }}>
+              <div style={{
+                width: `${(eng / maxEng) * 100}%`, height: '100%',
+                background: isBest ? `linear-gradient(90deg, ${color}, #10B981)` : `linear-gradient(90deg, ${color}88, ${color}44)`,
+                borderRadius: '99px', transition: 'width 0.6s ease',
+              }} />
+            </div>
+            <span style={{ fontSize: '11px', fontWeight: isBest ? '800' : '600', color: isBest ? '#10B981' : '#FAFAFA' }}>{eng.toFixed(1)}%</span>
+          </div>
+        );
+      })}
+      {bestRow && (
+        <div style={{ marginTop: '6px', fontSize: '11px', fontWeight: '700', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Zap size={11} /> Óptimo: {bestRow.posts_per_week || bestRow.frequency || '?'} posts/semana
+        </div>
+      )}
+    </div>
+  );
+};
 
+// ── Best Times Chart ─────────────────────────────────────────────────────────
 const BestTimesChart = ({ times }) => {
   if (!times || times.length === 0) return null;
   const maxEng = Math.max(...times.map(t => t.avg_engagement)) || 1;
   return (
-    <div className="best-times-chart">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {times.map((t, i) => (
-        <div key={i} className="best-time-bar">
-          <div className="best-time-label">{t.label}</div>
-          <div className="best-time-track">
-            <div
-              className="best-time-fill"
-              style={{ width: `${Math.round((t.avg_engagement / maxEng) * 100)}%`, opacity: 1 - i * 0.08 }}
-            />
+        <div key={i} style={{ display: 'grid', gridTemplateColumns: '72px 1fr 40px', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '11px', fontWeight: '700', color: '#71717A', textAlign: 'right' }}>{t.label}</span>
+          <div style={{ height: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '99px', overflow: 'hidden' }}>
+            <div style={{ width: `${(t.avg_engagement / maxEng) * 100}%`, height: '100%', background: 'linear-gradient(90deg, var(--primary), #8B5CF6)', borderRadius: '99px', transition: 'width 0.6s ease' }} />
           </div>
-          <div className="best-time-value">{t.avg_engagement > 0 ? `~${t.avg_engagement}` : '—'}</div>
+          <span style={{ fontSize: '11px', fontWeight: '700', color: '#FAFAFA' }}>{t.avg_engagement > 0 ? `~${t.avg_engagement}` : '—'}</span>
         </div>
       ))}
     </div>
   );
 };
 
-const InsightCard = ({ insights, decisions, bestPlatform, bestPostTitle, engagementRate, loading }) => {
-  if (loading) {
-    return (
-      <div className="insight-card card-pro">
-        <div className="insight-header">
-          <Sparkles size={16} color="var(--primary)" />
-          <span>Analizando con IA...</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '20px 0', color: 'var(--text-muted)' }}>
-          <Loader2 size={16} className="animate-spin" />
-          <span style={{ fontSize: '13px' }}>Claude está procesando tus métricas...</span>
-        </div>
-      </div>
-    );
-  }
+// ── Post Table ───────────────────────────────────────────────────────────────
+const PostsTable = ({ posts, platform, explanations }) => {
+  const isIG = platform === 'instagram';
+  const isYT = platform === 'youtube';
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '650px' }}>
+        <thead>
+          <tr>
+            <th style={thStyle}>TÍTULO</th>
+            <th style={thStyle}>FECHA</th>
+            <th style={{ ...thStyle, textAlign: 'center' }}>❤️ Likes</th>
+            <th style={{ ...thStyle, textAlign: 'center' }}>💬 Coment.</th>
+            <th style={{ ...thStyle, textAlign: 'center' }}>👁 Views</th>
+            <th style={{ ...thStyle, textAlign: 'center' }}>🔁 Shares</th>
+            {isIG && <th style={{ ...thStyle, textAlign: 'center' }}>📌 Saves</th>}
+            {isIG && <th style={{ ...thStyle, textAlign: 'center' }}>⏱ Watch</th>}
+            <th style={{ ...thStyle, textAlign: 'center' }}>Share Rate<InfoTooltip text={explanations?.share_rate} /></th>
+            <th style={{ ...thStyle, textAlign: 'center' }}>VIRAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {posts.map((p, idx) => {
+            const hasData = (p.likes || 0) > 0 || (p.views || 0) > 0;
+            return (
+              <tr key={p.id || idx}>
+                <td style={tdStyle}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(129,140,248,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Film size={12} color="#818CF8" />
+                    </div>
+                    <span style={{ fontWeight: '600', color: '#FAFAFA', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>{p.title || 'Publicación'}</span>
+                  </div>
+                </td>
+                <td style={{ ...tdStyle, fontSize: '11px', color: '#71717A' }}>{p.date ? new Date(p.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : '—'}</td>
+                <td style={{ ...tdStyle, textAlign: 'center', fontWeight: '700', color: hasData ? '#FAFAFA' : '#3F3F46', fontSize: '12px' }}>{hasData ? fmt(p.likes) : '—'}</td>
+                <td style={{ ...tdStyle, textAlign: 'center', fontWeight: '700', color: hasData ? '#FAFAFA' : '#3F3F46', fontSize: '12px' }}>{hasData ? fmt(p.comments) : '—'}</td>
+                <td style={{ ...tdStyle, textAlign: 'center', fontWeight: '700', color: hasData ? '#FAFAFA' : '#3F3F46', fontSize: '12px' }}>{hasData ? fmt(p.views) : '—'}</td>
+                <td style={{ ...tdStyle, textAlign: 'center', fontWeight: '700', color: hasData ? '#FAFAFA' : '#3F3F46', fontSize: '12px' }}>{hasData ? fmt(p.shares) : '—'}</td>
+                {isIG && <td style={{ ...tdStyle, textAlign: 'center', fontWeight: '700', color: hasData ? '#A78BFA' : '#3F3F46', fontSize: '12px' }}>{hasData ? fmt(p.saves) : '—'}</td>}
+                {isIG && <td style={{ ...tdStyle, textAlign: 'center', fontWeight: '700', color: '#71717A', fontSize: '11px' }}>{p.ig_avg_watch_time > 0 ? `${p.ig_avg_watch_time}s` : '—'}</td>}
+                <td style={{ ...tdStyle, textAlign: 'center', fontWeight: '700', color: p.share_rate > 1 ? '#10B981' : '#71717A', fontSize: '11px' }}>{p.share_rate > 0 ? `${p.share_rate}%` : '—'}</td>
+                <td style={{ ...tdStyle, textAlign: 'center' }}>
+                  <span style={{ padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', color: p.viral_score > 7 ? '#10B981' : '#818CF8', background: p.viral_score > 7 ? 'rgba(16,185,129,0.1)' : 'rgba(129,140,248,0.1)', border: `1px solid ${p.viral_score > 7 ? 'rgba(16,185,129,0.2)' : 'rgba(129,140,248,0.2)'}` }}>
+                    {(p.viral_score || 0).toFixed(1)}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+          {posts.length === 0 && (
+            <tr><td colSpan={isIG ? 10 : 8} style={{ ...tdStyle, textAlign: 'center', padding: '40px', color: '#52525B' }}>No hay publicaciones con métricas.</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
-  if (!insights?.length) return null;
+const thStyle = { textAlign: 'left', padding: '8px 10px', fontSize: '10px', fontWeight: '700', color: '#52525B', borderBottom: '1px solid rgba(255,255,255,0.06)', textTransform: 'uppercase', letterSpacing: '0.05em' };
+const tdStyle = { padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.03)', verticalAlign: 'middle' };
+
+// ── Platform Command Center ──────────────────────────────────────────────────
+const PlatformView = ({ data, explanations }) => {
+  if (!data) return null;
+  const { platform, kpis, calculated, content_decay, posting_frequency, best_times, posts, platform_insights } = data;
+  const meta = PLATFORM_META[platform] || { label: platform, color: '#818CF8', emoji: '📱' };
+  const isIG = platform === 'instagram';
+  const isYT = platform === 'youtube';
+
+  const mainKPIs = [
+    { icon: <Users size={16} />, value: fmt(kpis.followers), label: 'Seguidores', key: 'followers', color: meta.color },
+    { icon: <Eye size={16} />, value: fmt(kpis.reach), label: 'Alcance', key: 'reach', color: '#38BDF8' },
+    { icon: <Eye size={16} />, value: fmt(kpis.views), label: 'Views', key: 'views', color: '#0EA5E9' },
+    { icon: <Heart size={16} />, value: fmt(kpis.likes), label: 'Likes', key: 'likes', color: '#F472B6' },
+    { icon: <Share2 size={16} />, value: fmt(kpis.shares), label: 'Compartidos', key: 'shares', color: '#FBBF24' },
+    { icon: <MessageCircle size={16} />, value: fmt(kpis.comments), label: 'Comentarios', key: 'comments', color: '#34D399' },
+    ...(isIG ? [{ icon: <Bookmark size={16} />, value: fmt(kpis.saves), label: 'Guardados', key: 'saves', color: '#A78BFA' }] : []),
+    ...(isYT && platform_insights ? [{ icon: <Timer size={16} />, value: `${fmt(platform_insights.watch_time_total)}m`, label: 'Watch Time Total', key: 'watch_time_total', color: '#FF0000' }] : []),
+  ];
+
+  const calcKPIs = [
+    { icon: <Zap size={14} />, value: pct(kpis.engagement_rate), label: 'Eng. Rate', key: 'engagement_rate', color: '#F59E0B' },
+    { icon: <TrendingUp size={14} />, value: `${calculated.growth_rate > 0 ? '+' : ''}${calculated.growth_rate}%`, label: 'Crecimiento /sem', key: 'growth_rate', color: calculated.growth_rate >= 0 ? '#10B981' : '#EF4444', trend: calculated.growth_rate },
+    { icon: <Activity size={14} />, value: pct(calculated.reach_follower_ratio), label: 'Reach/Follower', key: 'reach_follower_ratio', color: '#818CF8' },
+    { icon: <Share2 size={14} />, value: pct(calculated.share_rate), label: 'Share Rate', key: 'share_rate', color: '#10B981' },
+    ...(isIG ? [
+      { icon: <Bookmark size={14} />, value: pct(calculated.save_rate), label: 'Save Rate', key: 'save_rate', color: '#A78BFA' },
+      { icon: <Timer size={14} />, value: calculated.avg_watch_time > 0 ? `${calculated.avg_watch_time}s` : '—', label: 'Avg Watch Time', key: 'avg_watch_time', color: '#E1306C' },
+    ] : []),
+    ...(isIG && calculated.follow_conversion !== undefined ? [
+      { icon: <UserPlus size={14} />, value: pct(calculated.follow_conversion), label: 'Follow Conv.', key: 'follow_conversion', color: '#10B981' },
+      { icon: <UserMinus size={14} />, value: pct(calculated.churn_rate), label: 'Churn Rate', key: 'churn_rate', color: '#EF4444' },
+    ] : []),
+    ...(isYT ? [
+      { icon: <UserPlus size={14} />, value: `+${platform_insights?.subscribers_gained || 0}`, label: 'Subs Ganados', key: 'sub_conversion_rate', color: '#10B981' },
+      { icon: <UserMinus size={14} />, value: `${calculated.net_sub_growth >= 0 ? '+' : ''}${calculated.net_sub_growth || 0}`, label: 'Balance Neto', key: 'net_sub_growth', color: calculated.net_sub_growth >= 0 ? '#10B981' : '#EF4444' },
+      { icon: <Timer size={14} />, value: calculated.avg_watch_time > 0 ? `${calculated.avg_watch_time}m` : '—', label: 'Avg Watch/Video', key: 'avg_watch_time', color: '#FF0000' },
+    ] : []),
+    { icon: <MousePointerClick size={14} />, value: pct(calculated.click_rate), label: 'Click Rate', key: 'click_rate', color: '#06B6D4' },
+    { icon: <Activity size={14} />, value: fmt(calculated.engagement_per_post), label: 'Eng/Post', key: 'engagement_per_post', color: '#F59E0B' },
+    { icon: <Eye size={14} />, value: `${calculated.views_per_follower}x`, label: 'Views/Follower', key: 'views_per_follower', color: '#0EA5E9' },
+    { icon: <TrendingUp size={14} />, value: (calculated.viral_score_avg || 0).toFixed(1), label: 'Viral Avg', key: 'viral_score_avg', color: '#818CF8' },
+  ];
 
   return (
-    <div className="insight-card card-pro">
-      <div className="insight-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Sparkles size={16} color="var(--primary)" />
-          <span className="insight-title">Análisis IA de tu Contenido</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Platform Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', borderRadius: '14px', background: meta.bg, border: `1px solid ${meta.color}22` }}>
+        <span style={{ fontSize: '28px' }}>{meta.emoji}</span>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#FAFAFA', margin: 0 }}>{meta.label}</h2>
+          <span style={{ fontSize: '12px', color: '#71717A', fontWeight: '600' }}>{kpis.posts_count} publicaciones · {fmt(kpis.followers)} seguidores</span>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          {bestPlatform && bestPlatform !== 'sin datos' && (
-            <div className="insight-badge" style={{ background: 'rgba(22, 163, 74, 0.12)', color: '#4ADE80', borderColor: 'rgba(22, 163, 74, 0.3)' }}>
-              Mejor: {bestPlatform}
-            </div>
-          )}
-          {engagementRate > 0 && (
-            <div className="insight-badge" style={{ background: 'rgba(79, 70, 229, 0.12)', color: 'var(--primary)', borderColor: 'rgba(79, 70, 229, 0.3)' }}>
-              {Number(engagementRate).toFixed(1)}% engagement
-            </div>
-          )}
-        </div>
+        {kpis.engagement_rate > 0 && (
+          <span style={{ marginLeft: 'auto', fontSize: '13px', fontWeight: '800', background: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '99px', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Zap size={11} /> {kpis.engagement_rate.toFixed(1)}% ER
+          </span>
+        )}
       </div>
 
-      <div className="insight-body">
-        <div className="insight-col">
-          <div className="insight-col-title">
-            <Eye size={13} color="#6366F1" />
-            Observaciones
-          </div>
-          {insights.map((insight, i) => (
-            <div key={i} className="insight-item">
-              <AlertCircle size={13} color="#6366F1" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <span>{insight}</span>
-            </div>
-          ))}
-        </div>
+      {/* Main KPIs */}
+      <div className="av-kpi-grid">
+        {mainKPIs.map((k, i) => (
+          <KPICard key={i} icon={k.icon} value={k.value} label={k.label} explanation={explanations?.[k.key]} color={k.color} />
+        ))}
+      </div>
 
-        <div className="insight-divider" />
-
-        <div className="insight-col">
-          <div className="insight-col-title">
-            <Target size={13} color="#16A34A" />
-            Decisiones Recomendadas
-          </div>
-          {decisions.map((decision, i) => (
-            <div key={i} className="insight-item decision">
-              <Lightbulb size={13} color="#16A34A" style={{ flexShrink: 0, marginTop: '2px' }} />
-              <span>{decision}</span>
-            </div>
+      {/* Calculated KPIs */}
+      <div>
+        <div style={{ fontSize: '11px', fontWeight: '700', color: '#52525B', letterSpacing: '0.06em', marginBottom: '12px', textTransform: 'uppercase' }}>KPIs CALCULADOS — DECISIONES</div>
+        <div className="av-calc-grid">
+          {calcKPIs.map((k, i) => (
+            <KPICard key={i} icon={k.icon} value={k.value} label={k.label} explanation={explanations?.[k.key]} color={k.color} trend={k.trend} small />
           ))}
         </div>
       </div>
 
-      {bestPostTitle && bestPostTitle !== 'sin datos' && (
-        <div className="insight-best-post">
-          <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Mejor post:</span>
-          <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-main)' }}>"{bestPostTitle}"</span>
+      {/* Charts row */}
+      <div className="av-charts-grid">
+        <div style={{ ...cardStyle }}>
+          <div style={chartHeaderStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Activity size={14} color={meta.color} />
+              <span style={chartTitleStyle}>CONTENT DECAY</span>
+              <InfoTooltip text={explanations?.content_decay} />
+            </div>
+            <span style={chartBadgeStyle}>VIDA ÚTIL</span>
+          </div>
+          {content_decay.length > 0 ? (
+            <ContentDecayChart buckets={content_decay} color={meta.color} />
+          ) : (
+            <p style={emptyStyle}>Sincroniza para ver la curva de vida</p>
+          )}
+        </div>
+
+        <div style={{ ...cardStyle }}>
+          <div style={chartHeaderStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BarChart3 size={14} color={meta.color} />
+              <span style={chartTitleStyle}>POSTING FREQUENCY</span>
+              <InfoTooltip text={explanations?.posting_frequency} />
+            </div>
+            <span style={chartBadgeStyle}>ÓPTIMO</span>
+          </div>
+          {posting_frequency.length > 0 ? (
+            <PostingFreqChart rows={posting_frequency} color={meta.color} />
+          ) : (
+            <p style={emptyStyle}>Sincroniza para ver frecuencia óptima</p>
+          )}
+        </div>
+
+        <div style={{ ...cardStyle }}>
+          <div style={chartHeaderStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Clock size={14} color={meta.color} />
+              <span style={chartTitleStyle}>MEJOR HORA</span>
+              <InfoTooltip text={explanations?.best_times} />
+            </div>
+            <span style={chartBadgeStyle}>ENGAGEMENT</span>
+          </div>
+          {best_times.length > 0 ? (
+            <BestTimesChart times={best_times} />
+          ) : (
+            <p style={emptyStyle}>Sincroniza para ver mejores horarios</p>
+          )}
+        </div>
+      </div>
+
+      {/* Posts table */}
+      <div style={{ ...cardStyle }}>
+        <div style={{ ...chartHeaderStyle, marginBottom: '16px' }}>
+          <span style={chartTitleStyle}>PUBLICACIONES EN {meta.label.toUpperCase()}</span>
+        </div>
+        <PostsTable posts={posts || []} platform={platform} explanations={explanations} />
+      </div>
+    </div>
+  );
+};
+
+// ── Shared styles ────────────────────────────────────────────────────────────
+const cardStyle = { padding: '24px', borderRadius: '14px', background: '#111113', border: '1px solid rgba(255,255,255,0.06)' };
+const chartHeaderStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' };
+const chartTitleStyle = { fontSize: '12px', fontWeight: '800', color: '#818CF8', letterSpacing: '0.08em' };
+const chartBadgeStyle = { fontSize: '9px', fontWeight: '800', color: '#52525B', border: '1px solid rgba(255,255,255,0.06)', padding: '3px 8px', borderRadius: '20px' };
+const emptyStyle = { color: '#3F3F46', fontSize: '12px', textAlign: 'center', padding: '20px 0' };
+
+// ── Overview Tab ─────────────────────────────────────────────────────────────
+const OverviewTab = ({ data, explanations, onSelectPlatform }) => {
+  if (!data) return null;
+  const { overview, platforms, connected_platforms } = data;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Global KPIs */}
+      <div className="av-kpi-grid">
+        <KPICard icon={<Users size={16} />} value={fmt(overview.total_followers)} label="Seguidores" explanation={explanations?.followers} color="#818CF8" trend={overview.growth_rate} />
+        <KPICard icon={<Eye size={16} />} value={fmt(overview.total_reach)} label="Alcance" explanation={explanations?.reach} color="#38BDF8" />
+        <KPICard icon={<Zap size={16} />} value={pct(overview.avg_engagement_rate)} label="Eng. Rate" explanation={explanations?.engagement_rate} color="#F59E0B" />
+        <KPICard icon={<TrendingUp size={16} />} value={`${overview.growth_rate > 0 ? '+' : ''}${overview.growth_rate}%`} label="Crecimiento /sem" explanation={explanations?.growth_rate} color={overview.growth_rate >= 0 ? '#10B981' : '#EF4444'} />
+        <KPICard icon={<Activity size={16} />} value={(overview.viral_score_avg || 0).toFixed(1)} label="Viral Score Avg" explanation={explanations?.viral_score_avg} color="#A78BFA" />
+      </div>
+
+      {/* Platform Ranking */}
+      <div style={{ ...cardStyle }}>
+        <div style={{ ...chartHeaderStyle }}>
+          <span style={chartTitleStyle}>RANKING DE PLATAFORMAS</span>
+          <span style={chartBadgeStyle}>POR ENGAGEMENT</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {(overview.platform_ranking || []).map((p, i) => {
+            const meta = PLATFORM_META[p.platform] || {};
+            const maxER = overview.platform_ranking[0]?.engagement_rate || 1;
+            return (
+              <div key={p.platform} onClick={() => onSelectPlatform(p.platform)}
+                style={{ display: 'grid', gridTemplateColumns: '28px 100px 1fr 70px', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', transition: 'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <span style={{ fontSize: '18px' }}>{meta.emoji}</span>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: '#FAFAFA' }}>{meta.label}</span>
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '99px', overflow: 'hidden' }}>
+                  <div style={{ width: `${(p.engagement_rate / maxER) * 100}%`, height: '100%', background: meta.color, borderRadius: '99px', transition: 'width 0.6s ease' }} />
+                </div>
+                <span style={{ fontSize: '12px', fontWeight: '800', color: meta.color, textAlign: 'right' }}>{p.engagement_rate.toFixed(1)}% ER</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Top Posts */}
+      {overview.top_posts?.length > 0 && (
+        <div style={{ ...cardStyle }}>
+          <div style={{ ...chartHeaderStyle }}>
+            <span style={chartTitleStyle}>TOP POSTS DE LA SEMANA</span>
+          </div>
+          {overview.top_posts.map((p, i) => (
+            <div key={p.id || i} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 0', borderBottom: i < overview.top_posts.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+              <span style={{ fontSize: '16px', fontWeight: '800', color: i === 0 ? '#F59E0B' : '#3F3F46', width: '20px' }}>#{i + 1}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: '13px', fontWeight: '600', color: '#FAFAFA', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title || 'Publicación'}</p>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                  {(p.platforms || []).map(pl => <span key={pl} style={{ fontSize: '10px', color: PLATFORM_META[pl]?.color || '#71717A' }}>{PLATFORM_META[pl]?.emoji} {PLATFORM_META[pl]?.label}</span>)}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#FAFAFA' }}>👁 {fmt(p.views)}</span>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#F472B6' }}>❤️ {fmt(p.likes)}</span>
+                <span style={{ fontSize: '11px', fontWeight: '700', color: '#10B981' }}>🔁 {fmt(p.shares)}</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 };
 
-const PLATFORM_META = {
-  instagram: { label: 'Instagram', emoji: '📸', color: '#E1306C' },
-  tiktok:    { label: 'TikTok',    emoji: '🎵', color: '#69C9D0' },
-  youtube:   { label: 'YouTube',   emoji: '▶',  color: '#FF0000' },
-  facebook:  { label: 'Facebook',  emoji: '👥', color: '#1877F2' },
-  linkedin:  { label: 'LinkedIn',  emoji: '💼', color: '#0A66C2' },
-};
-
+// ── Main Component ───────────────────────────────────────────────────────────
 const AnalyticsView = ({ userId, activeArtist }) => {
   const [data, setData] = useState(null);
-  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [insightsLoading, setInsightsLoading] = useState(false);
   const [insights, setInsights] = useState(null);
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [loadingPosts, setLoadingPosts] = useState(false);
-  const [loadingInsights, setLoadingInsights] = useState(false);
-  const [activePlatform, setActivePlatform] = useState('all');
 
-  useEffect(() => {
-    setActivePlatform('all');
-    fetchStats();
-    if (activeArtist?.id) {
-      fetchPostMetrics(activeArtist.id);
-    }
-  }, [userId, activeArtist]);
+  const API = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+  const getToken = () => { try { return JSON.parse(localStorage.getItem('vidalis_user') || '{}').token || ''; } catch { return ''; } };
 
-  const fetchStats = async () => {
-    setLoadingStats(true);
+  const fetchData = async () => {
+    if (!activeArtist?.id) return;
+    setLoading(true);
     try {
-      const userStr = localStorage.getItem('vidalis_user');
-      const token = userStr ? JSON.parse(userStr).token : '';
-      const url = new URL(`${import.meta.env.VITE_API_URL}/api/vidalis/stats/${userId}`);
-      if (activeArtist?.id) url.searchParams.append('artistId', activeArtist.id);
-      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`${API}/api/vidalis/platform-analytics/${activeArtist.id}`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
       if (res.ok) setData(await res.json());
-    } catch (err) {
-      console.error('Analytics Fetch Error:', err);
-    } finally {
-      setLoadingStats(false);
-    }
+    } catch (err) { console.error('Platform analytics error:', err); }
+    setLoading(false);
   };
 
-  const fetchPostMetrics = async (artistId) => {
-    setLoadingPosts(true);
+  useEffect(() => { setActiveTab('overview'); fetchData(); }, [activeArtist]);
+
+  const handleSync = async () => {
+    if (!activeArtist?.id) return;
+    setSyncing(true);
     try {
-      const userStr = localStorage.getItem('vidalis_user');
-      const token = userStr ? JSON.parse(userStr).token : '';
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics-posts/${artistId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setPosts(json.posts || []);
-      }
-    } catch (err) {
-      console.error('Post metrics error:', err);
-    } finally {
-      setLoadingPosts(false);
-    }
+      await Promise.all([
+        fetch(`${API}/api/vidalis/artists/${activeArtist.id}/sync`, { method: 'POST', headers: { 'Authorization': `Bearer ${getToken()}` } }),
+        fetch(`${API}/api/vidalis/artists/${activeArtist.id}/sync-analytics`, { method: 'POST', headers: { 'Authorization': `Bearer ${getToken()}` } }),
+      ]);
+    } catch (err) { console.error('Sync error:', err); }
+    setSyncing(false);
+    fetchData();
   };
 
   const fetchInsights = async () => {
     if (!activeArtist?.id) return;
-    setLoadingInsights(true);
-    setInsights(null);
+    setInsightsLoading(true);
     try {
-      const userStr = localStorage.getItem('vidalis_user');
-      const token = userStr ? JSON.parse(userStr).token : '';
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/vidalis/analytics-insights/${activeArtist.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setInsights(json);
-        if (json.posts?.length) setPosts(json.posts);
-      }
-    } catch (err) {
-      console.error('Insights error:', err);
-    } finally {
-      setLoadingInsights(false);
-    }
+      const res = await fetch(`${API}/api/vidalis/analytics-insights/${activeArtist.id}`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+      if (res.ok) setInsights(await res.json());
+    } catch (err) { console.error('Insights error:', err); }
+    setInsightsLoading(false);
   };
 
-  const formatNum = (n) => {
-    if (!n || n === 0) return '0';
-    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
-    return String(n);
-  };
+  if (loading) return (
+    <div style={{ padding: '80px', textAlign: 'center' }}>
+      <Loader2 className="animate-spin" size={32} color="var(--primary)" />
+      <p style={{ marginTop: '16px', color: '#71717A', fontSize: '14px' }}>Cargando analítica por plataforma...</p>
+    </div>
+  );
 
-  const [isSyncing, setIsSyncing] = useState(false);
+  const connectedPlatforms = data?.connected_platforms || [];
+  const explanations = data?.explanations || {};
 
-  const handleSync = async () => {
-    const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
-    const userStr = localStorage.getItem('vidalis_user');
-    const token = userStr ? JSON.parse(userStr).token : '';
-    if (activeArtist?.id) {
-      setIsSyncing(true);
-      setLoadingStats(true);
-      try {
-        await Promise.all([
-          fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-          }),
-          fetch(`${apiBase}/api/vidalis/artists/${activeArtist.id}/sync-analytics`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-          }),
-        ]);
-      } catch (err) {
-        console.error('Sync error:', err);
-      } finally {
-        setIsSyncing(false);
-      }
-    }
-    fetchStats();
-    if (activeArtist?.id) fetchPostMetrics(activeArtist.id);
-  };
-
-  const loading = loadingStats && !data;
-
-  if (loading) {
-    return (
-      <div style={{ padding: '80px', textAlign: 'center' }}>
-        <Loader2 className="animate-spin" size={32} color="var(--primary)" />
-        <p style={{ marginTop: '16px', color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500' }}>Actualizando métricas...</p>
-      </div>
-    );
-  }
-
-  const breakdown = data?.platform_breakdown || {};
-  const connectedPlatforms = Object.keys(breakdown).filter(p => PLATFORM_META[p]);
-  const totalReachAll = connectedPlatforms.reduce((sum, p) => sum + (breakdown[p]?.reach || 0), 0);
-  const bestPlatformKey = connectedPlatforms.reduce((best, p) => {
-    const engA = breakdown[p]?.engagement_rate || 0;
-    const engB = breakdown[best]?.engagement_rate || 0;
-    return engA > engB ? p : best;
-  }, connectedPlatforms[0] || null);
-
-  // Merge postList from stats (has analytics_4h) with real-time from fetchPostMetrics
-  const statsPostList = data?.postList || [];
-  const realtimePosts = posts.length ? posts : [];
-  const mergedPosts = statsPostList.map(sp => {
-    const rt = realtimePosts.find(p => p.id === sp.id);
-    if (rt && (rt.likes > 0 || rt.views > 0)) return { ...sp, ...rt };
-    return sp;
-  });
-  const allPosts = mergedPosts.length ? mergedPosts : realtimePosts;
-  const filteredPosts = activePlatform === 'all'
-    ? allPosts
-    : allPosts.filter(p => Array.isArray(p.platforms) && p.platforms.includes(activePlatform));
-
-  const bestTimes = data?.best_posting_times || [];
+  const tabs = [
+    { key: 'overview', label: '★ Overview', color: '#818CF8' },
+    ...connectedPlatforms.map(p => ({
+      key: p,
+      label: `${PLATFORM_META[p]?.emoji || '📱'} ${PLATFORM_META[p]?.label || p}`,
+      color: PLATFORM_META[p]?.color || '#818CF8',
+    })),
+  ];
 
   return (
-    <div className="analytics-container animate-fade-in">
+    <div className="av-container">
       {/* Header */}
-      <div className="analytics-header">
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            className="btn-secondary"
-            onClick={handleSync}
-            disabled={isSyncing || loadingStats}
-            style={{
-              fontSize: '13px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              opacity: isSyncing ? 0.75 : 1,
-              transition: 'opacity 0.2s',
-              minWidth: '130px',
-            }}
-          >
-            <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
-            {isSyncing ? 'Actualizando...' : 'Sincronizar'}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        <button onClick={handleSync} disabled={syncing} style={{ ...btnStyle, background: '#1C1C1F', color: syncing ? '#52525B' : '#FAFAFA' }}>
+          <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
+          {syncing ? 'Sincronizando...' : 'Sincronizar'}
+        </button>
+        {activeArtist?.id && (
+          <button onClick={fetchInsights} disabled={insightsLoading} style={{ ...btnStyle, background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', color: '#fff' }}>
+            <Sparkles size={13} />
+            {insightsLoading ? 'Analizando...' : 'Analizar con IA'}
           </button>
-          {activeArtist?.id && (
-            <button className="btn-primary" onClick={fetchInsights} disabled={loadingInsights} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={13} />
-              {loadingInsights ? 'Analizando...' : 'Analizar con IA'}
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Insights IA */}
-      {(insights || loadingInsights) && (
-        <InsightCard
-          loading={loadingInsights}
-          insights={insights?.insights || []}
-          decisions={insights?.decisions || []}
-          bestPlatform={insights?.bestPlatform}
-          bestPostTitle={insights?.bestPostTitle}
-          engagementRate={insights?.engagementRate}
-        />
+      {/* AI Insights */}
+      {(insights || insightsLoading) && (
+        <div style={{ ...cardStyle, marginBottom: '24px', borderLeft: '3px solid var(--primary)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+            <Sparkles size={14} color="var(--primary)" />
+            <span style={{ fontSize: '13px', fontWeight: '700', color: '#FAFAFA' }}>Análisis IA</span>
+          </div>
+          {insightsLoading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#71717A', fontSize: '13px' }}>
+              <Loader2 size={14} className="animate-spin" /> Procesando métricas...
+            </div>
+          ) : (
+            <div className="av-insights-grid">
+              <div>
+                <div style={{ fontSize: '10px', fontWeight: '700', color: '#818CF8', textTransform: 'uppercase', marginBottom: '8px' }}>Observaciones</div>
+                {(insights?.insights || []).map((ins, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '6px', fontSize: '12px', color: '#E2E8F0', lineHeight: '1.6', marginBottom: '6px' }}>
+                    <AlertCircle size={12} color="#818CF8" style={{ flexShrink: 0, marginTop: '3px' }} />
+                    <span>{ins}</span>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <div style={{ fontSize: '10px', fontWeight: '700', color: '#10B981', textTransform: 'uppercase', marginBottom: '8px' }}>Decisiones</div>
+                {(insights?.decisions || []).map((dec, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '6px', fontSize: '12px', color: '#4ADE80', lineHeight: '1.6', marginBottom: '6px' }}>
+                    <Lightbulb size={12} color="#10B981" style={{ flexShrink: 0, marginTop: '3px' }} />
+                    <span>{dec}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Platform Tabs */}
-      <div className="platform-tabs">
-        <button onClick={() => setActivePlatform('all')} className={`platform-tab ${activePlatform === 'all' ? 'active' : ''}`}>
-          ★ Todo
-        </button>
-        {connectedPlatforms.map(p => (
-          <button key={p} onClick={() => setActivePlatform(p)} className={`platform-tab ${activePlatform === p ? 'active' : ''}`}>
-            {PLATFORM_META[p].emoji} {PLATFORM_META[p].label}
-            {breakdown[p]?.engagement_rate > 0 && (
-              <span className="tab-er-badge">{breakdown[p].engagement_rate.toFixed(1)}%</span>
-            )}
+      <div className="av-tabs">
+        {tabs.map(t => (
+          <button key={t.key} onClick={() => setActiveTab(t.key)}
+            className={`av-tab ${activeTab === t.key ? 'active' : ''}`}
+            style={{ '--tab-color': t.color }}
+          >
+            {t.label}
           </button>
         ))}
       </div>
 
-      {/* ── VISTA TODO ── */}
-      {activePlatform === 'all' && (
-        <>
-          <div className="stats-section-label" style={{ display: 'flex', alignItems: 'center' }}>
-            COMPARATIVA DE PLATAFORMAS<InfoTooltip metricKey="comparativa_plataformas" />
-          </div>
-          {connectedPlatforms.length === 0 ? (
-            <div className="card-pro" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', marginBottom: '32px' }}>
-              <BarChart3 size={32} style={{ marginBottom: '12px', opacity: 0.3 }} />
-              <p style={{ margin: 0 }}>Sincroniza tus redes sociales para ver métricas por plataforma.</p>
-            </div>
-          ) : (
-            <div className="platform-compare-grid">
-              {connectedPlatforms.map(p => {
-                const m = breakdown[p] || {};
-                const pct = totalReachAll > 0 ? Math.round((m.reach || 0) / totalReachAll * 100) : 0;
-                const meta = PLATFORM_META[p];
-                const isBest = p === bestPlatformKey;
-                return (
-                  <div key={p} className="platform-compare-card card-pro" onClick={() => setActivePlatform(p)} style={{ cursor: 'pointer', borderColor: isBest ? `${meta.color}55` : undefined }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '22px' }}>{meta.emoji}</span>
-                        <span style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{meta.label}</span>
-                      </div>
-                      {isBest && <span style={{ fontSize: '10px', fontWeight: '800', background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '99px', padding: '2px 10px' }}>★ LÍDER</span>}
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
-                      {[
-                        { icon: <Users size={12} />,        val: formatNum(m.followers), label: 'Seguidores',  tip: 'seguidores' },
-                        { icon: <Eye size={12} />,          val: formatNum(m.reach),     label: 'Alcance',     tip: 'alcance'    },
-                        { icon: <Heart size={12} />,        val: formatNum(m.likes),     label: 'Likes',       tip: 'likes'      },
-                        { icon: <MessageCircle size={12} />,val: formatNum(m.comments),  label: 'Comentarios', tip: 'comentarios'},
-                      ].map((item, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ color: 'var(--text-muted)' }}>{item.icon}</span>
-                          <div>
-                            <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--text-main)', lineHeight: 1.2 }}>{item.val}</div>
-                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '600', display: 'flex', alignItems: 'center' }}>
-                              {item.label}<InfoTooltip metricKey={item.tip} />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Engagement rate badge */}
-                    {m.engagement_rate > 0 && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
-                        <Zap size={11} color="#F59E0B" />
-                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#F59E0B' }}>
-                          {m.engagement_rate.toFixed(1)}% engagement rate
-                        </span>
-                        <InfoTooltip metricKey="engagement" />
-                      </div>
-                    )}
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>{m.posts || 0} posts</span>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: '700' }}>{pct}% del alcance</span>
-                    </div>
-                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden' }}>
-                      <div style={{ width: `${pct}%`, height: '100%', background: meta.color, borderRadius: '99px', transition: 'width 0.6s ease' }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Tracción global + Mejor hora para publicar */}
-          <div className="analytics-traction-grid" style={{ display: 'grid', gridTemplateColumns: bestTimes.length ? '2fr 1fr' : '1fr', gap: '20px', marginBottom: '32px' }}>
-            <div className="card-pro chart-card-pro">
-              <div className="chart-card-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <h3 className="chart-title">TRACCIÓN VIRAL (7 DÍAS)</h3>
-                  <InfoTooltip metricKey="traccion_viral" />
-                </div>
-                <div className="chart-period">MÉTRICA LIVE</div>
-              </div>
-              <TrendChart data={data?.history} />
-            </div>
-
-            {bestTimes.length > 0 && (
-              <div className="card-pro" style={{ padding: '28px' }}>
-                <div className="chart-card-header" style={{ marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Clock size={14} color="var(--primary)" />
-                    <h3 className="chart-title">MEJOR HORA</h3>
-                    <InfoTooltip metricKey="best_times" />
-                  </div>
-                  <div className="chart-period">ENGAGEMENT</div>
-                </div>
-                <BestTimesChart times={bestTimes} />
-              </div>
-            )}
-          </div>
-        </>
+      {/* Content */}
+      {activeTab === 'overview' ? (
+        <OverviewTab data={data} explanations={explanations} onSelectPlatform={setActiveTab} />
+      ) : (
+        <PlatformView data={data?.platforms?.[activeTab]} explanations={explanations} />
       )}
 
-      {/* ── VISTA POR PLATAFORMA ── */}
-      {activePlatform !== 'all' && (() => {
-        const m = breakdown[activePlatform] || {};
-        const meta = PLATFORM_META[activePlatform] || {};
-        const isInstagram = activePlatform === 'instagram';
-        const isYouTube = activePlatform === 'youtube';
-
-        const kpis = [
-          { label: 'Seguidores',  value: formatNum(m.followers), icon: <Users size={18} />,         color: '#818CF8', tip: 'seguidores'  },
-          { label: 'Alcance',     value: formatNum(m.reach),     icon: <Eye size={18} />,            color: '#38BDF8', tip: 'alcance'     },
-          { label: 'Likes',       value: formatNum(m.likes),     icon: <Heart size={18} />,          color: '#F472B6', tip: 'likes'       },
-          { label: 'Comentarios', value: formatNum(m.comments),  icon: <MessageCircle size={18} />,  color: '#34D399', tip: 'comentarios' },
-          { label: 'Compartidos', value: formatNum(m.shares),    icon: <Share2 size={18} />,         color: '#FBBF24', tip: 'compartidos' },
-          ...(isInstagram ? [{ label: 'Guardados', value: formatNum(m.saves), icon: <Bookmark size={18} />, color: '#A78BFA', tip: 'guardados' }] : []),
-        ];
-
-        return (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '24px 0 20px' }}>
-              <span style={{ fontSize: '28px' }}>{meta.emoji}</span>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{meta.label}</h2>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>{m.posts || 0} publicaciones</span>
-              {m.engagement_rate > 0 && (
-                <span style={{ fontSize: '12px', fontWeight: '800', background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '99px', padding: '3px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Zap size={10} /> {m.engagement_rate.toFixed(1)}% ER
-                </span>
-              )}
-            </div>
-
-            <div className="platform-kpi-grid" style={{ marginBottom: '32px' }}>
-              {kpis.map((kpi, i) => (
-                <div key={i} className="card-pro stat-card-pro">
-                  <div className="stat-card-header">
-                    <div style={{ background: `${kpi.color}22`, color: kpi.color, padding: '8px', borderRadius: '8px' }}>{kpi.icon}</div>
-                  </div>
-                  <div className="stat-card-body">
-                    <div className="stat-card-value" style={{ color: kpi.color }}>{kpi.value}</div>
-                    <div className="stat-card-label" style={{ display: 'flex', alignItems: 'center' }}>
-                      {kpi.label}<InfoTooltip metricKey={kpi.tip} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {isYouTube && (
-              <div className="card-pro" style={{ padding: '16px 20px', marginBottom: '24px', borderLeft: '3px solid #FF0000', fontSize: '12px', color: 'var(--text-muted)' }}>
-                ⚠️ Los datos de YouTube tienen un retraso de 2-3 días. El watch time y CTR solo están disponibles en YouTube Studio.
-              </div>
-            )}
-          </>
-        );
-      })()}
-
-      {/* Tabla de posts */}
-      <div className="card-pro content-list-card-pro">
-        <div className="chart-card-header" style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <h3 className="chart-title">
-              {activePlatform === 'all' ? 'RENDIMIENTO POR PUBLICACIÓN' : `PUBLICACIONES EN ${(PLATFORM_META[activePlatform]?.label || activePlatform).toUpperCase()}`}
-            </h3>
-            <InfoTooltip metricKey="rendimiento_publicacion" />
-          </div>
-          {loadingPosts && <Loader2 size={14} className="animate-spin" color="var(--text-muted)" />}
-        </div>
-        <div className="table-wrapper">
-          <table className="posts-table-pro">
-            <thead>
-              <tr>
-                <th>PRODUCCIÓN</th>
-                <th>FECHA</th>
-                <th>CANALES</th>
-                <th style={{ textAlign: 'center' }}>❤️ Likes <InfoTooltip metricKey="likes" /></th>
-                <th style={{ textAlign: 'center' }}>💬 Coment. <InfoTooltip metricKey="comentarios" /></th>
-                <th style={{ textAlign: 'center' }}>👁 Views <InfoTooltip metricKey="views" /></th>
-                <th style={{ textAlign: 'center' }}>🔁 Shares <InfoTooltip metricKey="compartidos" /></th>
-                <th style={{ textAlign: 'center' }}>VIRAL <InfoTooltip metricKey="viral_score" /></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPosts.map((post, idx) => {
-                const safePlatforms = Array.isArray(post.platforms) ? post.platforms : [];
-                const safeScore = typeof post.viral_score === 'number' ? post.viral_score : 0;
-                const likes    = post.likes    ?? post.metrics?.likes    ?? post.metrics?.like_count    ?? 0;
-                const comments = post.comments ?? post.metrics?.comments ?? post.metrics?.comment_count ?? 0;
-                const views    = post.views    ?? post.metrics?.views    ?? post.metrics?.play_count    ?? post.metrics?.impressions ?? 0;
-                const shares   = post.shares   ?? post.metrics?.shares   ?? post.metrics?.share_count   ?? 0;
-                const hasData  = likes > 0 || views > 0 || comments > 0;
-                return (
-                  <tr key={post.id || idx}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div className="post-icon-box glass-morph"><Film size={14} color="var(--primary)" /></div>
-                        <span className="post-title-cell-pro">{post.title || 'Publicación'}</span>
-                      </div>
-                    </td>
-                    <td className="text-muted" style={{ fontSize: '13px' }}>{post.date ? new Date(post.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : 'N/A'}</td>
-                    <td><div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>{safePlatforms.map(p => <div key={p} className="platform-pill glass-morph" style={{ borderColor: PLATFORM_META[p]?.color + '44' }}>{PLATFORM_META[p]?.emoji || ''} {p}</div>)}</div></td>
-                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Heart size={11} />} value={hasData ? formatNum(likes) : '—'} color="#EF4444" /></td>
-                    <td style={{ textAlign: 'center' }}><MetricPill icon={<MessageCircle size={11} />} value={hasData ? formatNum(comments) : '—'} color="#6366F1" /></td>
-                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Eye size={11} />} value={hasData ? formatNum(views) : '—'} color="#0EA5E9" /></td>
-                    <td style={{ textAlign: 'center' }}><MetricPill icon={<Share2 size={11} />} value={hasData ? formatNum(shares) : '—'} color="#10B981" /></td>
-                    <td style={{ textAlign: 'center' }}>
-                      <div className="score-pill glass-morph" style={{ color: safeScore > 7 ? '#10B981' : 'var(--primary)', borderColor: safeScore > 7 ? 'rgba(16,185,129,0.3)' : 'var(--border-main)' }}>
-                        {safeScore.toFixed(1)} <span style={{ fontSize: '10px', opacity: 0.6 }}>/10</span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {!filteredPosts.length && (
-                <tr><td colSpan="8" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '14px' }}>
-                  {activePlatform === 'all' ? 'Aún no hay publicaciones con métricas.' : `No hay publicaciones en ${PLATFORM_META[activePlatform]?.label || activePlatform}.`}
-                </td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <style>{`
-        .analytics-container { padding-bottom: 40px; }
-        .analytics-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
-
-        /* Tabs */
-        .platform-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 32px; border-bottom: 1px solid var(--border-main); padding-bottom: 0; }
-        .platform-tab {
+        .av-container { padding-bottom: 40px; }
+        .av-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0; }
+        .av-tab {
           padding: 10px 18px; background: none; border: none; border-bottom: 2px solid transparent;
-          color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer;
-          transition: all 0.2s; margin-bottom: -1px; border-radius: 0; white-space: nowrap;
-          display: flex; align-items: center; gap: 6px;
+          color: #52525B; font-size: 13px; font-weight: 700; cursor: pointer;
+          transition: all 0.2s; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; white-space: nowrap;
         }
-        .platform-tab:hover { color: var(--text-main); }
-        .platform-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .tab-er-badge {
-          font-size: 9px; font-weight: 800; background: rgba(245,158,11,0.12);
-          color: #F59E0B; border: 1px solid rgba(245,158,11,0.25);
-          border-radius: 99px; padding: 1px 6px;
-        }
-
-        /* Platform compare grid */
-        .platform-compare-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
-        .platform-compare-card { padding: 20px; transition: transform 0.15s, box-shadow 0.15s; }
-        .platform-compare-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-
-        /* Per-platform KPI grid */
-        .platform-kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
-
-        .stats-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin: 32px 0 16px 0; letter-spacing: 0.05em; }
-        .stat-card-pro { padding: 24px; }
-        .stat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-        .stat-card-value { font-size: 28px; font-weight: 800; color: var(--text-main); font-family: 'Outfit'; margin-bottom: 4px; }
-        .stat-card-label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-
-        /* Best times chart */
-        .best-times-chart { display: flex; flex-direction: column; gap: 10px; }
-        .best-time-bar { display: grid; grid-template-columns: 72px 1fr 40px; align-items: center; gap: 10px; }
-        .best-time-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-align: right; white-space: nowrap; }
-        .best-time-track { height: 8px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
-        .best-time-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #8B5CF6); border-radius: 99px; transition: width 0.6s ease; }
-        .best-time-value { font-size: 11px; font-weight: 700; color: var(--text-main); text-align: left; }
-
-        .chart-card-pro, .content-list-card-pro { padding: 40px; border: 1px solid var(--border-main); }
-        .chart-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        .chart-title { font-size: 14px; font-weight: 900; color: var(--primary); margin: 0; letter-spacing: 0.1em; }
-        .chart-period { font-size: 10px; font-weight: 900; color: var(--text-dim); border: 1px solid var(--border-main); padding: 4px 12px; border-radius: 20px; }
-
-        .table-wrapper { overflow-x: auto; }
-        .posts-table-pro { width: 100%; border-collapse: collapse; min-width: 700px; }
-        .posts-table-pro th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border-main); }
-        .posts-table-pro td { padding: 12px; border-bottom: 1px solid var(--bg-primary); vertical-align: middle; }
-        .post-icon-box { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .post-title-cell-pro { font-weight: 600; color: var(--text-main); font-size: 13px; }
-        .platform-pill { padding: 2px 7px; border: 1px solid var(--border-main); border-radius: 4px; font-size: 10px; font-weight: 700; color: var(--text-muted); }
-        .score-pill { display: inline-block; padding: 3px 10px; border: 1px solid var(--border-main); border-radius: 8px; font-size: 12px; font-weight: 700; }
-        .metric-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; border: 1px solid; font-size: 12px; font-weight: 700; }
-        .metric-pill-value { color: var(--text-main); }
-        .metric-pill-label { color: var(--text-muted); font-size: 10px; }
-
-        /* Insight card */
-        .insight-card { padding: 28px; margin-bottom: 28px; border-left: 3px solid var(--primary); }
-        .insight-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .insight-title { font-size: 14px; font-weight: 700; color: var(--text-main); }
-        .insight-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
-        .insight-body { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 24px; }
-        .insight-divider { background: var(--border-main); }
-        .insight-col { display: flex; flex-direction: column; gap: 12px; }
-        .insight-col-title { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
-        .insight-item { display: flex; gap: 8px; font-size: 13px; color: var(--text-main); line-height: 1.5; }
-        .insight-item.decision { color: #4ADE80; }
-        .insight-best-post { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-main); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-        @media (max-width: 1024px) {
-          .platform-kpi-grid { grid-template-columns: repeat(3, 1fr); }
-          .insight-body { grid-template-columns: 1fr; }
-          .insight-divider { display: none; }
-        }
+        .av-tab:hover { color: #A1A1AA; }
+        .av-tab.active { color: var(--tab-color, #818CF8); border-bottom-color: var(--tab-color, #818CF8); }
+        .av-kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+        .av-calc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        .av-charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .av-insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 768px) {
-          .analytics-header { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
-          .platform-kpi-grid { grid-template-columns: 1fr 1fr; }
-          .chart-card-pro, .content-list-card-pro { padding: 20px 16px; margin: 0 0 24px 0; border-radius: 16px; }
-          .stat-card-pro { padding: 20px; }
-          .stat-card-value { font-size: 22px; }
-          .analytics-traction-grid { grid-template-columns: 1fr !important; }
+          .av-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+          .av-calc-grid { grid-template-columns: repeat(2, 1fr); }
+          .av-charts-grid { grid-template-columns: 1fr; }
+          .av-insights-grid { grid-template-columns: 1fr; }
+          .av-tabs { gap: 2px; }
+          .av-tab { padding: 8px 12px; font-size: 12px; }
+        }
+        @media (max-width: 480px) {
+          .av-kpi-grid { grid-template-columns: 1fr; }
+          .av-calc-grid { grid-template-columns: 1fr; }
         }
       `}</style>
     </div>
   );
 };
+
+const btnStyle = { fontSize: '13px', fontWeight: '700', padding: '10px 18px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' };
 
 export default AnalyticsView;

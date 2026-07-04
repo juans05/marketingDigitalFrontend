@@ -183,7 +183,7 @@ const DirectScheduleModal = ({ isOpen, onClose, initialDate, artistId, activePla
           </button>
         </div>
 
-        <div style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
+        <div className="modal-body-content" style={{ padding: '24px', flex: 1, overflowY: 'auto' }}>
           {error && (
             <div className="alert-error">{error}</div>
           )}
@@ -348,6 +348,11 @@ const styles = `
     box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     border: none !important;
     overflow: hidden;
+  }
+
+  .direct-schedule-modal:hover {
+    transform: translate(-50%, -50%) !important;
+    border-color: transparent !important;
   }
   
   .modal-header {
@@ -539,6 +544,40 @@ const styles = `
     background: rgba(0,0,0,0.6);
     backdrop-filter: blur(8px);
     z-index: 99999;
+  }
+
+  @media (max-width: 600px) {
+    .direct-schedule-modal {
+      width: 100vw !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      transform: none !important;
+    }
+    .direct-schedule-modal:hover {
+      transform: none !important;
+    }
+    .modal-header {
+      padding: 16px !important;
+    }
+    .modal-title {
+      font-size: 15px !important;
+    }
+    .file-drop {
+      padding: 24px 16px !important;
+    }
+    .modal-body-content {
+      padding: 16px !important;
+    }
+    .seg-btn {
+      padding: 10px 6px !important;
+      font-size: 10px !important;
+    }
+    .format-btn {
+      padding: 10px 6px !important;
+      font-size: 10px !important;
+    }
   }
 `;
 

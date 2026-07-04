@@ -85,20 +85,28 @@ const TONES = [
   { id: 'chill',         label: 'Chill / ASMR',   emoji: '✨' },
 ];
 
-const PLATFORMS = [
-  { id: 'tiktok',   label: 'TikTok / Reels',   sub: 'Optimizado para alta retención',  bg: '#000', icon: '⚡' },
-  { id: 'youtube',  label: 'YouTube Shorts',    sub: 'Optimizado para alcance & SEO',   bg: '#FF0000', icon: '▶' },
-];
+const ALL_PLATFORMS = {
+  tiktok:    { label: 'TikTok',          sub: 'Optimizado para alta retención',     bg: '#000',     icon: '⚡' },
+  instagram: { label: 'Instagram Reels', sub: 'Optimizado para descubrimiento',     bg: '#E1306C',  icon: '📸' },
+  youtube:   { label: 'YouTube Shorts',  sub: 'Optimizado para alcance & SEO',      bg: '#FF0000',  icon: '▶' },
+  facebook:  { label: 'Facebook Reels',  sub: 'Optimizado para audiencia amplia',   bg: '#1877F2',  icon: '📘' },
+};
 
 // ── Main Component ────────────────────────────────────────────────────────────
-const ContentCopilot = ({ artistId, onUploadSuccess }) => {
+const ContentCopilot = ({ artistId, onUploadSuccess, activePlatforms = [] }) => {
+  const PLATFORMS = (activePlatforms.length > 0
+    ? activePlatforms.filter(p => ALL_PLATFORMS[p]).map(p => ({ id: p, ...ALL_PLATFORMS[p] }))
+    : Object.entries(ALL_PLATFORMS).map(([id, meta]) => ({ id, ...meta }))
+  );
   const [script, setScript]     = useState('');
   const [title, setTitle]       = useState('');
   const [tone, setTone]         = useState('controversial');
-  const [platform, setPlatform] = useState('tiktok');
+  const [platform, setPlatform] = useState(PLATFORMS[0]?.id || 'tiktok');
   const [file, setFile]         = useState(null);
   const [fileError, setFileError] = useState('');
   const [uploadPhase, setUploadPhase] = useState('');
+  const [learnings, setLearnings] = useState(null);
+  const [learningsLoading, setLearningsLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult]     = useState(null);
   const [animScore, setAnimScore] = useState(false);
@@ -110,6 +118,19 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
     try { return JSON.parse(localStorage.getItem('vidalis_user') || '{}').token || ''; }
     catch { return ''; }
   };
+
+  // Fetch learnings on mount
+  useEffect(() => {
+    if (!artistId) return;
+    setLearningsLoading(true);
+    fetch(`${API}/api/vidalis/content-learnings/${artistId}`, {
+      headers: { 'Authorization': `Bearer ${getToken()}` }
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.learnings) setLearnings(data.learnings); })
+      .catch(() => {})
+      .finally(() => setLearningsLoading(false));
+  }, [artistId]);
 
   // Animate score counter when result arrives
   useEffect(() => {
@@ -795,6 +816,77 @@ const ContentCopilot = ({ artistId, onUploadSuccess }) => {
               </Glass>
             )}
           </div>
+        )}
+
+        {/* ── LEARNING PANEL ─────────────────────────────────────────── */}
+        {learnings && Object.keys(learnings).length > 0 && (
+          <Glass style={{ padding: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              <span style={{ fontSize: '20px' }}>🧠</span>
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#e7dff0', margin: 0 }}>Lo que la IA aprendió de tus posts</h3>
+                <p style={{ fontSize: '11px', color: 'rgba(204,195,216,0.5)', margin: '2px 0 0 0' }}>Basado en el análisis de tus publicaciones con métricas reales</p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {Object.entries(learnings).map(([plat, insights]) => {
+                const platMeta = {
+                  instagram: { emoji: '📸', label: 'Instagram', color: '#E1306C' },
+                  tiktok: { emoji: '🎵', label: 'TikTok', color: '#69C9D0' },
+                  youtube: { emoji: '▶', label: 'YouTube', color: '#FF0000' },
+                  facebook: { emoji: '📘', label: 'Facebook', color: '#1877F2' },
+                }[plat] || { emoji: '📱', label: plat, color: '#818CF8' };
+
+                if (!insights || insights.length === 0) return null;
+
+                return (
+                  <div key={plat} style={{
+                    padding: '18px', borderRadius: '12px',
+                    background: `${platMeta.color}08`,
+                    border: `1px solid ${platMeta.color}20`,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                      <span style={{ fontSize: '18px' }}>{platMeta.emoji}</span>
+                      <span style={{ fontSize: '13px', fontWeight: '800', color: platMeta.color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{platMeta.label}</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {insights.map((ins, i) => {
+                        const impactColors = {
+                          high: { bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', dot: '#10B981' },
+                          medium: { bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)', dot: '#F59E0B' },
+                          positive: { bg: 'rgba(78,222,163,0.08)', border: 'rgba(78,222,163,0.2)', dot: '#4edea3' },
+                          needs_work: { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.2)', dot: '#EF4444' },
+                        };
+                        const ic = impactColors[ins.impact] || impactColors.medium;
+
+                        return (
+                          <div key={i} style={{
+                            padding: '12px 14px', borderRadius: '10px',
+                            background: ic.bg, border: `1px solid ${ic.border}`,
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: ic.dot, flexShrink: 0 }} />
+                              <span style={{ fontSize: '13px', fontWeight: '700', color: '#e7dff0' }}>{ins.title}</span>
+                            </div>
+                            <p style={{ fontSize: '12px', color: 'rgba(204,195,216,0.7)', lineHeight: '1.6', margin: '0 0 0 14px' }}>{ins.detail}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Glass>
+        )}
+
+        {learningsLoading && (
+          <Glass style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            <Loader2 size={16} className="animate-spin" color="#d2bbff" />
+            <span style={{ fontSize: '13px', color: 'rgba(204,195,216,0.5)' }}>Analizando patrones de tus publicaciones...</span>
+          </Glass>
         )}
       </div>
     </>

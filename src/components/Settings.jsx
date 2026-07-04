@@ -115,7 +115,7 @@ const labelStyle = {
 };
 
 // ── Main Component ────────────────────────────────────────────────────────────
-const Settings = ({ user, activeArtist, onUpdate }) => {
+const Settings = ({ user, activeArtist, onUpdate, onPlatformsUpdated }) => {
   const [form, setForm] = useState({
     name:   user?.name    || '',
     handle: user?.handle  || user?.email?.split('@')[0] || '',
@@ -140,7 +140,7 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
 
   useEffect(() => {
     setActivePlatforms(activeArtist?.active_platforms || []);
-  }, [activeArtist?.id]);
+  }, [activeArtist?.id, activeArtist?.active_platforms?.length]);
   const API = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
   const getToken = () => {
@@ -272,7 +272,9 @@ const Settings = ({ user, activeArtist, onUpdate }) => {
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al verificar');
-      setActivePlatforms(data.platforms || []);
+      const platforms = data.platforms || [];
+      setActivePlatforms(platforms);
+      onPlatformsUpdated?.(platforms);
       setPopupOpened(false);
     } catch (err) {
       setConnectError(err.message);
