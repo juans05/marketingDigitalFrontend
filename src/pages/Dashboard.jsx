@@ -18,8 +18,9 @@ import CollaborationsView from '../components/CollaborationsView';
 import MediaKitView from '../components/MediaKitView';
 import CompetitorSpyView from '../components/CompetitorSpyView';
 import GrowthToolsView from '../components/GrowthToolsView';
+import RepurposerView from '../components/RepurposerView';
 import NotificationsPanel from '../components/NotificationsPanel';
-import { LogOut, Sparkles, BarChart3, Calendar, Loader2, Share2, Zap, MessageCircle, Settings as SettingsIcon, Lightbulb, TrendingUp, Handshake, FileText, Bell, MoreHorizontal, Search, FlaskConical } from 'lucide-react';
+import { LogOut, Sparkles, BarChart3, Calendar, Loader2, Share2, Zap, MessageCircle, Settings as SettingsIcon, Lightbulb, TrendingUp, Handshake, FileText, Bell, MoreHorizontal, Search, FlaskConical, Film } from 'lucide-react';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -261,6 +262,9 @@ const Dashboard = () => {
           <button className={activeView === 'content' ? 'active' : ''} onClick={() => setActiveView('content')}>
             <Sparkles size={20} /> <span style={{ fontWeight: '600' }}>Content Copilot</span>
           </button>
+          <button className={activeView === 'repurposer' ? 'active' : ''} onClick={() => setActiveView('repurposer')}>
+            <Film size={20} /> <span style={{ fontWeight: '600' }}>Repurposer</span>
+          </button>
           {((user.plan !== 'Free' && user.plan !== 'Creator') || import.meta.env.VITE_BYPASS_PLAN_LIMITS === 'true') && (
             <button className={activeView === 'planning' ? 'active' : ''} onClick={() => setActiveView('planning')}>
               <Calendar size={20} /> Calendario
@@ -311,6 +315,7 @@ const Dashboard = () => {
               {activeView === 'analytics' && 'Dashboard de Analítica'}
               {activeView === 'planning' && 'Planificación de Contenido'}
               {activeView === 'content' && 'AI Content Copilot'}
+              {activeView === 'repurposer' && 'Repurposer'}
               {activeView === 'inbox' && 'Inbox'}
               {activeView === 'connect' && 'Redes Sociales'}
               {activeView === 'artists' && 'Gestión de Marcas'}
@@ -422,6 +427,10 @@ const Dashboard = () => {
 
           {activeView === 'growthtools' && currentArtistId && (
             <GrowthToolsView artistId={currentArtistId} />
+          )}
+
+          {activeView === 'repurposer' && currentArtistId && (
+            <RepurposerView artistId={currentArtistId} />
           )}
 
           {activeView === 'settings' && <Settings user={user} activeArtist={activeArtist} onUpdate={(data) => {
