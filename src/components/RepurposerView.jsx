@@ -15,6 +15,15 @@ const PROCESSING_STEPS = [
   'Calculando el score de cada clip',
 ];
 
+// Mapea la etapa que reporta el backend (ai_clips_data.stage) al índice del paso.
+// Debe coincidir con STAGES en src/services/repurposeProgress.js del backend.
+const STAGE_TO_STEP = {
+  probing: 0,
+  detecting: 1,
+  cutting: 2,
+  scoring: 3,
+};
+
 const ScoreBadge = ({ score }) => {
   const s = score || 0;
   const color = s >= 8 ? '#10B981' : s >= 5 ? '#F59E0B' : '#71717A';
@@ -33,6 +42,7 @@ const RepurposerView = ({ artistId }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
   const [clips, setClips] = useState([]);
+  const [currentStep, setCurrentStep] = useState(0);
   const pollRef = useRef(null);
 
   useEffect(() => {
@@ -76,6 +86,10 @@ const RepurposerView = ({ artistId }) => {
           try { message = JSON.parse(video.error_log)?.message || message; } catch { /* error_log no es JSON */ }
           setError(message);
           setPhase('upload');
+        } else {
+          // En progreso: reflejar la etapa actual que reporta el backend
+          const stage = video.ai_clips_data?.stage;
+          if (stage && STAGE_TO_STEP[stage] !== undefined) setCurrentStep(STAGE_TO_STEP[stage]);
         }
       } catch (err) {
         console.error('Error consultando estado del video:', err);
@@ -87,7 +101,7 @@ const RepurposerView = ({ artistId }) => {
     if (!file) return;
     setError('');
     try {
-      setUploadPhase('uploading');
+      setUploadPhase('signing');
       setUploadProgress(0);
 
       // 1. Pedir URL prefirmada al backend
@@ -100,6 +114,7 @@ const RepurposerView = ({ artistId }) => {
       if (!presignRes.ok) throw new Error(presign.error || 'No se pudo iniciar la subida');
 
       // 2. PUT directo a R2 con progreso real (el archivo no pasa por el backend)
+      setUploadPhase('uploading');
       await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', presign.uploadUrl);
@@ -130,6 +145,7 @@ const RepurposerView = ({ artistId }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error registrando el video');
 
+      setCurrentStep(0);
       setPhase('processing');
       setUploadPhase('');
       startPolling(data.id);
@@ -147,9 +163,16 @@ const RepurposerView = ({ artistId }) => {
     return (
       <div className="card-pro" style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <Loader2 size={40} className="animate-spin" style={{ color: '#7C3AED', marginBottom: '16px' }} />
-        <div style={{ color: '#FFFFFF', fontWeight: 700, marginBottom: '16px' }}>Analizando tu video...</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#B8B8C0' }}>
-          {PROCESSING_STEPS.map(step => <div key={step}>🔵 {step}</div>)}
+        <div style={{ color: '#FFFFFF', fontWeight: 700, marginBottom: '16px' }}>{PROCESSING_STEPS[currentStep]}...</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
+          {PROCESSING_STEPS.map((step, i) => {
+            const icon = i < currentStep ? '✅' : i === currentStep ? '🔵' : '⚪';
+            return (
+              <div key={step} style={{ color: i <= currentStep ? '#FFFFFF' : '#6B6B75', fontWeight: i === currentStep ? 700 : 400 }}>
+                {icon} {step}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
