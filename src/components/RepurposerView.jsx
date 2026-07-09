@@ -30,6 +30,7 @@ const RepurposerView = ({ artistId }) => {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [uploadPhase, setUploadPhase] = useState('');
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
   const [clips, setClips] = useState([]);
   const pollRef = useRef(null);
@@ -86,42 +87,44 @@ const RepurposerView = ({ artistId }) => {
     if (!file) return;
     setError('');
     try {
-      setUploadPhase('signing');
-      const sigRes = await fetch(`${API}/api/vidalis/cloudinary-signature?resourceType=video`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      const sig = await sigRes.json();
-
       setUploadPhase('uploading');
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('api_key', sig.apiKey);
-      fd.append('timestamp', sig.timestamp);
-      fd.append('signature', sig.signature);
-      fd.append('folder', sig.folder);
-      fd.append('access_mode', 'public');
-      fd.append('resource_type', 'video');
-      if (sig.eager) fd.append('eager', sig.eager);
+      setUploadProgress(0);
 
-      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/video/upload`, {
-        method: 'POST', body: fd,
+      // 1. Pedir URL prefirmada al backend
+      const presignRes = await fetch(`${API}/api/vidalis/repurpose/presign`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ artistId, filename: file.name, contentType: file.type || 'video/mp4' }),
       });
-      const uploaded = await uploadRes.json();
-      if (!uploadRes.ok) throw new Error('Error subiendo el video a Cloudinary');
+      const presign = await presignRes.json();
+      if (!presignRes.ok) throw new Error(presign.error || 'No se pudo iniciar la subida');
 
-      if (uploaded.duration && uploaded.duration > MAX_DURATION_SECONDS) {
-        throw new Error(`El video dura ${Math.round(uploaded.duration / 60)} minutos — el máximo soportado es 2 horas`);
-      }
+      // 2. PUT directo a R2 con progreso real (el archivo no pasa por el backend)
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', presign.uploadUrl);
+        xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            setUploadProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+        xhr.onload = () => (xhr.status >= 200 && xhr.status < 300)
+          ? resolve()
+          : reject(new Error('Falló la subida del archivo a R2'));
+        xhr.onerror = () => reject(new Error('Error de red al subir el archivo'));
+        xhr.send(file);
+      });
 
+      // 3. Registrar el video con la URL pública de R2
       setUploadPhase('registering');
       const res = await fetch(`${API}/api/vidalis/repurpose/upload`, {
         method: 'POST',
         headers: headers(),
         body: JSON.stringify({
           artistId,
-          sourceUrl: uploaded.secure_url,
+          sourceUrl: presign.sourceUrl,
           title: title || file.name,
-          durationSeconds: uploaded.duration || null,
         }),
       });
       const data = await res.json();
@@ -207,7 +210,7 @@ const RepurposerView = ({ artistId }) => {
         style={{ marginTop: '20px', background: 'linear-gradient(135deg,#4F46E5,#7C3AED)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: 700, opacity: (!file || uploadPhase) ? 0.5 : 1 }}
       >
         {uploadPhase === 'signing' && 'Preparando subida...'}
-        {uploadPhase === 'uploading' && 'Subiendo video...'}
+        {uploadPhase === 'uploading' && `Subiendo video (${uploadProgress}%)...`}
         {uploadPhase === 'registering' && 'Iniciando análisis...'}
         {!uploadPhase && <><Sparkles size={16} style={{ marginRight: '6px' }} />Generar clips</>}
       </button>
