@@ -1,12 +1,18 @@
 // src/components/RepurposerView.jsx
 import { useState, useEffect, useRef } from 'react';
-import { Upload, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Upload, Loader2, AlertCircle, Sparkles, CheckCircle2 } from 'lucide-react';
 
 const API = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const getToken = () => { try { return JSON.parse(localStorage.getItem('vidalis_user') || '{}').token || ''; } catch { return ''; } };
 const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` });
 
 const MAX_DURATION_SECONDS = 7200; // 2 horas
+
+const formatFileSize = (bytes) => {
+  if (!bytes) return '';
+  const mb = bytes / (1024 * 1024);
+  return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+};
 
 const PROCESSING_STEPS = [
   'Analizando el video',
@@ -218,12 +224,31 @@ const RepurposerView = ({ artistId }) => {
         </div>
       )}
 
-      <label className="file-drop" style={{ cursor: 'pointer', width: '100%', maxWidth: '480px' }}>
-        <Upload size={32} />
-        <div style={{ color: '#fff', fontWeight: 600, marginTop: '8px' }}>
-          {file ? file.name : 'Arrastra tu video aquí o haz clic'}
-        </div>
-        <div style={{ fontSize: '12px', marginTop: '4px' }}>MP4, MOV, WebM — máx 2 horas</div>
+      <label
+        className="file-drop"
+        style={{
+          cursor: 'pointer', width: '100%', maxWidth: '480px',
+          ...(file ? { background: '#132A1D', border: '2px solid #10B981' } : {}),
+        }}
+      >
+        {file ? (
+          <>
+            <CheckCircle2 size={32} color="#10B981" />
+            <div style={{ color: '#FFFFFF', fontWeight: 700, marginTop: '8px' }}>Video seleccionado</div>
+            <div style={{ color: '#B8B8C0', fontSize: '13px', marginTop: '4px', wordBreak: 'break-all', padding: '0 12px' }}>
+              {file.name}{file.size ? ` · ${formatFileSize(file.size)}` : ''}
+            </div>
+            <div style={{ color: '#7C9FFF', fontSize: '12px', marginTop: '10px', textDecoration: 'underline' }}>
+              Cambiar archivo
+            </div>
+          </>
+        ) : (
+          <>
+            <Upload size={32} />
+            <div style={{ color: '#fff', fontWeight: 600, marginTop: '8px' }}>Arrastra tu video aquí o haz clic</div>
+            <div style={{ fontSize: '12px', marginTop: '4px' }}>MP4, MOV, WebM — máx 2 horas</div>
+          </>
+        )}
         <input type="file" accept="video/*" style={{ display: 'none' }} onChange={(e) => handleFileChange(e.target.files?.[0])} />
       </label>
 
