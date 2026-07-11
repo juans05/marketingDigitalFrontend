@@ -185,12 +185,20 @@ const RepurposerView = ({ artistId }) => {
           {clipProgress && ` (${clipProgress.current}/${clipProgress.total})`}
         </div>
         <div style={{ color: '#6B6B75', fontSize: '12px', marginBottom: '16px' }}>Esto puede tardar varios minutos en videos largos</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', width: '100%', maxWidth: '340px' }}>
           {PROCESSING_STEPS.map((step, i) => {
             const icon = i < currentStep ? '✅' : i === currentStep ? '🔵' : '⚪';
+            const percent = i < currentStep
+              ? 100
+              : i > currentStep
+                ? 0
+                : clipProgress
+                  ? Math.round((clipProgress.current / clipProgress.total) * 100)
+                  : 0;
             return (
-              <div key={step} style={{ color: i <= currentStep ? '#FFFFFF' : '#6B6B75', fontWeight: i === currentStep ? 700 : 400 }}>
-                {icon} {step}
+              <div key={step} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', color: i <= currentStep ? '#FFFFFF' : '#6B6B75', fontWeight: i === currentStep ? 700 : 400 }}>
+                <span>{icon} {step}</span>
+                <span style={{ color: i === currentStep ? '#7C3AED' : '#6B6B75', fontVariantNumeric: 'tabular-nums' }}>{percent}%</span>
               </div>
             );
           })}
