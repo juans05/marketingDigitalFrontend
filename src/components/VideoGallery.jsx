@@ -411,7 +411,10 @@ const VideoGallery = ({ artistId, artistName, refreshKey, activePlatforms = [] }
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>Viral IA</span>
-                      <ScoreBadge score={video.viral_score} calibration={video.score_calibration} />
+                      <ScoreBadge
+                        score={video.parent_video_id ? video.clip_impact_score : video.viral_score}
+                        calibration={video.parent_video_id ? null : video.score_calibration}
+                      />
                     </div>
                   </div>
 
