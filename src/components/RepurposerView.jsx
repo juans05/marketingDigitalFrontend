@@ -15,19 +15,25 @@ const formatFileSize = (bytes) => {
 };
 
 const PROCESSING_STEPS = [
-  'Analizando el video',
-  'Detectando los mejores capítulos',
-  'Generando clips',
+  'Transcribiendo el audio',
+  'Detectando los mejores momentos',
+  'Generando los clips',
+  'Validando la calidad visual',
   'Calculando el score de cada clip',
+  'Guardando los clips',
 ];
 
-// Mapea la etapa que reporta el backend (ai_clips_data.stage) al índice del paso.
-// Debe coincidir con STAGES en src/services/repurposeProgress.js del backend.
+// Mapea la etapa que reporta el backend (ai_clips_data.stage) al índice del
+// paso. Debe coincidir con los stages que emite generateClipsMultiIA() en
+// src/services/repurposerService.js del backend (transcribing → analyzing →
+// generating → validating → scoring → persisting → completed).
 const STAGE_TO_STEP = {
-  probing: 0,
-  detecting: 1,
-  cutting: 2,
-  scoring: 3,
+  transcribing: 0,
+  analyzing: 1,
+  generating: 2,
+  validating: 3,
+  scoring: 4,
+  persisting: 5,
 };
 
 const ScoreBadge = ({ score }) => {
@@ -49,6 +55,7 @@ const RepurposerView = ({ artistId }) => {
   const [error, setError] = useState('');
   const [clips, setClips] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [clipProgress, setClipProgress] = useState(null); // { current, total } | null
   const pollRef = useRef(null);
 
   useEffect(() => {
@@ -96,6 +103,9 @@ const RepurposerView = ({ artistId }) => {
           // En progreso: reflejar la etapa actual que reporta el backend
           const stage = video.ai_clips_data?.stage;
           if (stage && STAGE_TO_STEP[stage] !== undefined) setCurrentStep(STAGE_TO_STEP[stage]);
+
+          const { currentClip, totalClips } = video.ai_clips_data || {};
+          setClipProgress(totalClips ? { current: currentClip || 0, total: totalClips } : null);
         }
       } catch (err) {
         console.error('Error consultando estado del video:', err);
@@ -152,6 +162,7 @@ const RepurposerView = ({ artistId }) => {
       if (!res.ok) throw new Error(data.error || 'Error registrando el video');
 
       setCurrentStep(0);
+      setClipProgress(null);
       setPhase('processing');
       setUploadPhase('');
       startPolling(data.id);
@@ -169,7 +180,11 @@ const RepurposerView = ({ artistId }) => {
     return (
       <div className="card-pro" style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <Loader2 size={40} className="animate-spin" style={{ color: '#7C3AED', marginBottom: '16px' }} />
-        <div style={{ color: '#FFFFFF', fontWeight: 700, marginBottom: '16px' }}>{PROCESSING_STEPS[currentStep]}...</div>
+        <div style={{ color: '#FFFFFF', fontWeight: 700, marginBottom: '4px' }}>
+          {PROCESSING_STEPS[currentStep]}...
+          {clipProgress && ` (${clipProgress.current}/${clipProgress.total})`}
+        </div>
+        <div style={{ color: '#6B6B75', fontSize: '12px', marginBottom: '16px' }}>Esto puede tardar varios minutos en videos largos</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
           {PROCESSING_STEPS.map((step, i) => {
             const icon = i < currentStep ? '✅' : i === currentStep ? '🔵' : '⚪';
