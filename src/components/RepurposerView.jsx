@@ -47,7 +47,7 @@ const ScoreBadge = ({ score }) => {
 };
 
 const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) => {
-  const [phase, setPhase] = useState('upload'); // upload | processing | gallery
+  const [phase, setPhase] = useState('idle'); // idle | processing | gallery
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
   const [uploadPhase, setUploadPhase] = useState('');
@@ -59,6 +59,8 @@ const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) =>
   const [platform, setPlatform] = useState('');
   const [useArtistGenre, setUseArtistGenre] = useState(true);
   const [customNiche, setCustomNiche] = useState('');
+  const [rescoringId, setRescoringId] = useState(null);
+  const [rescorePlatform, setRescorePlatform] = useState({});
   const pollRef = useRef(null);
 
   useEffect(() => {
@@ -88,6 +90,38 @@ const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) =>
     }
   };
 
+  const handleRescore = async (clipId, newPlatform) => {
+    setRescoringId(clipId);
+    try {
+      const res = await fetch(`${API}/api/vidalis/clips/${clipId}/rescore`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ platform: newPlatform, niche: useArtistGenre ? artistGenre : customNiche }),
+      });
+      const updated = await res.json();
+      if (!res.ok) throw new Error(updated.error || 'Error al re-puntuar el clip');
+      setClips((prev) => prev.map((c) => (c.id === clipId ? { ...c, clip_impact_score: updated.score, ai_copy_short: updated.copy_short, hashtags: (updated.hashtags_suggested || []).join(' ') } : c)));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setRescoringId(null);
+    }
+  };
+
+  const handlePublish = async (clipId, clipPlatform) => {
+    try {
+      const res = await fetch(`${API}/api/vidalis/publish-now/${clipId}`, {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({ platforms: [clipPlatform] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al publicar el clip');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const startPolling = (id) => {
     pollRef.current = setInterval(async () => {
       try {
@@ -101,7 +135,7 @@ const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) =>
           let message = 'No se pudieron generar los clips';
           try { message = JSON.parse(video.error_log)?.message || message; } catch { /* error_log no es JSON */ }
           setError(message);
-          setPhase('upload');
+          setPhase('idle');
         } else {
           // En progreso: reflejar la etapa actual que reporta el backend
           const stage = video.ai_clips_data?.stage;
@@ -178,70 +212,10 @@ const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) =>
   };
 
   const reset = () => {
-    setPhase('upload'); setFile(null); setTitle(''); setClips([]); setError('');
+    setPhase('idle'); setFile(null); setTitle(''); setClips([]); setError('');
   };
 
-  if (phase === 'processing') {
-    return (
-      <div className="card-pro" style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <Loader2 size={40} className="animate-spin" style={{ color: '#7C3AED', marginBottom: '16px' }} />
-        <div style={{ color: '#FFFFFF', fontWeight: 700, marginBottom: '4px' }}>
-          {PROCESSING_STEPS[currentStep]}...
-          {clipProgress && ` (${clipProgress.current}/${clipProgress.total})`}
-        </div>
-        <div style={{ color: '#6B6B75', fontSize: '12px', marginBottom: '16px' }}>Esto puede tardar varios minutos en videos largos</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', width: '100%', maxWidth: '340px' }}>
-          {PROCESSING_STEPS.map((step, i) => {
-            const icon = i < currentStep ? '✅' : i === currentStep ? '🔵' : '⚪';
-            const percent = i < currentStep
-              ? 100
-              : i > currentStep
-                ? 0
-                : clipProgress
-                  ? Math.round((clipProgress.current / clipProgress.total) * 100)
-                  : 0;
-            return (
-              <div key={step} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', color: i <= currentStep ? '#FFFFFF' : '#6B6B75', fontWeight: i === currentStep ? 700 : 400 }}>
-                <span>{icon} {step}</span>
-                <span style={{ color: i === currentStep ? '#7C3AED' : '#6B6B75', fontVariantNumeric: 'tabular-nums' }}>{percent}%</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  if (phase === 'gallery') {
-    const best = clips.find(c => c.isBest);
-    const rest = clips.filter(c => !c.isBest);
-    return (
-      <div>
-        {best && (
-          <div style={{ border: '2px solid #7C3AED', borderRadius: '14px', padding: '14px', marginBottom: '20px', background: '#1C1C1F', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '-11px', left: '16px', background: 'linear-gradient(135deg,#4F46E5,#7C3AED)', color: '#fff', fontSize: '11px', fontWeight: 800, padding: '3px 10px', borderRadius: '100px' }}>
-              ⭐ MEJOR CLIP
-            </div>
-            <div style={{ marginTop: '6px' }}>
-              <div style={{ color: '#fff', fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>{best.title}</div>
-              <ScoreBadge score={best.viral_score_real} />
-            </div>
-          </div>
-        )}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px' }}>
-          {rest.map(clip => (
-            <div key={clip.id} style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '12px', padding: '12px' }}>
-              <div style={{ color: '#fff', fontSize: '12px', marginBottom: '6px' }}>{clip.title}</div>
-              <ScoreBadge score={clip.viral_score_real} />
-            </div>
-          ))}
-        </div>
-        <button onClick={reset} className="btn-secondary" style={{ marginTop: '20px' }}>Subir otro video</button>
-      </div>
-    );
-  }
-
-  return (
+  const uploadForm = (
     <div className="card-pro" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px' }}>
       <div style={{ color: '#fff', fontSize: '20px', fontWeight: 800, marginBottom: '6px' }}>Convierte un video largo en clips virales</div>
       <div style={{ color: '#B8B8C0', fontSize: '13px', marginBottom: '24px' }}>Sube tu podcast, entrevista o stream — la IA encuentra los mejores momentos</div>
@@ -329,6 +303,86 @@ const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) =>
         {uploadPhase === 'registering' && 'Iniciando análisis...'}
         {!uploadPhase && <><Sparkles size={16} style={{ marginRight: '6px' }} />Generar clips</>}
       </button>
+    </div>
+  );
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {uploadForm}
+
+      {phase === 'processing' && (
+        <div className="card-pro" style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <Loader2 size={40} className="animate-spin" style={{ color: '#7C3AED', marginBottom: '16px' }} />
+          <div style={{ color: '#FFFFFF', fontWeight: 700, marginBottom: '4px' }}>
+            {PROCESSING_STEPS[currentStep]}...
+            {clipProgress && ` (${clipProgress.current}/${clipProgress.total})`}
+          </div>
+          <div style={{ color: '#6B6B75', fontSize: '12px', marginBottom: '16px' }}>Esto puede tardar varios minutos en videos largos</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', width: '100%', maxWidth: '340px' }}>
+            {PROCESSING_STEPS.map((step, i) => {
+              const icon = i < currentStep ? '✅' : i === currentStep ? '🔵' : '⚪';
+              const percent = i < currentStep
+                ? 100
+                : i > currentStep
+                  ? 0
+                  : clipProgress
+                    ? Math.round((clipProgress.current / clipProgress.total) * 100)
+                    : 0;
+              return (
+                <div key={step} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', color: i <= currentStep ? '#FFFFFF' : '#6B6B75', fontWeight: i === currentStep ? 700 : 400 }}>
+                  <span>{icon} {step}</span>
+                  <span style={{ color: i === currentStep ? '#7C3AED' : '#6B6B75', fontVariantNumeric: 'tabular-nums' }}>{percent}%</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {phase === 'gallery' && clips.length > 0 && (
+        <div>
+          {clips.map((clip) => (
+            <div key={clip.id} style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '12px', padding: '16px', marginBottom: '14px' }}>
+              <div style={{ color: '#fff', fontSize: '14px', fontWeight: 700, marginBottom: '6px' }}>{clip.title}</div>
+              <ScoreBadge score={clip.clip_impact_score} />
+              {clip.ai_copy_short && (
+                <div style={{ color: '#B8B8C0', fontSize: '12px', marginTop: '8px' }}>{clip.ai_copy_short}</div>
+              )}
+              {clip.hashtags && (
+                <div style={{ color: '#7C9FFF', fontSize: '11px', marginTop: '4px' }}>{clip.hashtags}</div>
+              )}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                <select
+                  value={rescorePlatform[clip.id] || ''}
+                  onChange={(e) => setRescorePlatform((prev) => ({ ...prev, [clip.id]: e.target.value }))}
+                  style={{ fontSize: '11px', background: '#1C1C1F', color: '#fff', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', padding: '4px' }}
+                >
+                  <option value="">Otra red...</option>
+                  {activePlatforms.filter((p) => p !== platform).map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => rescorePlatform[clip.id] && handleRescore(clip.id, rescorePlatform[clip.id])}
+                  disabled={!rescorePlatform[clip.id] || rescoringId === clip.id}
+                  className="btn-secondary"
+                  style={{ fontSize: '11px', padding: '6px 10px' }}
+                >
+                  {rescoringId === clip.id ? 'Puntuando...' : 'Puntuar para otra red'}
+                </button>
+                <button
+                  onClick={() => handlePublish(clip.id, platform)}
+                  className="btn-secondary"
+                  style={{ fontSize: '11px', padding: '6px 10px' }}
+                >
+                  Subir a {platform}
+                </button>
+              </div>
+            </div>
+          ))}
+          <button onClick={reset} className="btn-secondary" style={{ marginTop: '20px' }}>Subir otro video</button>
+        </div>
+      )}
     </div>
   );
 };
