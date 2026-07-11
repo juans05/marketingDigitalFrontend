@@ -101,6 +101,7 @@ const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) =>
       const updated = await res.json();
       if (!res.ok) throw new Error(updated.error || 'Error al re-puntuar el clip');
       setClips((prev) => prev.map((c) => (c.id === clipId ? { ...c, clip_impact_score: updated.score, ai_copy_short: updated.copy_short, hashtags: (updated.hashtags_suggested || []).join(' ') } : c)));
+      setRescorePlatform((prev) => { const next = { ...prev }; delete next[clipId]; return next; });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -339,9 +340,12 @@ const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) =>
         </div>
       )}
 
-      {phase === 'gallery' && clips.length > 0 && (
+      {phase === 'gallery' && (
         <div>
-          {clips.map((clip) => (
+          {clips.length === 0 && (
+            <div style={{ color: '#B8B8C0', fontSize: '13px', marginBottom: '14px' }}>No se detectaron clips.</div>
+          )}
+          {clips.length > 0 && clips.map((clip) => (
             <div key={clip.id} style={{ background: '#121214', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '12px', padding: '16px', marginBottom: '14px' }}>
               <div style={{ color: '#fff', fontSize: '14px', fontWeight: 700, marginBottom: '6px' }}>{clip.title}</div>
               <ScoreBadge score={clip.clip_impact_score} />
