@@ -430,7 +430,11 @@ const Dashboard = () => {
           )}
 
           {activeView === 'repurposer' && currentArtistId && (
-            <RepurposerView artistId={currentArtistId} />
+            <RepurposerView
+              artistId={currentArtistId}
+              activePlatforms={activeArtist?.active_platforms || []}
+              artistGenre={activeArtist?.ai_genre || ''}
+            />
           )}
 
           {activeView === 'settings' && <Settings user={user} activeArtist={activeArtist} onUpdate={(data) => {

@@ -46,7 +46,7 @@ const ScoreBadge = ({ score }) => {
   );
 };
 
-const RepurposerView = ({ artistId }) => {
+const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) => {
   const [phase, setPhase] = useState('upload'); // upload | processing | gallery
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
@@ -56,6 +56,9 @@ const RepurposerView = ({ artistId }) => {
   const [clips, setClips] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [clipProgress, setClipProgress] = useState(null); // { current, total } | null
+  const [platform, setPlatform] = useState('');
+  const [useArtistGenre, setUseArtistGenre] = useState(true);
+  const [customNiche, setCustomNiche] = useState('');
   const pollRef = useRef(null);
 
   useEffect(() => {
@@ -114,7 +117,7 @@ const RepurposerView = ({ artistId }) => {
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !platform) return;
     setError('');
     try {
       setUploadPhase('signing');
@@ -156,6 +159,8 @@ const RepurposerView = ({ artistId }) => {
           artistId,
           sourceUrl: presign.sourceUrl,
           title: title || file.name,
+          platform,
+          niche: useArtistGenre ? artistGenre : customNiche,
         }),
       });
       const data = await res.json();
@@ -247,6 +252,45 @@ const RepurposerView = ({ artistId }) => {
         </div>
       )}
 
+      <div style={{ width: '100%', maxWidth: '480px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div>
+          <div style={{ color: '#B8B8C0', fontSize: '12px', fontWeight: 700, marginBottom: '6px' }}>Red social objetivo</div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {(activePlatforms.length ? activePlatforms : ['instagram', 'tiktok', 'youtube']).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPlatform(p)}
+                style={{
+                  padding: '8px 14px', borderRadius: '100px', fontSize: '12px', fontWeight: 700,
+                  border: platform === p ? '2px solid #7C3AED' : '1px solid rgba(255,255,255,0.15)',
+                  background: platform === p ? 'rgba(124,58,237,0.15)' : 'transparent',
+                  color: '#fff', cursor: 'pointer', textTransform: 'capitalize',
+                }}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#B8B8C0', cursor: 'pointer' }}>
+            <input type="checkbox" checked={useArtistGenre} onChange={(e) => setUseArtistGenre(e.target.checked)} />
+            Usar género del artista {artistGenre ? `(${artistGenre})` : ''}
+          </label>
+          {!useArtistGenre && (
+            <input
+              type="text"
+              value={customNiche}
+              onChange={(e) => setCustomNiche(e.target.value)}
+              placeholder="Ej: true crime, comedia, finanzas..."
+              style={{ marginTop: '8px', width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#121214', color: '#fff', fontSize: '13px' }}
+            />
+          )}
+        </div>
+      </div>
+
       <label
         className="file-drop"
         style={{
@@ -277,8 +321,8 @@ const RepurposerView = ({ artistId }) => {
 
       <button
         onClick={handleUpload}
-        disabled={!file || !!uploadPhase}
-        style={{ marginTop: '20px', background: 'linear-gradient(135deg,#4F46E5,#7C3AED)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: 700, opacity: (!file || uploadPhase) ? 0.5 : 1 }}
+        disabled={!file || !platform || !!uploadPhase}
+        style={{ marginTop: '20px', background: 'linear-gradient(135deg,#4F46E5,#7C3AED)', color: '#fff', border: 'none', padding: '12px 24px', borderRadius: '10px', fontWeight: 700, opacity: (!file || !platform || uploadPhase) ? 0.5 : 1 }}
       >
         {uploadPhase === 'signing' && 'Preparando subida...'}
         {uploadPhase === 'uploading' && `Subiendo video (${uploadProgress}%)...`}
