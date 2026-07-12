@@ -309,7 +309,7 @@ const RepurposerView = ({ artistId, activePlatforms = [], artistGenre = '' }) =>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {uploadForm}
+      {phase !== 'processing' && uploadForm}
 
       {phase === 'processing' && (
         <div className="card-pro" style={{ minHeight: '260px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
